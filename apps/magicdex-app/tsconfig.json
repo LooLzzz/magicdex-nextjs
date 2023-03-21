@@ -1,6 +1,18 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/api": ["./pages/api"],
+      "@/api/*": ["./pages/api/*"],
+      "@/components": ["./components"],
+      "@/components/*": ["./components/*"],
+      "@/pages": ["./pages"],
+      "@/pages/*": ["./pages/*"],
+      "@/public/*": ["./public/*"],
+      "@/services": ["./services"],
+      "@/services/*": ["./services/*"],
+    },
     "jsx": "preserve",
     "jsxImportSource": "@emotion/react",
     "allowJs": true,

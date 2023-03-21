@@ -24,15 +24,18 @@
       "defaultConfiguration": "development",
       "options": {
         "buildTarget": "magicdex-app:build",
+        "hostname": "0.0.0.0",
         "dev": true
       },
       "configurations": {
         "development": {
           "buildTarget": "magicdex-app:build:development",
+          "hostname": "0.0.0.0",
           "dev": true
         },
         "production": {
           "buildTarget": "magicdex-app:build:production",
+          "hostname": "0.0.0.0",
           "dev": false
         }
       }
