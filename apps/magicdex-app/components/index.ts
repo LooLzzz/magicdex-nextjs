@@ -1,5 +1,9 @@
+import CustomFooter from './CustomFooter'
+import CustomHeader from './CustomHeader'
 import HomePage from './HomePage'
 
 export {
-  HomePage
+  CustomFooter,
+  CustomHeader,
+  HomePage,
 }

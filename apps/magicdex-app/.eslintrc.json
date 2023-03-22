@@ -14,6 +14,10 @@
           "error",
           "apps/magicdex-app/pages"
         ]
+        // "import/newline-after-import": [
+        //   "error",
+        //   { "count": 2 }
+        // ]
       }
     },
     {
