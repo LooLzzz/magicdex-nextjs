@@ -12,8 +12,6 @@ export default createStyles(theme => ({
     color: theme.colorScheme === 'dark' ? theme.white : theme.black,
     fontWeight: 500,
     fontSize: theme.fontSizes.sm,
-    borderBottom: `${rem(2)} transparent solid`,
-    transition: 'border 0.2s ease-in-out',
 
     [theme.fn.smallerThan('sm')]: {
       height: rem(42),
@@ -28,11 +26,34 @@ export default createStyles(theme => ({
           ? theme.colors.dark[6]
           : theme.colors.gray[0],
     }),
-  },
 
-  activeLink: {
-    borderBottom: `${rem(2)} solid ${theme.primaryColor}`,
-    borderRadiusBottomRight: theme.radius.md
+    borderBottom: `${rem(2.5)} transparent solid`,
+    // borderRadius: theme.radius.md,
+    transition: 'border 0.2s ease-in-out',
+
+    '&.activeLink': {
+      borderBottom: `${rem(2.5)} solid ${theme.primaryColor}`,
+    },
+
+    '&.sidebar': {
+      borderBottom: `0 solid transparent`,
+      borderLeft: `${rem(3)} solid transparent`,
+    },
+
+    '&.activeLink&.sidebar': {
+      borderLeft: `${rem(3)} solid ${theme.primaryColor}`,
+
+      // justifyContent: 'space-between',
+      // '&:before': {
+      //   // draw a triangle
+      //   content: '""',
+      //   width: 0,
+      //   height: 0,
+      //   borderStyle: 'solid',
+      //   borderWidth: `${rem(10)} 0 ${rem(10)} ${rem(15)}`,
+      //   borderColor: `transparent transparent transparent ${theme.primaryColor}`,
+      // },
+    },
   },
 
   subLink: {
