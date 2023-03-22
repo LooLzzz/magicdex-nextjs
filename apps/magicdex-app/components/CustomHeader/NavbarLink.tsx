@@ -1,16 +1,17 @@
 import Link from 'next/link'
 import { useRouter } from 'next/router'
+import { MouseEventHandler } from 'react'
 import useStyles from './styles'
 
 
-// TODO: do something with `sidebar` property
-
 export default function NavbarLink({
   href,
+  onClick = undefined,
   sidebar = false,
   children
 }: {
   href: string,
+  onClick?: MouseEventHandler<HTMLAnchorElement>,
   sidebar?: boolean,
   children: React.ReactNode
 }) {
@@ -21,10 +22,14 @@ export default function NavbarLink({
 
   return (
     <Link
+      onClick={onClick}
       href={href}
       className={cx(
         classes.link,
-        { [classes.activeLink]: isRouteActive }
+        {
+          sidebar,
+          activeLink: isRouteActive,
+        }
       )}
     >
       {children}

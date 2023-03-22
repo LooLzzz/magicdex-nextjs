@@ -1,4 +1,4 @@
-import routes from '@/pages/(routes)'
+import navbarRoutes from '@/pages/(navbarRoutes)'
 import {
   Box,
   Burger,
@@ -15,7 +15,6 @@ import {
 import { useDisclosure } from '@mantine/hooks'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import { useEffect } from 'react'
 import NavbarLink from './NavbarLink'
 import useStyles from './styles'
 
@@ -28,12 +27,12 @@ export default function CustomHeader({
   const router = useRouter()
   const { classes } = useStyles()
 
-  const [drawerOpened, { toggle: toggleDrawer, close: closeDrawer }] = useDisclosure(false)
-  // const [linksOpened, { toggle: toggleLinks }] = useDisclosure(false)
-
-  // Close drawer on route change
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(closeDrawer, [router.pathname])
+  const [
+    drawerOpened,
+    {
+      toggle: toggleDrawer,
+      close: closeDrawer
+    }] = useDisclosure(false)
 
   return (
     <Box pb={20}>
@@ -41,7 +40,11 @@ export default function CustomHeader({
         <Container sx={{ height: '100%' }}>
           <Group position='apart' sx={{ height: '100%' }}>
             <Link href="/">
-              <Image alt='Magicdex Logo' src='favicon.ico' width={headerHeight * 0.75} />
+              <Image
+                alt='Magicdex Logo'
+                src='favicon.ico'
+                width={headerHeight * 0.75}
+              />
             </Link>
 
             <Group
@@ -49,20 +52,24 @@ export default function CustomHeader({
               spacing={0}
               className={classes.hiddenMobile}
             >
-              {routes.map(route => (
-                <NavbarLink key={route.href} href={route.href}>
+              {navbarRoutes.map((route, idx) => (
+                <NavbarLink key={idx} href={route.url}>
                   {route.title}
                 </NavbarLink>
               ))}
             </Group>
 
             <Group className={classes.hiddenMobile}>
-              <Link href='login'>
-                <Button variant='default'>Log in</Button>
-              </Link>
-              <Link href='signup'>
-                <Button>Sign up</Button>
-              </Link>
+              {/* TODO: hide behind an 'profile' icon popover */}
+              <Button
+                variant='default'
+                onClick={() => router.push('/login') && closeDrawer()}
+              >
+                Log in
+              </Button>
+              <Button onClick={() => router.push('/signup') && closeDrawer()}>
+                Sign up
+              </Button>
             </Group>
 
             <Burger
@@ -86,8 +93,8 @@ export default function CustomHeader({
         <ScrollArea h={`calc(100vh - ${rem(60)})`} mx="-md">
           <Divider my='sm' />
 
-          {routes.map(route => (
-            <NavbarLink sidebar key={route.href} href={route.href}>
+          {navbarRoutes.map((route, idx) => (
+            <NavbarLink sidebar onClick={closeDrawer} key={idx} href={route.url}>
               {route.title}
             </NavbarLink>
           ))}
@@ -95,8 +102,15 @@ export default function CustomHeader({
           <Divider my='sm' />
 
           <Group position='center' grow pb='xl' px='md'>
-            <Button variant='default'>Log in</Button>
-            <Button>Sign up</Button>
+            <Button
+              variant='default'
+              onClick={() => router.push('/login') && closeDrawer()}
+            >
+              Log in
+            </Button>
+            <Button onClick={() => router.push('/signup') && closeDrawer()}>
+              Sign up
+            </Button>
           </Group>
         </ScrollArea>
       </Drawer>
