@@ -17,7 +17,7 @@ export default function HomePage() {
   }
 
   return (
-    <div>
+    <div style={{ textAlign: 'center' }}>
       <h1>
         Current color scheme:&nbsp;
         <span style={{ color: colorScheme === 'dark' ? 'red' : 'blue' }}>
