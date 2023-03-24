@@ -4,7 +4,7 @@ import { hasLength, matchesField, useForm } from '@mantine/form'
 import { useState } from 'react'
 
 
-export default function Page() {
+export default function SignupPage() {
   const [signupError, setSignupError] = useState('')
   const [loadingOverlayVisible, setLoadingOverlay] = useState(false)
 
@@ -58,6 +58,7 @@ export default function Page() {
           <FloatingLabelInput required
             id='username'
             label='Username'
+            autoComplete='off'
             {...form.getInputProps('username')}
           />
 
@@ -68,14 +69,14 @@ export default function Page() {
           />
 
           <FloatingLabelInput password
-            autoComplete='off'
+            autoComplete='new-password'
             label='Confirm Password'
             {...form.getInputProps('confirmPassword')}
           />
 
           {
             signupError
-              ? <Text color={'red'} size='sm'>
+              ? <Text color='red' size='sm'>
                 {signupError}
               </Text>
               : null

@@ -1,7 +1,7 @@
 import { CustomFooter, CustomHeader } from '@/components'
-import { ColorScheme, ColorSchemeProvider, MantineProvider } from '@mantine/core'
+import { ColorScheme, ColorSchemeProvider, Container, MantineProvider } from '@mantine/core'
 import { ModalsProvider } from '@mantine/modals'
-import { Notifications } from '@mantine/notifications'
+import { Notifications, showNotification } from '@mantine/notifications'
 import { getCookie, setCookie } from 'cookies-next'
 import NextApp, { AppContext, AppProps } from 'next/app'
 import Head from 'next/head'
@@ -23,6 +23,12 @@ const App = ({
     setColorScheme(nextColorScheme)
     // when color scheme is updated save it to cookie
     setCookie('mantine-color-scheme', nextColorScheme, { maxAge: 60 * 60 * 24 * 30 })
+
+    showNotification({
+      title: 'Color scheme toggled',
+      message: `Current color scheme is now ${colorScheme === 'dark' ? 'light' : 'dark'}`,
+      color: colorScheme === 'dark' ? 'red' : 'blue',
+    })
   }
 
   return (
@@ -51,9 +57,10 @@ const App = ({
                 limit={3}
                 position='bottom-left'
               />
-
               <CustomHeader />
-              <Component {...pageProps} />
+              <Container>
+                <Component {...pageProps} />
+              </Container>
               <CustomFooter />
 
             </ModalsProvider>

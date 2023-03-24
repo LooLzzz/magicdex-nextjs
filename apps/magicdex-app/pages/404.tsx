@@ -76,7 +76,7 @@ const Illustration = (props: React.ComponentPropsWithoutRef<'svg'>) => {
   )
 }
 
-export default function Error404() {
+export default function Error404Page() {
   const { classes } = useStyles()
 
   return (
