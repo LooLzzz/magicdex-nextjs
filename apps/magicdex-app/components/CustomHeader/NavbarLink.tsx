@@ -18,7 +18,19 @@ export default function NavbarLink({
   const router = useRouter()
   const { classes, cx } = useStyles()
 
-  const isRouteActive = router.pathname === href
+  const isRouteActive = (
+    href === '/'
+      ? router.pathname === href
+      : (
+        router
+          .pathname
+          .replace(/^[/]/, '')
+          .startsWith(
+            href
+              .replace(/^[/]/, '')
+          )
+      )
+  )
 
   return (
     <Link

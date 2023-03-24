@@ -4,7 +4,7 @@ import { useForm } from '@mantine/form'
 import { useState } from 'react'
 
 
-export default function Page() {
+export default function LoginPage() {
   const [loginError, setLoginError] = useState('')
   const [loadingOverlayVisible, setLoadingOverlay] = useState(false)
 

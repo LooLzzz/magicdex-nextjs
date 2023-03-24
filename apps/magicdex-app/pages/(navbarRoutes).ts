@@ -5,8 +5,8 @@ const navbarRoutes = [
     title: 'Home'
   },
   {
-    url: '/test-page',
-    title: 'Test Page'
+    url: '/collection',
+    title: 'Collection'
   }
 ]
 

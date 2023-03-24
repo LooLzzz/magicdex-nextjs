@@ -1,8 +1,19 @@
-import { HomePage } from '@/components'
+import { Center, Title, useMantineColorScheme } from '@mantine/core'
 
 
-export default function Page() {
+// TODO: all this
+
+export default function HomePage() {
+  const { colorScheme } = useMantineColorScheme()
+
   return (
-    <HomePage />
+    <Center>
+      <Title>
+        {'Current color scheme: '}
+        <span style={{ color: colorScheme === 'dark' ? 'red' : 'blue' }}>
+          {colorScheme}
+        </span>
+      </Title>
+    </Center>
   )
 }

@@ -1,5 +1,6 @@
 import navbarRoutes from '@/pages/(navbarRoutes)'
 import {
+  Avatar,
   Box,
   Burger,
   Button,
@@ -9,12 +10,16 @@ import {
   Group,
   Header,
   Image,
+  Menu,
   rem,
-  ScrollArea
+  ScrollArea,
+  useMantineColorScheme
 } from '@mantine/core'
 import { useDisclosure } from '@mantine/hooks'
+import { IconMoonFilled, IconSunFilled } from '@tabler/icons-react'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
+import { useState } from 'react'
 import NavbarLink from './NavbarLink'
 import useStyles from './styles'
 
@@ -26,7 +31,10 @@ export default function CustomHeader({
 }) {
   const router = useRouter()
   const { classes } = useStyles()
+  const { colorScheme, toggleColorScheme } = useMantineColorScheme()
 
+  const [avatarIconHovering, setAvatarIconHovering] = useState(false)
+  const [menuOpened, setMenuOpened] = useState(false)
   const [
     drawerOpened,
     {
@@ -59,18 +67,40 @@ export default function CustomHeader({
               ))}
             </Group>
 
-            <Group className={classes.hiddenMobile}>
-              {/* TODO: hide behind an 'profile' icon popover */}
-              <Button
-                variant='default'
-                onClick={() => router.push('/login') && closeDrawer()}
-              >
-                Log in
-              </Button>
-              <Button onClick={() => router.push('/signup') && closeDrawer()}>
-                Sign up
-              </Button>
-            </Group>
+
+            <Menu withArrow
+              opened={menuOpened}
+              onChange={setMenuOpened}
+            >
+              <Menu.Target>
+                <Avatar
+                  variant={avatarIconHovering || menuOpened ? 'filled' : 'default'}
+                  onMouseEnter={() => setAvatarIconHovering(true)}
+                  onMouseLeave={() => setAvatarIconHovering(false)}
+                  style={{ cursor: 'pointer' }}
+                  className={classes.hiddenMobile}
+                />
+              </Menu.Target>
+
+              <Menu.Dropdown>
+                <Menu.Item closeMenuOnClick onClick={() => router.push('/login')}>Login</Menu.Item>
+                <Menu.Item closeMenuOnClick onClick={() => router.push('/signup')}>Signup</Menu.Item>
+
+                <Menu.Divider />
+                <Menu.Item
+                  closeMenuOnClick={false}
+                  icon={
+                    colorScheme == 'dark'
+                      ? <IconMoonFilled size={14} />
+                      : <IconSunFilled size={14} />
+                  }
+                  onClick={() => toggleColorScheme()}
+                >
+                  Toggle Theme
+                </Menu.Item>
+              </Menu.Dropdown>
+            </Menu>
+
 
             <Burger
               opened={drawerOpened}
