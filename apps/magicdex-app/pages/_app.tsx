@@ -3,6 +3,7 @@ import { ColorScheme, ColorSchemeProvider, Container, MantineProvider } from '@m
 import { ModalsProvider } from '@mantine/modals'
 import { Notifications, showNotification } from '@mantine/notifications'
 import { getCookie, setCookie } from 'cookies-next'
+import { SessionProvider } from 'next-auth/react'
 import NextApp, { AppContext, AppProps } from 'next/app'
 import Head from 'next/head'
 import { useState } from 'react'
@@ -11,7 +12,7 @@ import './styles.css'
 
 const App = ({
   Component,
-  pageProps,
+  pageProps: { session, ...pageProps },
   colorScheme: _colorScheme
 }:
   AppProps & { colorScheme: ColorScheme }
@@ -38,34 +39,36 @@ const App = ({
       </Head>
 
       <main>
-        <ColorSchemeProvider
-          colorScheme={colorScheme}
-          toggleColorScheme={toggleColorScheme}
-        >
-          <MantineProvider
-            withGlobalStyles
-            withNormalizeCSS
-            theme={{
-              colorScheme,
-              primaryColor: 'violet',
-              // primaryShade: 8,
-              white: '#F8F9FA',
-            }}
+        <SessionProvider session={session}>
+          <ColorSchemeProvider
+            colorScheme={colorScheme}
+            toggleColorScheme={toggleColorScheme}
           >
-            <ModalsProvider>
-              <Notifications
-                limit={3}
-                position='bottom-left'
-              />
-              <CustomHeader />
-              <Container>
-                <Component {...pageProps} />
-              </Container>
-              <CustomFooter />
+            <MantineProvider
+              withGlobalStyles
+              withNormalizeCSS
+              theme={{
+                colorScheme,
+                primaryColor: 'violet',
+                // primaryShade: 8,
+                white: '#F8F9FA',
+              }}
+            >
+              <ModalsProvider>
+                <Notifications
+                  limit={3}
+                  position='bottom-left'
+                />
+                <CustomHeader />
+                <Container>
+                  <Component {...pageProps} />
+                </Container>
+                <CustomFooter />
 
-            </ModalsProvider>
-          </MantineProvider>
-        </ColorSchemeProvider>
+              </ModalsProvider>
+            </MantineProvider>
+          </ColorSchemeProvider>
+        </SessionProvider>
       </main>
     </>
   )

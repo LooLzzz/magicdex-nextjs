@@ -1,19 +1,26 @@
-import { Center, Title, useMantineColorScheme } from '@mantine/core'
+import { Stack, Text, Title } from '@mantine/core'
+import { useSession } from 'next-auth/react'
+import Image from 'next/image'
 
 
 // TODO: all this
 
 export default function HomePage() {
-  const { colorScheme } = useMantineColorScheme()
+  const session = useSession()
 
   return (
-    <Center>
+    <Stack align='center'>
       <Title>
-        {'Current color scheme: '}
-        <span style={{ color: colorScheme === 'dark' ? 'red' : 'blue' }}>
-          {colorScheme}
-        </span>
+        Welcome to MagicDex!
       </Title>
-    </Center>
+
+      <Text>
+        {
+          session.status === 'authenticated'
+            ? `Logged in as ${session.data.user.name}`
+            : 'Not currently logged in'
+        }
+      </Text>
+    </Stack>
   )
 }
