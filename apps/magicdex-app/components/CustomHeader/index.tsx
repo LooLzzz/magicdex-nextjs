@@ -3,7 +3,6 @@ import {
   Avatar,
   Box,
   Burger,
-  Button,
   Container,
   Divider,
   Drawer,
@@ -17,9 +16,10 @@ import {
 } from '@mantine/core'
 import { useDisclosure } from '@mantine/hooks'
 import { IconMoonFilled, IconSunFilled } from '@tabler/icons-react'
+import { useSession } from 'next-auth/react'
 import Link from 'next/link'
-import { useRouter } from 'next/router'
 import { useState } from 'react'
+import LoginLogoutButtons from './LoginLogoutButtons'
 import NavbarLink from './NavbarLink'
 import useStyles from './styles'
 
@@ -29,8 +29,8 @@ export default function CustomHeader({
 }: {
   headerHeight?: number
 }) {
-  const router = useRouter()
-  const { classes } = useStyles()
+  const session = useSession()
+  const { classes, cx } = useStyles()
   const { colorScheme, toggleColorScheme } = useMantineColorScheme()
 
   const [avatarIconHovering, setAvatarIconHovering] = useState(false)
@@ -67,26 +67,46 @@ export default function CustomHeader({
               ))}
             </Group>
 
-
             <Menu withArrow
               opened={menuOpened}
               onChange={setMenuOpened}
             >
               <Menu.Target>
-                <Avatar
-                  variant={avatarIconHovering || menuOpened ? 'filled' : 'default'}
-                  onMouseEnter={() => setAvatarIconHovering(true)}
-                  onMouseLeave={() => setAvatarIconHovering(false)}
-                  style={{ cursor: 'pointer' }}
-                  className={classes.hiddenMobile}
-                />
+                {
+                  session.status === 'authenticated' && session.data?.user?.image
+                    ? <Box pos='relative' p={rem(4)}>
+                      <Image
+                        radius='xl'
+                        className={cx(
+                          classes.hiddenMobile,
+                          { [classes.avatarHover]: avatarIconHovering || menuOpened }
+                        )}
+                        style={{ cursor: 'pointer' }}
+                        alt='User Avatar'
+                        src={session.data.user.image}
+                        width={headerHeight * 0.5}
+                        height={headerHeight * 0.5}
+                        onMouseEnter={() => setAvatarIconHovering(true)}
+                        onMouseLeave={() => setAvatarIconHovering(false)}
+                      />
+                    </Box>
+                    : <Avatar
+                      variant={avatarIconHovering || menuOpened ? 'filled' : 'default'}
+                      onMouseEnter={() => setAvatarIconHovering(true)}
+                      onMouseLeave={() => setAvatarIconHovering(false)}
+                      style={{ cursor: 'pointer' }}
+                      className={classes.hiddenMobile}
+                    />
+                }
               </Menu.Target>
 
               <Menu.Dropdown>
-                <Menu.Item closeMenuOnClick onClick={() => router.push('/login')}>Login</Menu.Item>
-                <Menu.Item closeMenuOnClick onClick={() => router.push('/signup')}>Signup</Menu.Item>
+                <LoginLogoutButtons
+                  component={({ children, ...props }) => <Menu.Item closeMenuOnClick {...props}>{children}</Menu.Item>}
+                />
 
                 <Menu.Divider />
+
                 <Menu.Item
                   closeMenuOnClick={false}
                   icon={
@@ -118,7 +138,6 @@ export default function CustomHeader({
         padding='md'
         title='Navigation'
         className={classes.hiddenDesktop}
-        zIndex={1000000}
       >
         <ScrollArea h={`calc(100vh - ${rem(60)})`} mx="-md">
           <Divider my='sm' />
@@ -132,15 +151,10 @@ export default function CustomHeader({
           <Divider my='sm' />
 
           <Group position='center' grow pb='xl' px='md'>
-            <Button
-              variant='default'
-              onClick={() => router.push('/login') && closeDrawer()}
-            >
-              Log in
-            </Button>
-            <Button onClick={() => router.push('/signup') && closeDrawer()}>
-              Sign up
-            </Button>
+            <LoginLogoutButtons
+              signupProps={{ variant: 'default' }}
+              afterOnClick={closeDrawer}
+            />
           </Group>
         </ScrollArea>
       </Drawer>

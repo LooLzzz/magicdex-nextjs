@@ -95,5 +95,19 @@ export default createStyles(theme => ({
       display: 'none',
     },
   },
+
+  avatarHover: {
+    '&::after': {
+      content: '""',
+      borderRadius: '10%',
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      opacity: 0.1,
+      backgroundColor: theme.colorScheme === 'dark' ? theme.colors.gray[0] : theme.colors.gray[8],
+    },
+  },
 }))
 
