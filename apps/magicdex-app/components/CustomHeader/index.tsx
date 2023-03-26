@@ -138,7 +138,7 @@ export default function CustomHeader({
         padding='md'
         title='Navigation'
         className={classes.hiddenDesktop}
-      >
+      > 
         <ScrollArea h={`calc(100vh - ${rem(60)})`} mx="-md">
           <Divider my='sm' />
 
