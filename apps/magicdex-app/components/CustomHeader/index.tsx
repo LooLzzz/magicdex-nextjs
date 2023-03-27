@@ -12,6 +12,7 @@ import {
   Menu,
   rem,
   ScrollArea,
+  Overlay,
   useMantineColorScheme
 } from '@mantine/core'
 import { useDisclosure } from '@mantine/hooks'
@@ -44,7 +45,7 @@ export default function CustomHeader({
 
   return (
     <Box pb={20}>
-      <Header height={headerHeight} px='md'>
+      <Header px='md' height={headerHeight}>
         <Container sx={{ height: '100%' }}>
           <Group position='apart' sx={{ height: '100%' }}>
             <Link href="/">
@@ -84,8 +85,8 @@ export default function CustomHeader({
                         style={{ cursor: 'pointer' }}
                         alt='User Avatar'
                         src={session.data.user.image}
-                        width={headerHeight * 0.5}
-                        height={headerHeight * 0.5}
+                        width={headerHeight * 0.6}
+                        height={headerHeight * 0.6}
                         onMouseEnter={() => setAvatarIconHovering(true)}
                         onMouseLeave={() => setAvatarIconHovering(false)}
                       />
@@ -102,7 +103,11 @@ export default function CustomHeader({
 
               <Menu.Dropdown>
                 <LoginLogoutButtons
-                  component={({ children, ...props }) => <Menu.Item closeMenuOnClick {...props}>{children}</Menu.Item>}
+                  component={({ children, ...props }) => (
+                    <Menu.Item closeMenuOnClick {...props}>
+                      {children}
+                    </Menu.Item>
+                  )}
                 />
 
                 <Menu.Divider />
@@ -111,8 +116,8 @@ export default function CustomHeader({
                   closeMenuOnClick={false}
                   icon={
                     colorScheme == 'dark'
-                      ? <IconMoonFilled size={14} />
-                      : <IconSunFilled size={14} />
+                      ? <IconMoonFilled size={rem(14)} />
+                      : <IconSunFilled size={rem(14)} />
                   }
                   onClick={() => toggleColorScheme()}
                 >
@@ -121,12 +126,27 @@ export default function CustomHeader({
               </Menu.Dropdown>
             </Menu>
 
-
-            <Burger
-              opened={drawerOpened}
-              onClick={toggleDrawer}
+            <Box
+              pos='relative'
               className={classes.hiddenDesktop}
-            />
+              onClick={toggleDrawer}
+            >
+              {
+                session.status === 'authenticated' && session.data?.user?.image
+                  ? <Image
+                    radius='xl'
+                    className={cx({
+                      [classes.avatarHover]: drawerOpened
+                    })}
+                    alt='User Avatar'
+                    src={session.data.user.image}
+                    width={headerHeight * 0.6}
+                    height={headerHeight * 0.6}
+                  />
+                  : <Burger opened={drawerOpened} />
+              }
+            </Box>
+
           </Group>
         </Container>
       </Header>
@@ -138,23 +158,24 @@ export default function CustomHeader({
         padding='md'
         title='Navigation'
         className={classes.hiddenDesktop}
-      > 
+      >
         <ScrollArea h={`calc(100vh - ${rem(60)})`} mx="-md">
           <Divider my='sm' />
 
           {navbarRoutes.map((route, idx) => (
-            <NavbarLink sidebar onClick={closeDrawer} key={idx} href={route.url}>
+            <NavbarLink sidebar
+              key={idx}
+              onClick={closeDrawer}
+              href={route.url}
+            >
               {route.title}
             </NavbarLink>
           ))}
 
           <Divider my='sm' />
 
-          <Group position='center' grow pb='xl' px='md'>
-            <LoginLogoutButtons
-              signupProps={{ variant: 'default' }}
-              afterOnClick={closeDrawer}
-            />
+          <Group grow position='center' pb='xl' px='md'>
+            <LoginLogoutButtons afterOnClick={closeDrawer} />
           </Group>
         </ScrollArea>
       </Drawer>

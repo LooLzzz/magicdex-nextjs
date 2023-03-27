@@ -1,6 +1,5 @@
 import { Stack, Text, Title } from '@mantine/core'
 import { useSession } from 'next-auth/react'
-import Image from 'next/image'
 
 
 // TODO: all this
@@ -17,7 +16,20 @@ export default function HomePage() {
       <Text>
         {
           session.status === 'authenticated'
-            ? `Logged in as ${session.data.user.name}`
+            ? <>
+              <Text weight={600}>
+                Available session user data:
+              </Text>
+              <ul>
+                {Object.entries(session.data.user).map(([key, value]) => (
+                  <li key={key}>
+                    <Text>
+                      {`${key}: ${value}`}
+                    </Text>
+                  </li>
+                ))}
+              </ul>
+            </>
             : 'Not currently logged in'
         }
       </Text>

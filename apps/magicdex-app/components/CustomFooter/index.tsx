@@ -7,7 +7,7 @@ export default function CustomFooter() {
   const { classes } = useStyles()
 
   return (
-    <div className={classes.footer}>
+    <div className='mantine-footer'>
       <Container className={classes.inner}>
         {/* <Image alt='Magicdex logo' src={'logo.png'} width={150} /> */}
 

@@ -1,5 +1,12 @@
 import { CustomFooter, CustomHeader } from '@/components'
-import { ColorScheme, ColorSchemeProvider, Container, MantineProvider } from '@mantine/core'
+import {
+  ColorScheme,
+  ColorSchemeProvider,
+  Container,
+  MantineProvider,
+  MantineThemeOverride,
+  rem
+} from '@mantine/core'
 import { ModalsProvider } from '@mantine/modals'
 import { Notifications, showNotification } from '@mantine/notifications'
 import { getCookie, setCookie } from 'cookies-next'
@@ -9,6 +16,48 @@ import Head from 'next/head'
 import { useState } from 'react'
 import './styles.css'
 
+
+const getMantineTheme = (colorScheme: ColorScheme): MantineThemeOverride => ({
+  colorScheme,
+  primaryColor: 'violet',
+  // primaryShade: 8,
+  white: '#F8F9FA',
+
+  globalStyles: (theme) => ({
+    // body: {
+    //   background: (
+    //     theme.colorScheme === 'dark'
+    //       ? `linear-gradient(160deg, transparent 0%, rgba(255,255,255,1) 600%)`
+    //       : `linear-gradient(160deg, transparent 0%, rgba(0,0,0,0.3)       250%)`
+    //   ),
+    // },
+
+    '.mantine-Overlay-root': {
+      backgroundColor: (
+        theme.colorScheme === 'dark'
+          ? 'rgba(44, 46, 51, 0.75)'
+          : 'rgba(210, 210, 220, 0.75)'
+      ),
+    },
+
+    '.mantine-Header-root': {
+      borderColor: (
+        theme.colorScheme === 'dark'
+          ? theme.colors.dark[5]
+          : theme.colors.gray[4]
+      ),
+    },
+    '.mantine-footer': {
+      marginTop: rem(20),
+      borderTop: `${rem(1)} solid`,
+      borderColor: (
+        theme.colorScheme === 'dark'
+          ? theme.colors.dark[5]
+          : theme.colors.gray[4]
+      ),
+    },
+  }),
+})
 
 const App = ({
   Component,
@@ -26,6 +75,7 @@ const App = ({
     setCookie('mantine-color-scheme', nextColorScheme, { maxAge: 60 * 60 * 24 * 30 })
 
     showNotification({
+      // TODO: remove this
       title: 'Color scheme toggled',
       message: `Current color scheme is now ${colorScheme === 'dark' ? 'light' : 'dark'}`,
       color: colorScheme === 'dark' ? 'red' : 'blue',
@@ -47,12 +97,7 @@ const App = ({
             <MantineProvider
               withGlobalStyles
               withNormalizeCSS
-              theme={{
-                colorScheme,
-                primaryColor: 'violet',
-                // primaryShade: 8,
-                white: '#F8F9FA',
-              }}
+              theme={getMantineTheme(colorScheme)}
             >
               <ModalsProvider>
                 <Notifications
