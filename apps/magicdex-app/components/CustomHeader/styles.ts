@@ -32,7 +32,7 @@ export default createStyles(theme => ({
     transition: 'border 0.2s ease-in-out',
 
     '&.activeLink': {
-      borderBottom: `${rem(2.5)} solid ${theme.primaryColor}`,
+      borderBottom: `${rem(2.5)} solid ${theme.fn.themeColor(theme.primaryColor, 5)}`,
     },
 
     '&.sidebar': {
@@ -41,24 +41,13 @@ export default createStyles(theme => ({
     },
 
     '&.activeLink&.sidebar': {
-      borderLeft: `${rem(3)} solid ${theme.primaryColor}`,
-
-      // justifyContent: 'space-between',
-      // '&:before': {
-      //   // draw a triangle
-      //   content: '""',
-      //   width: 0,
-      //   height: 0,
-      //   borderStyle: 'solid',
-      //   borderWidth: `${rem(10)} 0 ${rem(10)} ${rem(15)}`,
-      //   borderColor: `transparent transparent transparent ${theme.primaryColor}`,
-      // },
+      borderLeft: `${rem(3)} solid ${theme.fn.themeColor(theme.primaryColor, 5)}`,
     },
   },
 
   subLink: {
     width: '100%',
-    padding: `${theme.spacing.xs} ${theme.spacing.md}`,
+    padding: `${theme.spacing.xs} ${theme.fn.themeColor(theme.primaryColor, 5)}`,
     borderRadius: theme.radius.md,
 
     ...theme.fn.hover({
@@ -93,6 +82,24 @@ export default createStyles(theme => ({
   hiddenDesktop: {
     [theme.fn.largerThan('sm')]: {
       display: 'none',
+    },
+  },
+
+  avatarHover: {
+    '&::after': {
+      content: '""',
+      borderRadius: '10%',
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      opacity: 0.1,
+      backgroundColor: (
+        theme.colorScheme === 'dark'
+          ? theme.colors.gray[0]
+          : theme.colors.gray[8]
+      ),
     },
   },
 }))

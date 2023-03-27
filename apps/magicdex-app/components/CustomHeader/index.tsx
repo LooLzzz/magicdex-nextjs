@@ -3,7 +3,6 @@ import {
   Avatar,
   Box,
   Burger,
-  Button,
   Container,
   Divider,
   Drawer,
@@ -13,13 +12,15 @@ import {
   Menu,
   rem,
   ScrollArea,
+  Overlay,
   useMantineColorScheme
 } from '@mantine/core'
 import { useDisclosure } from '@mantine/hooks'
 import { IconMoonFilled, IconSunFilled } from '@tabler/icons-react'
+import { useSession } from 'next-auth/react'
 import Link from 'next/link'
-import { useRouter } from 'next/router'
 import { useState } from 'react'
+import LoginLogoutButtons from './LoginLogoutButtons'
 import NavbarLink from './NavbarLink'
 import useStyles from './styles'
 
@@ -29,8 +30,8 @@ export default function CustomHeader({
 }: {
   headerHeight?: number
 }) {
-  const router = useRouter()
-  const { classes } = useStyles()
+  const session = useSession()
+  const { classes, cx } = useStyles()
   const { colorScheme, toggleColorScheme } = useMantineColorScheme()
 
   const [avatarIconHovering, setAvatarIconHovering] = useState(false)
@@ -44,7 +45,7 @@ export default function CustomHeader({
 
   return (
     <Box pb={20}>
-      <Header height={headerHeight} px='md'>
+      <Header px='md' height={headerHeight}>
         <Container sx={{ height: '100%' }}>
           <Group position='apart' sx={{ height: '100%' }}>
             <Link href="/">
@@ -67,32 +68,56 @@ export default function CustomHeader({
               ))}
             </Group>
 
-
             <Menu withArrow
               opened={menuOpened}
               onChange={setMenuOpened}
             >
               <Menu.Target>
-                <Avatar
-                  variant={avatarIconHovering || menuOpened ? 'filled' : 'default'}
-                  onMouseEnter={() => setAvatarIconHovering(true)}
-                  onMouseLeave={() => setAvatarIconHovering(false)}
-                  style={{ cursor: 'pointer' }}
-                  className={classes.hiddenMobile}
-                />
+                {
+                  session.status === 'authenticated' && session.data?.user?.image
+                    ? <Box pos='relative' p={rem(4)}>
+                      <Image
+                        radius='xl'
+                        className={cx(
+                          classes.hiddenMobile,
+                          { [classes.avatarHover]: avatarIconHovering || menuOpened }
+                        )}
+                        style={{ cursor: 'pointer' }}
+                        alt='User Avatar'
+                        src={session.data.user.image}
+                        width={headerHeight * 0.6}
+                        height={headerHeight * 0.6}
+                        onMouseEnter={() => setAvatarIconHovering(true)}
+                        onMouseLeave={() => setAvatarIconHovering(false)}
+                      />
+                    </Box>
+                    : <Avatar
+                      variant={avatarIconHovering || menuOpened ? 'filled' : 'default'}
+                      onMouseEnter={() => setAvatarIconHovering(true)}
+                      onMouseLeave={() => setAvatarIconHovering(false)}
+                      style={{ cursor: 'pointer' }}
+                      className={classes.hiddenMobile}
+                    />
+                }
               </Menu.Target>
 
               <Menu.Dropdown>
-                <Menu.Item closeMenuOnClick onClick={() => router.push('/login')}>Login</Menu.Item>
-                <Menu.Item closeMenuOnClick onClick={() => router.push('/signup')}>Signup</Menu.Item>
+                <LoginLogoutButtons
+                  component={({ children, ...props }) => (
+                    <Menu.Item closeMenuOnClick {...props}>
+                      {children}
+                    </Menu.Item>
+                  )}
+                />
 
                 <Menu.Divider />
+
                 <Menu.Item
                   closeMenuOnClick={false}
                   icon={
                     colorScheme == 'dark'
-                      ? <IconMoonFilled size={14} />
-                      : <IconSunFilled size={14} />
+                      ? <IconMoonFilled size={rem(14)} />
+                      : <IconSunFilled size={rem(14)} />
                   }
                   onClick={() => toggleColorScheme()}
                 >
@@ -101,12 +126,27 @@ export default function CustomHeader({
               </Menu.Dropdown>
             </Menu>
 
-
-            <Burger
-              opened={drawerOpened}
-              onClick={toggleDrawer}
+            <Box
+              pos='relative'
               className={classes.hiddenDesktop}
-            />
+              onClick={toggleDrawer}
+            >
+              {
+                session.status === 'authenticated' && session.data?.user?.image
+                  ? <Image
+                    radius='xl'
+                    className={cx({
+                      [classes.avatarHover]: drawerOpened
+                    })}
+                    alt='User Avatar'
+                    src={session.data.user.image}
+                    width={headerHeight * 0.6}
+                    height={headerHeight * 0.6}
+                  />
+                  : <Burger opened={drawerOpened} />
+              }
+            </Box>
+
           </Group>
         </Container>
       </Header>
@@ -118,29 +158,24 @@ export default function CustomHeader({
         padding='md'
         title='Navigation'
         className={classes.hiddenDesktop}
-        zIndex={1000000}
       >
         <ScrollArea h={`calc(100vh - ${rem(60)})`} mx="-md">
           <Divider my='sm' />
 
           {navbarRoutes.map((route, idx) => (
-            <NavbarLink sidebar onClick={closeDrawer} key={idx} href={route.url}>
+            <NavbarLink sidebar
+              key={idx}
+              onClick={closeDrawer}
+              href={route.url}
+            >
               {route.title}
             </NavbarLink>
           ))}
 
           <Divider my='sm' />
 
-          <Group position='center' grow pb='xl' px='md'>
-            <Button
-              variant='default'
-              onClick={() => router.push('/login') && closeDrawer()}
-            >
-              Log in
-            </Button>
-            <Button onClick={() => router.push('/signup') && closeDrawer()}>
-              Sign up
-            </Button>
+          <Group grow position='center' pb='xl' px='md'>
+            <LoginLogoutButtons afterOnClick={closeDrawer} />
           </Group>
         </ScrollArea>
       </Drawer>

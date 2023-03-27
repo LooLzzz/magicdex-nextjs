@@ -1,12 +1,7 @@
-import { createStyles, rem } from '@mantine/core'
+import { createStyles } from '@mantine/core'
 
 
 export default createStyles(theme => ({
-  footer: {
-    marginTop: rem(20),
-    borderTop: `${rem(1)} solid ${theme.colorScheme === 'dark' ? theme.colors.dark[5] : theme.colors.gray[2]}`,
-  },
-
   inner: {
     display: 'flex',
     justifyContent: 'space-between',
