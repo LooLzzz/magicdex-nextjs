@@ -3,6 +3,7 @@
 # environment config
 .env.local
 .env.development.local
+*firebase-adminsdk-*.json
 
 # compiled output
 dist
