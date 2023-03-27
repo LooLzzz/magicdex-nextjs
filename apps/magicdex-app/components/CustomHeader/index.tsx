@@ -1,4 +1,4 @@
-import navbarRoutes from '@/pages/(navbarRoutes)'
+import navbarRoutes from '@/services/navbarRoutes'
 import {
   Avatar,
   Box,
@@ -12,7 +12,6 @@ import {
   Menu,
   rem,
   ScrollArea,
-  Overlay,
   useMantineColorScheme
 } from '@mantine/core'
 import { useDisclosure } from '@mantine/hooks'
