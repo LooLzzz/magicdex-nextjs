@@ -1,4 +1,4 @@
-import { firestore } from '@/services'
+import firestore from '@/services/firestore'
 import { FirestoreAdapter } from '@next-auth/firebase-adapter'
 import NextAuth, { NextAuthOptions } from 'next-auth'
 import DiscordProvider from 'next-auth/providers/discord'

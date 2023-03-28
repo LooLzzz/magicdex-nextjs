@@ -1,5 +1,8 @@
 import { initFirestore } from '@next-auth/firebase-adapter'
 import { cert } from 'firebase-admin/app'
+import * as cardServices from './cardServices'
+import * as dbServices from './dbServices'
+import * as userServices from './userServices'
 
 
 const firestore = initFirestore({
@@ -10,4 +13,9 @@ const firestore = initFirestore({
   })
 })
 
-export default firestore
+export {
+  firestore as default,
+  cardServices,
+  dbServices,
+  userServices,
+}
