@@ -14,11 +14,11 @@ const nextConfig = {
     svgr: false,
   },
 
-  output: 'standalone',
-  experimental: {
-    outputFileTracingRoot: path.join(__dirname, '../../'),
-    externalDir: true,
-  },
+  // output: 'standalone',
+  // experimental: {
+  //   outputFileTracingRoot: path.join(__dirname, '../../'),
+  //   externalDir: true,
+  // },
 
   images: {
     remotePatterns: [
