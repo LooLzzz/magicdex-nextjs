@@ -4,6 +4,7 @@ import NextAuth, { NextAuthOptions } from 'next-auth'
 import DiscordProvider from 'next-auth/providers/discord'
 import GitHubProvider from 'next-auth/providers/github'
 import GitLabProvider from 'next-auth/providers/gitlab'
+import GoogleProvider from 'next-auth/providers/google'
 import LinkedInProvider from 'next-auth/providers/linkedin'
 
 
@@ -11,6 +12,18 @@ export const authOptions: NextAuthOptions = {
   adapter: FirestoreAdapter(firestore),
 
   providers: [
+    ...(
+      // Only enable GoogleProvider if credentials are set.
+      // Credentials are not available while developing locally,
+      // but should be already set in production (on vercel.com)
+      process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET
+        ? [GoogleProvider({
+          allowDangerousEmailAccountLinking: true,
+          clientId: process.env.GOOGLE_CLIENT_ID,
+          clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+        })]
+        : []
+    ),
     GitHubProvider({
       allowDangerousEmailAccountLinking: true,
       clientId: process.env.GITHUB_CLIENT_ID,
