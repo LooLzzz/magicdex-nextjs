@@ -1,4 +1,5 @@
 import { CustomFooter, CustomHeader } from '@/components'
+import { defaultFetcher } from '@/services'
 import {
   ColorScheme,
   ColorSchemeProvider,
@@ -14,6 +15,7 @@ import { SessionProvider } from 'next-auth/react'
 import NextApp, { AppContext, AppProps } from 'next/app'
 import Head from 'next/head'
 import { useState } from 'react'
+import { SWRConfig } from 'swr'
 import './styles.css'
 
 
@@ -90,29 +92,37 @@ const App = ({
 
       <main>
         <SessionProvider session={session}>
-          <ColorSchemeProvider
-            colorScheme={colorScheme}
-            toggleColorScheme={toggleColorScheme}
+          <SWRConfig
+            value={{
+              fetcher: defaultFetcher,
+              // revalidateOnFocus: true,
+              // refreshInterval: 3000,
+            }}
           >
-            <MantineProvider
-              withGlobalStyles
-              withNormalizeCSS
-              theme={getMantineTheme(colorScheme)}
+            <ColorSchemeProvider
+              colorScheme={colorScheme}
+              toggleColorScheme={toggleColorScheme}
             >
-              <ModalsProvider>
-                <Notifications
-                  limit={3}
-                  position='bottom-left'
-                />
-                <CustomHeader />
-                <Container>
-                  <Component {...pageProps} />
-                </Container>
-                <CustomFooter />
+              <MantineProvider
+                withGlobalStyles
+                withNormalizeCSS
+                theme={getMantineTheme(colorScheme)}
+              >
+                <ModalsProvider>
+                  <Notifications
+                    limit={3}
+                    position='bottom-left'
+                  />
+                  <CustomHeader />
+                  <Container>
+                    <Component {...pageProps} />
+                  </Container>
+                  <CustomFooter />
 
-              </ModalsProvider>
-            </MantineProvider>
-          </ColorSchemeProvider>
+                </ModalsProvider>
+              </MantineProvider>
+            </ColorSchemeProvider>
+          </SWRConfig>
         </SessionProvider>
       </main>
     </>

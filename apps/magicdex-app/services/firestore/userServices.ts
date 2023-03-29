@@ -1,16 +1,21 @@
-import firestore from './index'
+import { UserData } from '@/types'
+import { collections } from './index'
 
 
-export async function getUserDocumentById({ id, ref = false }: { id: string, ref?: boolean }) {
-  const doc = (
-    firestore
-      .collection('users')
-      .doc(id)
-  )
-
+export async function getUserDocumentById(id: string) {
   return (
-    ref
-      ? doc
-      : await doc.get()
+    await collections
+      .users
+      .doc(id)
+      .get()
   )
+}
+
+export async function getUserDataById(id: string): Promise<UserData> {
+  const userDoc = await getUserDocumentById(id)
+
+  return ({
+    id: userDoc.id,
+    ...userDoc.data(),
+  })
 }

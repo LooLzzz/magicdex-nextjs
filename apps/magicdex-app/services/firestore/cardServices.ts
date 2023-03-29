@@ -1,22 +1,33 @@
-import firestore from './index'
-import { Card } from './types'
+import { CardData } from '@/types'
+import { collections } from './index'
 import { getUserDocumentById } from './userServices'
 
 
-export async function getCardsDataByUserId(id: string) {
+export async function getCardDocumentById(id: string) {
   return (
-    (await firestore
-      .collection('cards')
-      .where('owner', '==', await getUserDocumentById({ id, ref: true }))
+    await collections
+      .cards
+      .doc(id)
+      .get()
+  )
+}
+
+export async function getCardsDataByUserId(id: string): Promise<CardData[]> {
+  const userDoc = await getUserDocumentById(id)
+
+  return (
+    (await collections
+      .cards
+      .where('owner', '==', userDoc.ref)
       .get())
       .docs
       .map(doc => {
         const { owner, ...docData } = doc.data()
         return {
           id: doc.id,
-          owner: owner.id,
+          ownerId: owner.id,
           ...docData
         }
       })
-  ) as Card[]
+  )
 }

@@ -12,6 +12,8 @@
       "@/public/*": ["./public/*"],
       "@/services": ["./services"],
       "@/services/*": ["./services/*"],
+      "@/types": ["./types"],
+      "@/types/*": ["./types/*"],
     },
     "jsx": "preserve",
     "jsxImportSource": "@emotion/react",
