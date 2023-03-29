@@ -4,12 +4,7 @@ import useSWR, { SWRConfiguration } from 'swr'
 
 
 export function useUserCards(options: SWRConfiguration = {}) {
-  const {
-    data,
-    error,
-    isLoading,
-    mutate
-  } = useSWR(apiRoutes.userCards, options)
+  const { data, error, isLoading, mutate } = useSWR(apiRoutes.userCards, options)
 
   return {
     cards: data as CardData[],

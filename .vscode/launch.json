@@ -1,0 +1,36 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Next.js: Debug App",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "nx run ${input:app-name}:serve",
+      "sourceMaps": true,
+      "sourceMapPathOverrides": {
+        "webpack:///./*": "${workspaceFolder}/apps/${input:app-name}/*",
+        "webpack:///../../libs/*": "${workspaceFolder}/libs/*",
+      },
+      "serverReadyAction": {
+        "action": "startDebugging",
+        "name": "Launch Client",
+        "pattern": "[ ready ] on http"
+      }
+    },
+    {
+      "name": "Launch Client",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:4200",
+      "webRoot": "${workspaceFolder}/apps/${input:app-name}",
+    }
+  ],
+  "inputs": [
+    {
+      "id": "app-name",
+      "type": "promptString",
+      "description": "Select the app to debug",
+      "default": "magicdex-app"
+    }
+  ]
+}
