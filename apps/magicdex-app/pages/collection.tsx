@@ -12,19 +12,12 @@ export default function CollectionPage() {
   const { cards, isLoading, error } = useUserCards()
 
   return (
-    <Center>
-      <Stack>
-        <Text weight={500}>
-          Available card info:
-        </Text>
 
         <CardsTable
           cards={cards}
           isLoading={isLoading}
           error={error}
         />
-      </Stack>
-    </Center>
   )
 }
 
