@@ -1,3 +1,4 @@
+import { apiRoutes } from '@/routes'
 import { CardData } from '@/types'
 import useSWR, { SWRConfiguration } from 'swr'
 
@@ -8,7 +9,7 @@ export function useUserCards(options: SWRConfiguration = {}) {
     error,
     isLoading,
     mutate
-  } = useSWR('/api/me/cards', options)
+  } = useSWR(apiRoutes.userCards, options)
 
   return {
     cards: data as CardData[],

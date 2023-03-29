@@ -1,4 +1,4 @@
-import navbarRoutes from '@/services/navbarRoutes'
+import { navbarRoutes } from '@/routes'
 import {
   Avatar,
   Box,
