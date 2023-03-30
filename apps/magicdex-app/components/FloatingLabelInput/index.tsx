@@ -9,7 +9,6 @@ export default function FloatingLabelInput({
 }: (TextInputProps | PasswordInputProps) & { password?: boolean }) {
   const [focused, setFocused] = useState(false)
 
-  // ignore next line's error
   const { classes } = useStyles({ floating: String(inputProps?.value)?.trim().length !== 0 || focused })
 
   return (

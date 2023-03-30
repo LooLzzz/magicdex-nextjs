@@ -1,5 +1,5 @@
 import { CustomFooter, CustomHeader } from '@/components'
-import { defaultFetcher } from '@/services'
+import defaultFetcher from '@/services/fetchers'
 import {
   ColorScheme,
   ColorSchemeProvider,

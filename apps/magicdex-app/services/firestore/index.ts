@@ -1,4 +1,4 @@
-import { CardDocument, UserDocument } from '@/types'
+import { CardDocument, UserDocument } from '@/types/firestore'
 import { initFirestore } from '@next-auth/firebase-adapter'
 import { cert } from 'firebase-admin/app'
 import * as cardServices from './cardServices'
