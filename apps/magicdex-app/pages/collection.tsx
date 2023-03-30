@@ -9,7 +9,10 @@ import { authOptions } from './api/auth/[...nextauth]'
 // TODO: all this
 
 export default function CollectionPage() {
-  const { cards, isLoading, error } = useUserCards()
+  const { cards, isLoading, error } = useUserCards({
+    swrConfig: { revalidateOnFocus: false },
+    populateScryfallData: true
+  })
 
   return (
 

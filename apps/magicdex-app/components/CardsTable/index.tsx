@@ -1,4 +1,4 @@
-import { CardData } from '@/types'
+import { CardData } from '@/types/firestore'
 import { MantineReactTable, MRT_ColumnDef } from 'mantine-react-table'
 import { useMemo } from 'react'
 
@@ -13,14 +13,14 @@ export default function CardsTable({
   error?: Error,
 }) {
   const columns = useMemo<MRT_ColumnDef<CardData>[]>(() => [
-    // {
-    //   accessorKey: 'id',
-    //   header: 'ID',
-    // },
-    // {
-    //   accessorKey: 'ownerId',
-    //   header: 'Owner ID',
-    // },
+    {
+      accessorKey: 'id',
+      header: 'ID',
+    },
+    {
+      accessorKey: 'ownerId',
+      header: 'Owner ID',
+    },
     {
       accessorKey: 'scryfallId',
       header: 'Scryfall ID',
@@ -39,9 +39,9 @@ export default function CardsTable({
       mantineToolbarAlertBannerProps={
         error
           ? {
-              color: 'error',
-              children: 'Error loading data',
-            }
+            color: 'error',
+            children: 'Error loading data',
+          }
           : null
       }
       state={{
@@ -49,28 +49,5 @@ export default function CardsTable({
         showProgressBars: isLoading,
       }}
     />
-
-    // <Text>
-    //   {
-    //     error
-    //       ? `Error loading cards: ${error}`
-    //       : isLoading
-    //         ? 'Loading...'
-    //         : cards?.length === 0
-    //           ? <Title order={3}>No cards found</Title>
-    //           : <ul>
-    //             {cards.map(card => (
-    //               <li key={card.id}>
-    //                 {Object.keys(card).sort().map(key => (
-    //                   <React.Fragment key={key}>
-    //                     {key}: <Code>{card[key]}</Code>
-    //                     <br />
-    //                   </React.Fragment>
-    //                 ))}
-    //               </li>
-    //             ))}
-    //           </ul>
-    //   }
-    // </Text>
   )
 }

@@ -1,26 +1,29 @@
+import { ScryfallCardData } from './scryfall'
 
-export type UserDocument = {
+
+export interface UserDocument {
   email: string
   name: string
   image?: string
 }
 
-export type UserData = {
+export interface UserData {
   id: string
   email: string
   name: string
   image?: string
 }
 
-export type CardDocument = {
+export interface CardDocument {
   owner: FirebaseFirestore.DocumentReference
   scryfallId: string
   amount: number
 }
 
-export type CardData = {
+export interface CardData {
   id: string
   ownerId: string
   scryfallId: string
   amount: number
+  scryfallData?: ScryfallCardData | Record<string, never>  // either 'ScryfallCardData' or 'EmptyObject'
 }
