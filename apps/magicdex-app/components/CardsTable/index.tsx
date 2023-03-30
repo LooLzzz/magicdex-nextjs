@@ -1,5 +1,5 @@
-import { CardData } from '@/types'
-import { Code, Text, Title } from '@mantine/core'
+import { CardData } from '@/types/firestore'
+import { Code, JsonInput, Text, Title } from '@mantine/core'
 import React from 'react'
 
 
@@ -26,7 +26,12 @@ export default function CardsTable({
                   <li key={card.id}>
                     {Object.keys(card).sort().map(key => (
                       <React.Fragment key={key}>
-                        {key}: <Code>{card[key]}</Code>
+                        {key + ': '}
+                        {
+                          typeof card[key] === 'object'
+                            ? <JsonInput sx={{ width: 800 }} autosize value={JSON.stringify(card[key])} />
+                            : <Code>{card[key]}</Code>
+                        }
                         <br />
                       </React.Fragment>
                     ))}

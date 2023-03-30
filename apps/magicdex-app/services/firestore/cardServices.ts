@@ -1,4 +1,4 @@
-import { CardData } from '@/types'
+import { CardData } from '@/types/firestore'
 import { collections } from './index'
 import { getUserDocumentById } from './userServices'
 
@@ -26,6 +26,7 @@ export async function getCardsDataByUserId(id: string): Promise<CardData[]> {
         return {
           id: doc.id,
           ownerId: owner.id,
+          scryfallData: {},
           ...docData
         }
       })
