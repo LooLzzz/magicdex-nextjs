@@ -22,11 +22,13 @@ export async function getCardsDataByUserId(id: string): Promise<CardData[]> {
       .get())
       .docs
       .map(doc => {
-        const { owner, ...docData } = doc.data()
+        const { owner, createdAt, updatedAt, ...docData } = doc.data()
         return {
           id: doc.id,
           ownerId: owner.id,
           scryfallData: {},
+          createdAt: createdAt.toDate(),
+          updatedAt: updatedAt.toDate(),
           ...docData
         }
       })

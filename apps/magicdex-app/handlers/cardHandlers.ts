@@ -7,8 +7,8 @@ async function getCardsDataByUserIdHandler({ id, populateScryfallData }: {
   populateScryfallData: boolean
 }) {
   const userCards = await cardServices.getCardsDataByUserId(id)
-
   let scryfallCards = { data: [], missing: [] }
+
   if (populateScryfallData) {
     scryfallCards = await scryfallServices.getCardsDataByIds(
       userCards.map(card => card.scryfallId)

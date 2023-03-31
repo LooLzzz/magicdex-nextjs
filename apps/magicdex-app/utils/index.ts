@@ -43,3 +43,10 @@ export function stringToBoolean(value: string) {
 
   throw new Error(`Invalid boolean string, expected 'true' or 'false', got '${value}'`)
 }
+
+export function toTitleCase(value: string) {
+  return value.replace(
+    /\w\S*/g,
+    txt => txt.charAt(0).toUpperCase() + txt.substring(1).toLowerCase()
+  )
+}

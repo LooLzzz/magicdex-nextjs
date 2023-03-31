@@ -1,118 +1,142 @@
 
 export type CardBorderColor = 'black' | 'borderless' | 'gold' | 'silver' | 'white'
 export type CardColor = 'W' | 'U' | 'B' | 'R' | 'G'
+export type CardColorColorless = CardColor | '∅'
+export type CardFaceObject = 'card_face'
 export type CardFinish = 'foil' | 'nonfoil' | 'etched'
 export type CardGameType = 'paper' | 'arena' | 'mtgo'
 export type CardImageStatus = 'missing' | 'placeholder' | 'lowres' | 'highres_scan'
+export type CardLayout = 'normal' | 'split' | 'flip' | 'transform' | 'modal_dfc' | 'meld' | 'leveler' | 'class' | 'saga' | 'adventure' | 'battle' | 'planar' | 'scheme' | 'vanguard' | 'token' | 'double_faced_token' | 'emblem' | 'augment' | 'host' | 'art_series' | 'reversible_card'
 export type CardLegality = 'legal' | 'not_legal'
 export type CardObject = 'card'
 export type CardRarity = 'common' | 'uncommon' | 'rare' | 'mythic' | 'special' | 'bonus'
 export type CardSecurityStamp = 'oval' | 'triangle' | 'acorn' | 'circle' | 'arena' | 'heart'
 
-export interface ScryfallCardData {
-  object: CardObject
-  id: string
-  oracle_id: string
-  multiverse_ids: number[]
-  tcgplayer_id: number
-  cardmarket_id: number
-  name: string
-  lang: string
-  released_at: string
-  uri: string
-  scryfall_uri: string
-  layout: string
-  highres_image: boolean
-  image_status: CardImageStatus
-  image_uris: {
-    small: string,
-    normal: string,
-    large: string,
-    png: string,
-    art_crop: string,
-    border_crop: string,
-  }
-  mana_cost: string
-  cmc: number
-  type_line: string
-  oracle_text: string
-  colors: CardColor[]
-  color_identity: CardColor[]
-  keywords: string[]
-  legalities: {
-    standard: CardLegality,
-    future: CardLegality,
-    historic: CardLegality,
-    gladiator: CardLegality,
-    pioneer: CardLegality,
-    explorer: CardLegality,
-    modern: CardLegality,
-    legacy: CardLegality,
-    pauper: CardLegality,
-    vintage: CardLegality,
-    penny: CardLegality,
-    commander: CardLegality,
-    oathbreaker: CardLegality,
-    brawl: CardLegality,
-    historicbrawl: CardLegality,
-    alchemy: CardLegality,
-    paupercommander: CardLegality,
-    duel: CardLegality,
-    oldschool: CardLegality,
-    premodern: CardLegality,
-    predh: CardLegality,
-  }
-  games: CardGameType
-  reserved: boolean
-  foil: boolean
-  nonfoil: boolean
-  finishes: CardFinish[]
-  oversized: boolean
-  promo: boolean
-  reprint: boolean
-  variation: boolean
-  set_id: string
-  set: string
-  set_name: string
-  set_type: string
-  set_uri: string
-  set_search_uri: string
-  scryfall_set_uri: string
-  rulings_uri: string
-  prints_search_uri: string
-  collector_number: string
-  digital: boolean
-  rarity: CardRarity
-  card_back_id: string
-  artist: string
-  artist_ids: string[]
-  illustration_id: string
-  border_color: CardBorderColor
-  frame: string
-  security_stamp: CardSecurityStamp
-  full_art: boolean
-  textless: boolean
-  booster: boolean
-  story_spotlight: boolean
-  edhrec_rank: number
-  penny_rank: number
-  prices: {
-    usd?: string
-    usd_foil?: string
-    usd_etched?: string
-    eur?: string
-    eur_foil?: string
-    tix?: string
-  }
-  related_uris: {
-    gatherer: string
-    tcgplayer_infinite_articles: string
-    tcgplayer_infinite_decks: string
-    edhrec: string
-  }
-  purchase_uris: {
-    tcgplayer: string
-    cardmarket: string
-    cardhoarder: string
-  }
+export interface BaseCardProps {
+  artist_id: string,
+  artist: string,
+  color_indicator: CardColor[],
+  colors: CardColor[],
+  flavor_text?: string,
+  illustration_id: string,
+  image_uris: CardImageUris,
+  layout: CardLayout,
+  loyalty?: string,
+  mana_cost: string,
+  name: string,
+  object: string,
+  oracle_text?: string,
+  power?: string,
+  toughness?: string,
+  type_line: string,
+}
+
+export interface CardImageUris {
+  art_crop: string,
+  border_crop: string,
+  large: string,
+  normal: string,
+  png: string,
+  small: string,
+}
+
+export interface CardLegalities {
+  alchemy: CardLegality,
+  brawl: CardLegality,
+  commander: CardLegality,
+  duel: CardLegality,
+  explorer: CardLegality,
+  future: CardLegality,
+  gladiator: CardLegality,
+  historic: CardLegality,
+  historicbrawl: CardLegality,
+  legacy: CardLegality,
+  modern: CardLegality,
+  oathbreaker: CardLegality,
+  oldschool: CardLegality,
+  pauper: CardLegality,
+  paupercommander: CardLegality,
+  penny: CardLegality,
+  pioneer: CardLegality,
+  predh: CardLegality,
+  premodern: CardLegality,
+  standard: CardLegality,
+  vintage: CardLegality,
+}
+
+export interface CardPrices {
+  eur_foil?: string,
+  eur?: string,
+  tix?: string,
+  usd_etched?: string,
+  usd_foil?: string,
+  usd?: string,
+}
+
+export interface CardRelatedUris {
+  edhrec: string,
+  gatherer: string,
+  tcgplayer_infinite_articles: string,
+  tcgplayer_infinite_decks: string,
+}
+
+export interface CardPurchaseUris {
+  cardhoarder: string,
+  cardmarket: string,
+  tcgplayer: string,
+}
+
+export interface ScryfallCardData extends BaseCardProps {
+  booster: boolean,
+  border_color: CardBorderColor,
+  card_back_id: string,
+  card_faces?: ({ object: CardFaceObject } & BaseCardProps)[],
+  cardmarket_id: number,
+  cmc: number,
+  collector_number: string,
+  color_identity: CardColor[],
+  digital: boolean,
+  edhrec_rank: number,
+  finishes: CardFinish[],
+  foil: boolean,
+  frame: string,
+  full_art: boolean,
+  games: CardGameType,
+  highres_image: boolean,
+  id: string,
+  image_status: CardImageStatus,
+  image_uris?: CardImageUris,
+  keywords: string[],
+  lang: string,
+  legalities: CardLegalities,
+  multiverse_ids: number[],
+  nonfoil: boolean,
+  object: CardObject,
+  oracle_id: string,
+  oversized: boolean,
+  penny_rank: number,
+  prices: CardPrices,
+  prints_search_uri: string,
+  promo: boolean,
+  purchase_uris: CardpurchaseUris,
+  rarity: CardRarity,
+  related_uris: CardRelatedUris,
+  released_at: string,
+  reprint: boolean,
+  reserved: boolean,
+  rulings_uri: string,
+  scryfall_set_uri: string,
+  scryfall_uri: string,
+  security_stamp: CardSecurityStamp,
+  set_id: string,
+  set_name: string,
+  set_search_uri: string,
+  set_type: string,
+  set_uri: string,
+  set: string,
+  story_spotlight: boolean,
+  tcgplayer_id: number,
+  textless: boolean,
+  uri: string,
+  variation: boolean,
 }
