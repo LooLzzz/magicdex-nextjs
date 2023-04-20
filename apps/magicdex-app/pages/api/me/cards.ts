@@ -1,11 +1,13 @@
+import { cardHandlers } from '@/api/(handlers)'
 import { authOptions } from '@/api/auth/[...nextauth]'
-import * as handlers from '@/handlers'
-import { stringToBoolean } from '@/utils'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { getServerSession } from 'next-auth'
 
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+export default async function handler(
+  req: NextApiRequest & { query: { [key: string]: undefined } },
+  res: NextApiResponse
+) {
   const session = await getServerSession(req, res, authOptions)
   const { method, body, query } = req
 
@@ -19,16 +21,25 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   if (method === 'GET') {
     try {
+      const { pagination, filters, globalFilter, sort } = {
+        pagination: JSON.parse(query.pagination ?? '{}'),
+        filters: JSON.parse(query.filters ?? '{}'),
+        globalFilter: query.globalFilter,
+        sort: JSON.parse(query.sort ?? '[]'),
+      }
+
+      // replace '-' with '—' for 'type_line' filter
+      if (filters?.type_line)
+        filters.type_line.value = (filters.type_line.value as string).replace(/-/g, '—')
+
       res.status(200).json(
-        await handlers.getCardsDataByUserIdHandler({
-          id: session.user.id,
-          populateScryfallData: stringToBoolean(query.populateScryfallData as string)
-        })
+        await cardHandlers.getCardsDataByUserSessionHandler(session, { pagination, globalFilter, filters, sort })
       )
     } catch (error) {
+      console.error(error)
       res.status(400).json({
         success: false,
-        message: error,
+        message: error.toString(),
       })
     }
   }

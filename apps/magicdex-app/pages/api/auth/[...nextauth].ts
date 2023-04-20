@@ -1,5 +1,5 @@
-import firestore from '@/services/firestore'
-import { FirestoreAdapter } from '@next-auth/firebase-adapter'
+import { SupabaseAdapter } from '@next-auth/supabase-adapter'
+import jwt from 'jsonwebtoken'
 import NextAuth, { NextAuthOptions } from 'next-auth'
 import DiscordProvider from 'next-auth/providers/discord'
 import GitHubProvider from 'next-auth/providers/github'
@@ -9,7 +9,10 @@ import LinkedInProvider from 'next-auth/providers/linkedin'
 
 
 export const authOptions: NextAuthOptions = {
-  adapter: FirestoreAdapter(firestore),
+  adapter: SupabaseAdapter({
+    url: process.env.NEXT_PUBLIC_SUPABASE_URL,
+    secret: process.env.SUPABASE_SERVICE_ROLE_KEY,
+  }),
 
   providers: [
     ...(
@@ -52,8 +55,24 @@ export const authOptions: NextAuthOptions = {
 
   callbacks: {
     session: async ({ session, user }) => {
+      // add user id to session
       if (session?.user)
-        session.user['id'] = user.id
+        session.user.id = user.id
+
+      // add supabase access token to session - used for supabase RLS
+      const signingSecret = process.env.SUPABASE_JWT_SECRET
+      if (signingSecret)
+        session.supabaseAccessToken = jwt.sign(
+          {
+            aud: 'authenticated',
+            exp: Math.floor(new Date(session.expires).getTime() / 1000),
+            sub: user.id,
+            email: user.email,
+            role: 'authenticated',
+          },
+          signingSecret
+        )
+
       return session
     },
   },

@@ -1,4 +1,4 @@
-import { Session as DefaultSession } from 'next-auth'
+import { DefaultSession } from 'next-auth'
 
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -10,12 +10,8 @@ declare module '*.svg' {
 
 
 declare module 'next-auth' {
-  export interface Session extends DefaultSession {
-    user: {
-      id?: string
-      name?: string
-      email?: string
-      image?: string
-    }
+  interface Session extends DefaultSession {
+    supabaseAccessToken?: string
+    user: DefaultSession['user'] & { id?: string }
   }
 }
