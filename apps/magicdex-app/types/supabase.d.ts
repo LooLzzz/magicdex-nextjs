@@ -18,4 +18,5 @@ export interface UserCardData extends ScryfallCardData {
   signed: boolean
   tags: string[]
   updated_at: Date
+  price_usd: number
 }

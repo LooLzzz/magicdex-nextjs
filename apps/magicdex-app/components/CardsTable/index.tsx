@@ -33,7 +33,11 @@ export default function CardsTable() {
   const [expandedRows, setExpandedRows] = useState<MRT_ExpandedState>({})
   const [columnFilters, setColumnFilters] = useState<MRT_ColumnFiltersState>([])
   const [globalFilter, setGlobalFilter] = useState('')
-  const [sorting, setSorting] = useState<MRT_SortingState>([])
+  const [sorting, setSorting] = useState<MRT_SortingState>([{
+    // id: 'name',
+    id: 'prices->usd',
+    desc: true
+  }])
   const [pagination, setPagination] = useState<MRT_PaginationState>({
     pageIndex: 0,
     pageSize: 15,
@@ -91,6 +95,7 @@ export default function CardsTable() {
         // showColumnFilters: true
         density: 'sm',
         columnVisibility: {
+          rarity: false,
           color_identity: false,
         },
       }}

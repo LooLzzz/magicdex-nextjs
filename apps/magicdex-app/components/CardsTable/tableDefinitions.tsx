@@ -1,7 +1,7 @@
 import { CardColor } from '@/types/scryfall'
 import { UserCardData } from '@/types/supabase'
 import { toTitleCase } from '@/utils'
-import { Menu, Text, Tooltip } from '@mantine/core'
+import { Checkbox, clsx, Group, Menu, Text, Tooltip } from '@mantine/core'
 import { MRT_Cell, MRT_ColumnDef } from 'mantine-react-table'
 import { useMemo } from 'react'
 
@@ -16,7 +16,11 @@ export const cardRarityMap = {
 }
 
 const CellWithLineClampText = <T,>({ cell, lineClamp = 2 }: { cell: MRT_Cell<T>, lineClamp: number }) => (
-  <Text title={cell.getValue<string>()} lineClamp={lineClamp}>
+  <Text
+    // truncate
+    title={cell.getValue<string>()}
+    lineClamp={lineClamp}
+  >
     {cell.getValue<string>()}
   </Text>
 )
@@ -33,11 +37,15 @@ const useColumnsDef = (allSets: string[]) => {
       filterFn: 'equals',
       columnFilterModeOptions: ['equals', 'notEquals', 'greaterThan', 'greaterThanOrEqualTo', 'lessThan', 'lessThanOrEqualTo'],
       enableColumnFilterModes: true,
-      enableFilterMatchHighlighting: false,
       mantineFilterTextInputProps: {
         placeholder: 'by Amount',
         type: 'number',
       },
+      Cell: ({ cell }) => (
+        <Text align='right'>
+          {cell.getValue<number>()}
+        </Text>
+      ),
     },
 
     {
@@ -61,26 +69,28 @@ const useColumnsDef = (allSets: string[]) => {
         placeholder: 'by Set Name',
       },
       mantineFilterMultiSelectProps: {
-        // TODO: get this from the metadata received from the API
         // TODO: find out how to separate 'dataValue' and 'displayValue' for the multi-select
         data: allSets as unknown as readonly string[] & string,
       },
       Cell: ({ cell }) => (
-        <Tooltip
-          withArrow
-          label={cell.row.original.set_name + ' - ' + toTitleCase(cell.row.original.rarity)}
-        >
-          <span
-            className={[
-              'ss',
-              'ss-fw',
-              'ss-2x',
-              'ss-' + cell.row.original.rarity.toLowerCase(),
-              'ss-' + cell.row.original.set.toLowerCase(),
-            ].join(' ')
-            }
-          />
-        </Tooltip>
+        <Text align='center'>
+          <Tooltip withArrow
+            // arrowPosition='side'
+            // position='right'
+            // offset={10}
+            label={<>{cell.row.original.set_name} - <Text span italic>{toTitleCase(cell.row.original.rarity)}</Text></>}
+          >
+            <div
+              className={clsx([
+                'ss',
+                'ss-fw',
+                'ss-2x',
+                'ss-' + cell.row.original.rarity.toLowerCase(),
+                'ss-' + cell.row.original.set.toLowerCase(),
+              ])}
+            />
+          </Tooltip>
+        </Text>
       ),
     },
 
@@ -135,12 +145,12 @@ const useColumnsDef = (allSets: string[]) => {
                   <span
                     key={idx}
                     style={{ margin: '0 1px' }}
-                    className={[
+                    className={clsx([
                       'ms',
                       'ms-shadow',
                       'ms-cost',
                       'ms-' + color.toLowerCase(),
-                    ].join(' ')}
+                    ])}
                   />
                 ))
             }
@@ -189,7 +199,8 @@ const useColumnsDef = (allSets: string[]) => {
       mantineFilterMultiSelectProps: {
         title: 'by Colors',
         placeholder: 'by Colors',
-        data: ['W', 'U', 'B', 'R', 'G', '∅'] as unknown as readonly string[] & string,
+        data: ['W', 'U', 'B', 'R', 'G'] as unknown as readonly string[] & string,
+        // data: ['W', 'U', 'B', 'R', 'G', '∅'] as unknown as readonly string[] & string,
       },
       Cell: ({ cell }) => {
         const cellValue = cell.getValue<CardColor[]>()
@@ -200,19 +211,78 @@ const useColumnsDef = (allSets: string[]) => {
                 <span
                   key={idx}
                   style={{ margin: '0 1px' }}
-                  className={[
+                  className={clsx([
                     'ms',
                     'ms-shadow',
                     'ms-cost',
                     'ms-' + color.toLowerCase(),
-                  ].join(' ')}
+                  ])}
                 />
               ))
             }
           </span>
           : null
       },
-    }
+    },
+
+    {
+      accessorKey: 'foil',
+      header: 'Foil',
+      filterVariant: 'select',
+      // filterFn: 'equals',
+      enableColumnFilterModes: false,
+      mantineFilterTextInputProps: {
+        placeholder: 'by Foil',
+      },
+      mantineFilterSelectProps: {
+        data: ['True', 'False'] as unknown as readonly string[] & string,
+      },
+      Cell: ({ cell }) => (
+        <Group position='center'>
+          <Checkbox checked={cell.getValue<boolean>()} />
+        </Group>
+      ),
+    },
+
+    {
+      accessorKey: 'price_usd',
+      header: 'Price',
+      filterFn: 'equals',
+      columnFilterModeOptions: ['equals', 'notEquals', 'greaterThan', 'greaterThanOrEqualTo', 'lessThan', 'lessThanOrEqualTo'],
+      enableColumnFilterModes: true,
+      mantineFilterTextInputProps: {
+        placeholder: 'by Price',
+      },
+      Cell: ({ cell }) => {
+        const { amount, price_usd } = cell.row.original
+
+        return (
+          <Text align='center'>
+            {
+              typeof price_usd === 'number'
+                ? amount === 1
+                  ? `$${price_usd}`
+                  : <>
+                    <Tooltip
+                      withArrow
+                      label='Price for x1'
+                    >
+                      <span>${price_usd}</span>
+                    </Tooltip>
+                    {' / '}
+                    <Tooltip
+                      withArrow
+                      label={`Price for x${amount}`}
+                    >
+                      <span>${price_usd * amount}</span>
+                    </Tooltip>
+                  </>
+                : <Text italic>N/A</Text>
+            }
+          </Text>
+        )
+      }
+    },
   ], [allSets])
 }
 

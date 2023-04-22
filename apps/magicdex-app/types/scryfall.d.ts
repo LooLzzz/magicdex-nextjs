@@ -65,12 +65,12 @@ export interface CardLegalities {
 }
 
 export interface CardPrices {
-  eur_foil?: string,
-  eur?: string,
-  tix?: string,
-  usd_etched?: string,
-  usd_foil?: string,
-  usd?: string,
+  eur_foil?: number,
+  eur?: number,
+  tix?: number,
+  usd_etched?: number,
+  usd_foil?: number,
+  usd?: number,
 }
 
 export interface CardRelatedUris {
