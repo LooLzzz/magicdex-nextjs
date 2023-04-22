@@ -13,14 +13,20 @@ const nextConfig = {
     svgr: false,
   },
 
-  // output: 'standalone',
-  // experimental: {
-  //   outputFileTracingRoot: path.join(__dirname, '../../'),
-  //   externalDir: true,
-  // },
+  i18n: {
+    locales: ['en-GB'],
+    defaultLocale: 'en-GB',
+    localeDetection: false,
+  },
 
   images: {
     remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'cards.scryfall.io',
+        port: '',
+        pathname: '/**',
+      },
       {
         protocol: 'https',
         hostname: 'avatars.githubusercontent.com',

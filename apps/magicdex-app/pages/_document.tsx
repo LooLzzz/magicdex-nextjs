@@ -1,3 +1,5 @@
+/* eslint-disable @next/next/no-css-tags */
+
 import { createGetInitialProps } from '@mantine/next'
 import Document, { Head, Html, Main, NextScript } from 'next/document'
 
@@ -10,7 +12,18 @@ export default class _Document extends Document {
   render() {
     return (
       <Html>
-        <Head />
+        <Head>
+          <link
+            href='//cdn.jsdelivr.net/npm/keyrune@latest/css/keyrune.css'
+            rel='stylesheet'
+            type='text/css'
+          />
+          <link
+            href='//cdn.jsdelivr.net/npm/mana-font@latest/css/mana.css'
+            rel='stylesheet'
+            type='text/css'
+          />
+        </Head>
 
         <body>
           <Main />

@@ -1,5 +1,4 @@
 import { CustomFooter, CustomHeader } from '@/components'
-import defaultFetcher from '@/services/fetchers'
 import {
   ColorScheme,
   ColorSchemeProvider,
@@ -10,12 +9,12 @@ import {
 } from '@mantine/core'
 import { ModalsProvider } from '@mantine/modals'
 import { Notifications, showNotification } from '@mantine/notifications'
+import { Hydrate, QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { getCookie, setCookie } from 'cookies-next'
 import { SessionProvider } from 'next-auth/react'
 import NextApp, { AppContext, AppProps } from 'next/app'
 import Head from 'next/head'
 import { useState } from 'react'
-import { SWRConfig } from 'swr'
 import './styles.css'
 
 
@@ -33,6 +32,14 @@ const getMantineTheme = (colorScheme: ColorScheme): MantineThemeOverride => ({
     //       : `linear-gradient(160deg, transparent 0%, rgba(0,0,0,0.3)       250%)`
     //   ),
     // },
+
+    '.ss-common': {
+      color: (
+        theme.colorScheme === 'dark'
+          ? '#60584D'
+          : theme.colors.dark[5]
+      ),
+    },
 
     '.mantine-Overlay-root': {
       backgroundColor: (
@@ -63,12 +70,14 @@ const getMantineTheme = (colorScheme: ColorScheme): MantineThemeOverride => ({
 
 const App = ({
   Component,
-  pageProps: { session, ...pageProps },
+  pageProps: { session, dehydratedState, ...pageProps },
   colorScheme: _colorScheme
 }:
   AppProps & { colorScheme: ColorScheme }
 ) => {
   const [colorScheme, setColorScheme] = useState<ColorScheme>(_colorScheme)
+  const [queryClient] = useState(() => new QueryClient())
+
 
   const toggleColorScheme = (value?: ColorScheme) => {
     const nextColorScheme = value || (colorScheme === 'dark' ? 'light' : 'dark')
@@ -92,37 +101,33 @@ const App = ({
 
       <main>
         <SessionProvider session={session}>
-          <SWRConfig
-            value={{
-              fetcher: defaultFetcher,
-              // revalidateOnFocus: true,
-              // refreshInterval: 3000,
-            }}
-          >
-            <ColorSchemeProvider
-              colorScheme={colorScheme}
-              toggleColorScheme={toggleColorScheme}
-            >
-              <MantineProvider
-                withGlobalStyles
-                withNormalizeCSS
-                theme={getMantineTheme(colorScheme)}
+          <QueryClientProvider client={queryClient}>
+            <Hydrate state={dehydratedState}>
+              <ColorSchemeProvider
+                colorScheme={colorScheme}
+                toggleColorScheme={toggleColorScheme}
               >
-                <ModalsProvider>
-                  <Notifications
-                    limit={3}
-                    position='bottom-left'
-                  />
-                  <CustomHeader />
-                  <Container>
-                    <Component {...pageProps} />
-                  </Container>
-                  <CustomFooter />
+                <MantineProvider
+                  withGlobalStyles
+                  withNormalizeCSS
+                  theme={getMantineTheme(colorScheme)}
+                >
+                  <ModalsProvider>
+                    <Notifications
+                      limit={3}
+                      position='bottom-left'
+                    />
+                    <CustomHeader />
+                    <Container>
+                      <Component {...pageProps} />
+                    </Container>
+                    <CustomFooter />
 
-                </ModalsProvider>
-              </MantineProvider>
-            </ColorSchemeProvider>
-          </SWRConfig>
+                  </ModalsProvider>
+                </MantineProvider>
+              </ColorSchemeProvider>
+            </Hydrate>
+          </QueryClientProvider>
         </SessionProvider>
       </main>
     </>
