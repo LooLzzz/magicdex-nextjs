@@ -9,7 +9,7 @@ export default createStyles(theme => ({
     paddingLeft: theme.spacing.md,
     paddingRight: theme.spacing.md,
     textDecoration: 'none',
-    color: theme.colorScheme === 'dark' ? theme.white : theme.black,
+    color: theme.white,
     fontWeight: 500,
     fontSize: theme.fontSizes.sm,
 
@@ -23,8 +23,8 @@ export default createStyles(theme => ({
     ...theme.fn.hover({
       backgroundColor:
         theme.colorScheme === 'dark'
-          ? theme.colors.dark[6]
-          : theme.colors.gray[0],
+          ? theme.fn.themeColor(theme.primaryColor, 9)
+          : theme.fn.themeColor(theme.primaryColor, 5),
     }),
 
     borderBottom: `${rem(2.5)} transparent solid`,
@@ -32,7 +32,9 @@ export default createStyles(theme => ({
     transition: 'border 0.2s ease-in-out',
 
     '&.activeLink': {
-      borderBottom: `${rem(2.5)} solid ${theme.fn.themeColor(theme.primaryColor, 5)}`,
+      borderBottom: `${rem(2.5)} solid ${theme.colorScheme === 'dark'
+        ? theme.fn.themeColor(theme.primaryColor, 2)
+        : theme.fn.themeColor(theme.primaryColor, 1)}`,
     },
 
     '&.sidebar': {

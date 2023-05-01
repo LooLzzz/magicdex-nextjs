@@ -12,6 +12,7 @@ export type CardObject = 'card'
 export type CardRarity = 'common' | 'uncommon' | 'rare' | 'mythic' | 'special' | 'bonus'
 export type CardSecurityStamp = 'oval' | 'triangle' | 'acorn' | 'circle' | 'arena' | 'heart'
 
+
 export interface BaseCardProps {
   artist_id: string,
   artist: string,

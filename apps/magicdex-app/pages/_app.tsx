@@ -20,7 +20,8 @@ import './styles.css'
 
 const getMantineTheme = (colorScheme: ColorScheme): MantineThemeOverride => ({
   colorScheme,
-  primaryColor: 'violet',
+  // primaryColor: 'violet',
+  primaryColor: 'indigo',
   // primaryShade: 8,
   white: '#F8F9FA',
 
@@ -41,6 +42,10 @@ const getMantineTheme = (colorScheme: ColorScheme): MantineThemeOverride => ({
       ),
     },
 
+    '.ss-2x': {
+      fontSize: '1.65rem',
+    },
+
     '.mantine-Overlay-root': {
       backgroundColor: (
         theme.colorScheme === 'dark'
@@ -55,14 +60,21 @@ const getMantineTheme = (colorScheme: ColorScheme): MantineThemeOverride => ({
           ? theme.colors.dark[5]
           : theme.colors.gray[4]
       ),
+      backgroundColor: theme.fn.themeColor(theme.primaryColor, 7),
     },
+
     '.mantine-footer': {
       marginTop: rem(20),
       borderTop: `${rem(1)} solid`,
+      backgroundColor: (
+        theme.colorScheme === 'dark'
+          ? theme.colors.dark[6]
+          : theme.colors.gray[2]
+      ),
       borderColor: (
         theme.colorScheme === 'dark'
           ? theme.colors.dark[5]
-          : theme.colors.gray[4]
+          : theme.colors.gray[3]
       ),
     },
   }),
@@ -86,7 +98,7 @@ const App = ({
     setCookie('mantine-color-scheme', nextColorScheme, { maxAge: 60 * 60 * 24 * 30 })
 
     showNotification({
-      // TODO: remove this
+      // TODO: maybe remove this?
       title: 'Color scheme toggled',
       message: `Current color scheme is now ${colorScheme === 'dark' ? 'light' : 'dark'}`,
       color: colorScheme === 'dark' ? 'red' : 'blue',
@@ -118,7 +130,11 @@ const App = ({
                       position='bottom-left'
                     />
                     <CustomHeader />
-                    <Container>
+                    <Container fluid
+                      sx={{
+                        minHeight: `calc(100vh - 100px)`,
+                      }}
+                    >
                       <Component {...pageProps} />
                     </Container>
                     <CustomFooter />

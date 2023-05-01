@@ -63,3 +63,7 @@ pre {
   overflow: scroll;
   padding: 0.5rem 0.75rem;
 }
+
+.cursor-not-allowed {
+  cursor: not-allowed;
+}

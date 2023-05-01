@@ -91,10 +91,11 @@ export default function CustomHeader({
                       />
                     </Box>
                     : <Avatar
+                      color='white'
                       variant={avatarIconHovering || menuOpened ? 'filled' : 'default'}
                       onMouseEnter={() => setAvatarIconHovering(true)}
                       onMouseLeave={() => setAvatarIconHovering(false)}
-                      style={{ cursor: 'pointer' }}
+                      style={{ cursor: 'pointer', color: 'white' }}
                       className={classes.hiddenMobile}
                     />
                 }
