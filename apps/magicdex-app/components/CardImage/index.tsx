@@ -1,5 +1,5 @@
 import { UserCardData } from '@/types/supabase'
-import { AspectRatio, AspectRatioProps, Overlay } from '@mantine/core'
+import { AspectRatio, AspectRatioProps, Box, BoxProps, Overlay, useMantineTheme } from '@mantine/core'
 import Image, { ImageProps } from 'next/image'
 import Tilt, { GlareProps, TiltProps } from 'react-parallax-tilt'
 import { cardbackSmallBase64 } from './cardbackBase64'
@@ -33,7 +33,7 @@ export default function CardImage({
   imageProps = {},
   ...rootProps
 }:
-  React.HTMLAttributes<HTMLDivElement> & {
+  BoxProps & {
     card?: UserCardData,
     width?: ImageProps['width'],
     height?: ImageProps['height'],
@@ -52,24 +52,24 @@ export default function CardImage({
     aspectRatioProps?: Omit<AspectRatioProps, 'ratio'> & { ratio?: number },
   }
 ) {
-  // const { classes } = useStyles()
+  const theme = useMantineTheme()
   // TODO: handle multi-faced cards
 
   return (
-    <div {...rootProps}>
-      <Tilt
-        tiltEnable={tiltEnabled}
-        glareEnable={glareEnabled}
-        tiltMaxAngleX={tiltMaxAngleX}
-        tiltMaxAngleY={tiltMaxAngleY}
-        glareBorderRadius={glareBorderRadius}
-        glarePosition={glarePosition}
-        glareMaxOpacity={glareMaxOpacity}
-        {...tiltProps}
+    <Box {...rootProps}>
+      <AspectRatio
+        ratio={ratio}
+        {...aspectRatioProps}
       >
-        <AspectRatio
-          ratio={ratio}
-          {...aspectRatioProps}
+        <Tilt
+          tiltEnable={tiltEnabled}
+          glareEnable={glareEnabled}
+          tiltMaxAngleX={tiltMaxAngleX}
+          tiltMaxAngleY={tiltMaxAngleY}
+          glareBorderRadius={glareBorderRadius}
+          glarePosition={glarePosition}
+          glareMaxOpacity={glareMaxOpacity}
+          {...tiltProps}
         >
           <Image
             src={card?.image_uris?.png ?? '/cardback.png'}
@@ -79,20 +79,25 @@ export default function CardImage({
             placeholder={placeholder}
             blurDataURL={blurDataURL}
             {...imageProps}
+            style={{
+              width: '100%',
+              height: '100%',
+              ...imageProps?.style,
+            }}
           />
           {card?.foil && (
             <Overlay
               style={{
                 backgroundImage: 'URL(card-foil-overlay.png)',
-                mixBlendMode: 'lighten',
-                opacity: 0.75,
+                mixBlendMode: theme.colorScheme === 'dark' ? 'lighten' : 'hard-light',
+                opacity: theme.colorScheme === 'dark' ? 0.75 : 0.5,
                 borderRadius: glareBorderRadius,
               }}
             />
           )}
-        </AspectRatio>
-      </Tilt>
-    </div>
+        </Tilt>
+      </AspectRatio>
+    </Box>
   )
 }
 

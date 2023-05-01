@@ -45,7 +45,7 @@ export default function CustomHeader({
   return (
     <Box pb={20}>
       <Header px='md' height={headerHeight}>
-        <Container sx={{ height: '100%' }}>
+        <Container size='xl' sx={{ height: '100%' }}>
           <Group position='apart' sx={{ height: '100%' }}>
             <Link href="/">
               <Image
