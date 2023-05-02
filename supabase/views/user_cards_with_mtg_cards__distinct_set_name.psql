@@ -1,0 +1,8 @@
+-- DROP VIEW distinct_user_cards_sets
+
+CREATE OR REPLACE VIEW distinct_user_cards_sets AS
+    SELECT DISTINCT mtg_cards.set_name,mtg_cards.set,mtg_cards.released_at
+    FROM user_cards
+    LEFT JOIN mtg_cards ON user_cards.scryfall_id = mtg_cards.id;
+
+ALTER VIEW distinct_user_cards_sets SET (security_invoker = on);

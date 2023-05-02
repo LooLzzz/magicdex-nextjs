@@ -15,7 +15,8 @@
         "action": "startDebugging",
         "name": "Launch Client",
         "pattern": "[ ready ] on http"
-      }
+      },
+      "preLaunchTask": "Start Supabase"
     },
     {
       "name": "Launch Client",

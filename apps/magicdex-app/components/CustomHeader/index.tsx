@@ -45,12 +45,12 @@ export default function CustomHeader({
   return (
     <Box pb={20}>
       <Header px='md' height={headerHeight}>
-        <Container sx={{ height: '100%' }}>
+        <Container size='xl' sx={{ height: '100%' }}>
           <Group position='apart' sx={{ height: '100%' }}>
             <Link href="/">
               <Image
                 alt='Magicdex Logo'
-                src='favicon.ico'
+                src='/favicon.ico'
                 width={headerHeight * 0.75}
               />
             </Link>
@@ -91,10 +91,11 @@ export default function CustomHeader({
                       />
                     </Box>
                     : <Avatar
+                      color='white'
                       variant={avatarIconHovering || menuOpened ? 'filled' : 'default'}
                       onMouseEnter={() => setAvatarIconHovering(true)}
                       onMouseLeave={() => setAvatarIconHovering(false)}
-                      style={{ cursor: 'pointer' }}
+                      style={{ cursor: 'pointer', color: 'white' }}
                       className={classes.hiddenMobile}
                     />
                 }

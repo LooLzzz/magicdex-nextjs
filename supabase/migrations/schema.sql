@@ -217,6 +217,8 @@ ALTER TABLE "next_auth"."verification_tokens" OWNER TO "postgres";
 -- Name: mtg_cards; Type: TABLE; Schema: public; Owner: postgres
 --
 
+CREATE TYPE "public"."card_rarity" AS ENUM ('common','uncommon','rare','mythic','special','bonus');
+
 CREATE TABLE "public"."mtg_cards" (
     "created_at" timestamp without time zone DEFAULT "now"() NOT NULL,
     "updated_at" timestamp without time zone DEFAULT "now"() NOT NULL,
@@ -274,7 +276,7 @@ CREATE TABLE "public"."mtg_cards" (
     "produced_mana" "text"[],
     "promo" boolean,
     "promo_types" "text"[],
-    "rarity" "text",
+    "rarity" "public"."card_rarity",
     "related_uris" "jsonb",
     "released_at" "date",
     "reprint" boolean,

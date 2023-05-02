@@ -1,12 +1,14 @@
-import { CardsTable } from '@/components'
+import { authOptions } from '@/api/auth/[...nextauth]'
+import { Container } from '@mantine/core'
 import { GetServerSidePropsContext } from 'next'
 import { getServerSession } from 'next-auth'
-import { authOptions } from './api/auth/[...nextauth]'
 
 
-export default function CollectionPage() {
+export default function CollectionExportPage() {
   return (
-    <CardsTable />
+    <Container size='xl'>
+      CollectionExportPage
+    </Container>
   )
 }
 

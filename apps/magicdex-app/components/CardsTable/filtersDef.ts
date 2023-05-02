@@ -14,9 +14,9 @@ export const localization = {
   filterArrExcludesAny: 'Exclude Any',
 }
 
-export const filtersDefinition = {
+export const filtersDef = {
   filterFns,
   localization,
 }
 
-export default filtersDefinition
+export default filtersDef

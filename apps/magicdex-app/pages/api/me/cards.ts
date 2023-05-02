@@ -32,6 +32,18 @@ export default async function handler(
       if (filters?.type_line)
         filters.type_line.value = (filters.type_line.value as string).replace(/-/g, '—')
 
+      // if 'set' or 'set_name' sort is present, add 'rarity' secondary sort
+      const sortFieldIdx = {
+        set: sort.findIndex(item => ['set', 'set_name'].includes(item.id)),
+        rarity: sort.findIndex(item => ['rarity'].includes(item.id)),
+      }
+      if (sortFieldIdx.set !== -1 && sortFieldIdx.rarity === -1)
+        sort.splice(
+          sortFieldIdx.set + 1,
+          0,
+          { id: 'rarity', desc: false }
+        )
+
       res.status(200).json(
         await cardHandlers.getCardsDataByUserSessionHandler(session, { pagination, globalFilter, filters, sort })
       )

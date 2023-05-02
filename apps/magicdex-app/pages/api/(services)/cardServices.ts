@@ -58,18 +58,20 @@ export async function getTotalCardsCountByUserSession(session: Session) {
   return count
 }
 
+/**
+ * Get distinct card sets of user using the access token stored in the user session.
+ */
 export async function getAllSetsByUserSession(session: Session) {
   const supabaseClient = await createClientWithRLS(session.supabaseAccessToken)
 
   const { data, error } = (
     await supabaseClient
-      .from('user_cards_with_mtg_cards')
-      .select('set_name')
+      .from('distinct_user_cards_sets')
+      .select('set_name, set_id:set, released_at')
       .order('released_at', { ascending: false })
   )
 
   if (error)
     throw new Error(error.message)
-  // return unique values only
-  return [...new Set(data.map(({ set_name }) => set_name))]
+  return data
 }
