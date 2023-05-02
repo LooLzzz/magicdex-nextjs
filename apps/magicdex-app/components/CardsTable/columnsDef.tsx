@@ -115,8 +115,6 @@ export default function useColumnsDef(allSets: { set_name: string, set_id: strin
       Cell: ({ cell }) => (
         <Center>
           <Tooltip
-            withArrow
-            transitionProps={{ transition: 'pop' }}
             events={{ hover: true, focus: true, touch: true }}
             label={<>{cell.row.original.set_name} - <Text span italic>{toTitleCase(cell.row.original.rarity)}</Text></>}
           >
@@ -310,8 +308,6 @@ export default function useColumnsDef(allSets: { set_name: string, set_id: strin
                   ? `$${price_usd}`
                   : <>
                     <Tooltip
-                      withArrow
-                      transitionProps={{ transition: 'pop' }}
                       events={{ hover: true, focus: true, touch: true }}
                       label='Price for x1'
                     >
@@ -319,8 +315,6 @@ export default function useColumnsDef(allSets: { set_name: string, set_id: strin
                     </Tooltip>
                     {' / '}
                     <Tooltip
-                      withArrow
-                      transitionProps={{ transition: 'pop' }}
                       events={{ hover: true, focus: true, touch: true }}
                       label={`Price for x${amount}`}
                     >

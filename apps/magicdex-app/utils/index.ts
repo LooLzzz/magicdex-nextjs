@@ -1,3 +1,5 @@
+import { Embla } from '@mantine/carousel'
+
 
 export function appendUrlParams(url: string, params: Record<string, string>) {
   const urlParams = new URLSearchParams(params)
@@ -49,4 +51,32 @@ export function toTitleCase(value: string) {
     /\w\S*/g,
     txt => txt.charAt(0).toUpperCase() + txt.substring(1).toLowerCase()
   )
+}
+
+
+export function emblaAutoHeightEffect(embla: Embla) {
+  embla.on('init', e => {
+    const slidesInView = embla.slidesInView(true)
+    if (slidesInView.length === 0)
+      return
+
+    const { clientHeight: slideClientHeight } = embla.slideNodes()[slidesInView[0]]
+    embla.rootNode().style.height = `${slideClientHeight}px`
+  })
+  embla.on('reInit', e => {
+    const slidesInView = embla.slidesInView(true)
+    if (slidesInView.length === 0)
+      return
+
+    const { clientHeight: slideClientHeight } = embla.slideNodes()[embla.slidesInView(true)[0]]
+    embla.rootNode().style.height = `${slideClientHeight}px`
+  })
+  embla.on('select', e => {
+    const slidesInView = embla.slidesInView(true)
+    if (slidesInView.length === 0)
+      return
+
+    const { clientHeight: slideClientHeight } = embla.slideNodes()[embla.slidesInView(true)[0]]
+    embla.rootNode().style.height = `${slideClientHeight}px`
+  })
 }

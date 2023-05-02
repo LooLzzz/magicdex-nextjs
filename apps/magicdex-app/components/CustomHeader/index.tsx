@@ -50,7 +50,7 @@ export default function CustomHeader({
             <Link href="/">
               <Image
                 alt='Magicdex Logo'
-                src='favicon.ico'
+                src='/favicon.ico'
                 width={headerHeight * 0.75}
               />
             </Link>

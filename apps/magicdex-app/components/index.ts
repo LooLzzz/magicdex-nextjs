@@ -5,7 +5,7 @@ import CardsTable from './CardsTable'
 import CustomFooter from './CustomFooter'
 import CustomHeader from './CustomHeader'
 import FloatingLabelInput from './FloatingLabelInput'
-
+import * as ImportComponents from './ImportComponents'
 
 export {
   ContainedTextInput,
@@ -19,4 +19,5 @@ export {
   CustomFooter,
   CustomHeader,
   FloatingLabelInput,
+  ImportComponents,
 }

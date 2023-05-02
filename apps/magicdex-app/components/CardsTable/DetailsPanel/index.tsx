@@ -1,11 +1,12 @@
 import { CardImage } from '@/components'
 import { UserCardData } from '@/types/supabase'
+import { emblaAutoHeightEffect } from '@/utils'
 import { Carousel, Embla } from '@mantine/carousel'
-import { ActionIcon, Center, Flex, JsonInput, Paper, Stack } from '@mantine/core'
+import { ActionIcon, Center, Flex, JsonInput, Paper, Stack, useMantineTheme } from '@mantine/core'
 import { useMediaQuery } from '@mantine/hooks'
 import { IconChevronLeft, IconChevronRight } from '@tabler/icons-react'
 import { MRT_Row, MRT_TableInstance } from 'mantine-react-table'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import CardText from '../CardText'
 
 
@@ -14,6 +15,7 @@ export default function DetailsPanel<T extends UserCardData>(
     table: MRT_TableInstance<T>,
     row: MRT_Row<T>,
   }) {
+  const theme = useMantineTheme()
   const [embla, setEmbla] = useState<Embla>(null)
   const isSmallerThanLg = useMediaQuery('(max-width: 1100px)', false)
   const tableContainerWidth = table.refs.tableContainerRef?.current?.clientWidth
@@ -22,10 +24,19 @@ export default function DetailsPanel<T extends UserCardData>(
   // run embla.reInit() after the carousel has been rendered
   setTimeout(() => embla?.reInit(), 100)
 
+  useEffect(() => {
+    if (embla)
+      emblaAutoHeightEffect(embla)
+  }, [embla])
+
   // TODO: handle double-face cards
   return (
     <Paper
-      bg={'gray'}
+      bg={(
+        theme.colorScheme === 'dark'
+          ? theme.colors.gray[7]
+          : theme.colors.gray[3]
+      )}
       radius='md'
       p='md'
       pos='sticky'
@@ -47,7 +58,7 @@ export default function DetailsPanel<T extends UserCardData>(
               top: 0,
               right: 0,
             }}>
-              <ActionIcon variant='light' onClick={() => embla.scrollNext()}>
+              <ActionIcon variant='transparent' onClick={() => embla.scrollNext()}>
                 <IconChevronRight />
               </ActionIcon>
             </div>
@@ -99,9 +110,10 @@ export default function DetailsPanel<T extends UserCardData>(
 
         <Carousel.Slide>
           <Stack pos='relative'>
+            {/* TODO: make an info panel with edit functionality */}
             <JsonInput
               formatOnBlur
-              minRows={10}
+              minRows={20}
               defaultValue={JSON.stringify(row.original, null, 2)}
             />
 
@@ -110,7 +122,7 @@ export default function DetailsPanel<T extends UserCardData>(
               top: 0,
               left: 0,
             }}>
-              <ActionIcon variant='light' onClick={() => embla.scrollPrev()}>
+              <ActionIcon variant='transparent' onClick={() => embla.scrollPrev()}>
                 <IconChevronLeft />
               </ActionIcon>
             </div>

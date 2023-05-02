@@ -1,4 +1,4 @@
-import { PasswordInput, PasswordInputProps, TextInput, TextInputProps } from '@mantine/core'
+import { Box, PasswordInput, PasswordInputProps, TextInput, TextInputProps } from '@mantine/core'
 import { useState } from 'react'
 import useStyles from './styles'
 
@@ -12,7 +12,7 @@ export default function FloatingLabelInput({
   const { classes } = useStyles({ floating: String(inputProps?.value)?.trim().length !== 0 || focused })
 
   return (
-    <>
+    <Box pt='xs'>
       {
         password
           ? <PasswordInput
@@ -28,6 +28,6 @@ export default function FloatingLabelInput({
             onBlur={() => setFocused(false)}
           />
       }
-    </>
+    </Box>
   )
 }

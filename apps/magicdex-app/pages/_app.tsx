@@ -25,6 +25,47 @@ const getMantineTheme = (colorScheme: ColorScheme): MantineThemeOverride => ({
   // primaryShade: 8,
   white: '#F8F9FA',
 
+  components: {
+    SegmentedControl: {
+      defaultProps: theme => ({
+        bg: (
+          theme.colorScheme === 'dark'
+            ? theme.colors.dark[4]
+            : theme.colors.gray[3]
+        ),
+      }),
+    },
+    Carousel: {
+      defaultProps: {
+        styles: {
+          control: {
+            '&[data-inactive]': {
+              opacity: 0,
+              cursor: 'default',
+            },
+          },
+        },
+      },
+    },
+    Paper: {
+      defaultProps: theme => ({
+        bg: (
+          theme.colorScheme === 'dark'
+            ? theme.colors.gray[8]
+            : theme.colors.gray[2]
+        ),
+      }),
+    },
+    Tooltip: {
+      defaultProps: {
+        withArrow: true,
+        transitionProps: {
+          transition: 'pop',
+        },
+      },
+    },
+  },
+
   globalStyles: (theme) => ({
     // body: {
     //   background: (
@@ -77,6 +118,17 @@ const getMantineTheme = (colorScheme: ColorScheme): MantineThemeOverride => ({
           : theme.colors.gray[3]
       ),
     },
+
+    '.mantine-Carousel-viewport': {
+      transition: 'height 0.2s',
+    },
+
+    '.mantine-Carousel-container': {
+      transition: 'height 0.2s',
+      display: 'flex',
+      alignItems: 'flex-start',
+    },
+
   }),
 })
 
