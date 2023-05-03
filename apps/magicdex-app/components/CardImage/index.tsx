@@ -1,6 +1,7 @@
 import { UserCardData } from '@/types/supabase'
-import { AspectRatio, AspectRatioProps, Box, BoxProps, Overlay, useMantineTheme } from '@mantine/core'
+import { AspectRatio, AspectRatioProps, Box, BoxProps, LoadingOverlay, Overlay, useMantineTheme } from '@mantine/core'
 import Image, { ImageProps } from 'next/image'
+import { useEffect, useState } from 'react'
 import Tilt, { GlareProps, TiltProps } from 'react-parallax-tilt'
 import { cardbackSmallBase64 } from './cardbackBase64'
 // import useStyles from './styles'
@@ -53,7 +54,13 @@ export default function CardImage({
   }
 ) {
   const theme = useMantineTheme()
+  const [isLoaded, setLoaded] = useState(false)
+
   // TODO: handle multi-faced cards
+
+  useEffect(() => {
+    setLoaded(false)
+  }, [card?.image_uris?.png])
 
   return (
     <Box {...rootProps}>
@@ -62,6 +69,8 @@ export default function CardImage({
         {...aspectRatioProps}
       >
         <Tilt
+          gyroscope
+          tiltReverse
           tiltEnable={tiltEnabled}
           glareEnable={glareEnabled}
           tiltMaxAngleX={tiltMaxAngleX}
@@ -79,6 +88,7 @@ export default function CardImage({
             placeholder={placeholder}
             blurDataURL={blurDataURL}
             {...imageProps}
+            onLoad={event => { setLoaded(true); imageProps?.onLoad?.(event) }}
             style={{
               width: '100%',
               height: '100%',
@@ -88,13 +98,18 @@ export default function CardImage({
           {card?.foil && (
             <Overlay
               style={{
-                backgroundImage: 'URL(card-foil-overlay.png)',
+                backgroundImage: 'URL(/card-foil-overlay.png)',
                 mixBlendMode: theme.colorScheme === 'dark' ? 'lighten' : 'hard-light',
                 opacity: theme.colorScheme === 'dark' ? 0.75 : 0.5,
                 borderRadius: glareBorderRadius,
               }}
             />
           )}
+          <LoadingOverlay
+            visible={card?.image_uris && !isLoaded}
+            opacity={0.9}
+            radius={glareBorderRadius}
+          />
         </Tilt>
       </AspectRatio>
     </Box>

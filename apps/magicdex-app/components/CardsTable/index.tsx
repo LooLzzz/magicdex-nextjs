@@ -1,7 +1,7 @@
 import { useUserCardsQuery } from '@/services/hooks'
 import { UserCardData } from '@/types/supabase'
 import { ActionIcon, Tooltip, useMantineTheme } from '@mantine/core'
-import { useWindowEvent } from '@mantine/hooks'
+import { useHotkeys } from '@mantine/hooks'
 import { IconRefresh } from '@tabler/icons-react'
 import { OnChangeFn } from '@tanstack/react-table'
 import {
@@ -48,11 +48,10 @@ export default function CardsTable({
   })
   const { columns, initialColumnSizing } = useColumnsDef(data?.metadata?.allSets || [])
 
-  useWindowEvent('keydown', e => {
+  useHotkeys([
     // close expanded row on Escape
-    if (e.key === 'Escape')
-      tableInstanceRef.current?.setExpanded({})
-  })
+    ['Escape', () => tableInstanceRef.current?.setExpanded({})],
+  ])
 
   return (
     <MantineReactTable
