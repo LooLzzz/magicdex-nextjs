@@ -15,7 +15,7 @@ import {
 } from '@mantine/core'
 import { MRT_ColumnDef } from 'mantine-react-table'
 import { useMemo } from 'react'
-import CardText from './CardText'
+import CardText, { CardPrice } from './CardText'
 
 
 const cardRarityMap = {
@@ -297,35 +297,7 @@ export default function useColumnsDef(allSets: { set_name: string, set_id: strin
       mantineFilterTextInputProps: {
         placeholder: 'by Price',
       },
-      Cell: ({ cell }) => {
-        const { amount, price_usd } = cell.row.original
-
-        return (
-          <Text align='center'>
-            {
-              typeof price_usd === 'number'
-                ? amount === 1
-                  ? `$${price_usd}`
-                  : <>
-                    <Tooltip
-                      events={{ hover: true, focus: true, touch: true }}
-                      label='Price for x1'
-                    >
-                      <span>${price_usd}</span>
-                    </Tooltip>
-                    {' / '}
-                    <Tooltip
-                      events={{ hover: true, focus: true, touch: true }}
-                      label={`Price for x${amount}`}
-                    >
-                      <span>${price_usd * amount}</span>
-                    </Tooltip>
-                  </>
-                : <Text italic>N/A</Text>
-            }
-          </Text>
-        )
-      }
+      Cell: ({ cell }) => <CardPrice data={cell.row.original} />
     },
   ], [allSets])
 

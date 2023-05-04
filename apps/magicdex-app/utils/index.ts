@@ -53,6 +53,11 @@ export function toTitleCase(value: string) {
   )
 }
 
+export function roundPrecision(num: number, precision: number) {
+  const d = 10 ** precision
+  num += Number.EPSILON
+  return Math.round(num * d) / d
+}
 
 export function emblaAutoHeightEffect(embla: Embla) {
   embla.on('init', e => {

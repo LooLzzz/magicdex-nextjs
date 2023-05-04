@@ -5,7 +5,11 @@ import {
   FloatingLabelNumberInput,
   FloatingLabelSelect,
 } from '@/components'
-import { useScryfallAutocompleteQuery, useScryfallCardPrintsQuery, useUserCardsMutation } from '@/services/hooks'
+import {
+  useScryfallAutocompleteQuery,
+  useScryfallCardPrintsQuery,
+  useUserCardsMutation
+} from '@/services/hooks'
 import { ScryfallCardData } from '@/types/scryfall'
 import {
   ActionIcon,
@@ -21,10 +25,11 @@ import {
   Stack,
   Text,
   Tooltip,
+  em,
   rem,
 } from '@mantine/core'
 import { useForm } from '@mantine/form'
-import { getHotkeyHandler, useHotkeys, useListState } from '@mantine/hooks'
+import { getHotkeyHandler, useHotkeys, useListState, useMediaQuery } from '@mantine/hooks'
 import { notifications } from '@mantine/notifications'
 import { IconEdit, IconPlus, IconTrash } from '@tabler/icons-react'
 import { useEffect, useRef, useState } from 'react'
@@ -33,8 +38,23 @@ import useStyles from './styles'
 import { BaseCardData, placeholderFormValues } from './types'
 
 
+function _getFinishes(cardData: ScryfallCardData, mergeEtchedWithFoil = true) {
+  const finishes = Object.fromEntries(
+    cardData?.finishes?.map(item => ([item, true]))
+    ?? []
+  )
+
+  if (mergeEtchedWithFoil) {
+    finishes.foil = finishes.foil || finishes.etched || false
+    delete finishes.etched
+  }
+
+  return finishes
+}
+
 export default function ImportWizard() {
-  const { classes } = useStyles()
+  const { classes, theme } = useStyles()
+  const smallerThanSm = useMediaQuery(`(max-width: ${em(theme.breakpoints.sm)})`)
   const nameInputRef = useRef<HTMLInputElement>(null)
   const focusNameInput = () => nameInputRef.current?.focus()
   const form = useForm({ initialValues: placeholderFormValues.empty })
@@ -131,6 +151,21 @@ export default function ImportWizard() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedCard, cardPrintsData])
 
+  useEffect(() => {
+    const finishes = _getFinishes(
+      cardPrintsData?.data?.find(item =>
+        `${item.set}:${item.collector_number}` === form.values.set
+      )
+    )
+
+    if (finishes.foil && finishes.nonfoil)
+      form.setFieldValue('foil', form.values?.foil ?? false)
+    else
+      form.setFieldValue('foil', finishes.foil)
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form.values?.set])
+
   return (
     <Paper
       pos='relative'
@@ -157,9 +192,12 @@ export default function ImportWizard() {
           <Grid align='center' gutter='xl'>
             <Grid.Col sm={12} md={3} {...{ align: 'center' }}>
               <CardImage
+                displayPrice
+                openPriceTooltipToSides
                 card={{
                   ...cardLangsData?.data?.find(item => item.lang === form.values.lang),
                   foil: form.values.foil,
+                  amount: form.values.amount,
                 } as undefined}
                 aspectRatioProps={{
                   maw: CardImage.defaultWidth,
@@ -175,8 +213,6 @@ export default function ImportWizard() {
                     <FloatingLabelAutocomplete
                       ref={nameInputRef}
                       hoverOnSearchChange
-                      onItemSubmit={({ value }) => setSelectedCard(value)}
-                      onSelect={() => form.values.name !== selectedCard && setSelectedCard(null)}
                       label='Card Name'
                       placeholder='Search for a card...'
                       data={autocompleteData?.data ?? []}
@@ -184,22 +220,29 @@ export default function ImportWizard() {
                       onKeyDown={getHotkeyHandler([
                         ['Enter', () => selectedCard && handleAddCurrentValuesToStagingArea({ resetForm: true })],
                       ])}
-                      {...form.getInputProps('name')}
                       boxRootProps={{ sx: { flex: 1 } }}
+                      {...form.getInputProps('name')}
+                      onItemSubmit={({ value }) => setSelectedCard(value)}
+                      onChange={value => { form.getInputProps('name').onChange(value); setSelectedCard(null) }}
                     />
-                    <ActionIcon
-                      disabled={!selectedCard}
-                      variant='filled'
-                      color='theme'
-                      top={rem(5)}
-                      ml={rem(10)}
-                      onClick={() => handleAddCurrentValuesToStagingArea({ resetForm: true })}
-                    >
-                      <IconPlus />
-                    </ActionIcon>
+                    {
+                      !smallerThanSm
+                        ?
+                        <ActionIcon
+                          disabled={!selectedCard}
+                          variant='filled'
+                          color='theme'
+                          top={rem(5)}
+                          ml={rem(10)}
+                          onClick={() => handleAddCurrentValuesToStagingArea({ resetForm: true })}
+                        >
+                          <IconPlus />
+                        </ActionIcon>
+                        : undefined
+                    }
                   </Flex>
                 </Grid.Col>
-                <Grid.Col xs='auto' sm={3}>
+                <Grid.Col sm={3}>
                   <FloatingLabelNumberInput
                     min={1}
                     disabled={!selectedCard}
@@ -207,14 +250,15 @@ export default function ImportWizard() {
                     {...form.getInputProps('amount')}
                   />
                 </Grid.Col>
-                <Grid.Col xs='auto' sm={7}>
+                <Grid.Col sm={7}>
                   <FloatingLabelSelect
                     loading={cardPrintsFetching}
                     disabled={!selectedCard || cardPrintsFetching}
                     label='Set'
                     data={cardPrintsData?.data?.map(item => ({
                       value: `${item.set}:${item.collector_number}`,
-                      label: `${item.set_name} [#${item.collector_number}]`
+                      label: `${item.set_name} [#${item.collector_number}]`,
+                      cardData: item,
                     })) ?? []}
                     {...form.getInputProps('set')}
                     onChange={value => {
@@ -225,37 +269,26 @@ export default function ImportWizard() {
                       })
                       form.getInputProps('set').onChange(value)
                     }}
-                    itemComponent={props => (
-                      <SelectCarditem
-                        {...props}
-                        cardData={{
-                          ...cardPrintsData?.data?.find(item => `${item.set}:${item.collector_number}` === props.value),
-                          foil: false,
-                        }}
-                      />
-                    )}
+                    itemComponent={SelectCarditem}
                   />
                 </Grid.Col>
-                <Grid.Col xs='auto' sm={2}>
+                <Grid.Col sm={2}>
                   <FloatingLabelSelect
                     disabled={!selectedCard || cardLangsFetching}
                     label='Lang'
-                    data={cardLangsData?.data?.map(item => item.lang) ?? []}
+                    data={cardLangsData?.data?.map(item => ({
+                      value: item.lang,
+                      label: item.lang,
+                      cardData: item,
+                      floatingTooltipPosition: 'left',
+                    })) ?? []}
                     loading={cardLangsFetching}
                     {...form.getInputProps('lang')}
-                    itemComponent={props => (
-                      <SelectCarditem
-                        {...props}
-                        cardData={{
-                          ...cardLangsData?.data?.find(item => item.lang === props.value),
-                          foil: false,
-                        }}
-                      />
-                    )}
+                    itemComponent={SelectCarditem}
                   />
                 </Grid.Col>
 
-                <Grid.Col xs='auto' sm={3}>
+                <Grid.Col sm={3}>
                   <FloatingLabelSelect
                     disabled={!selectedCard}
                     label='Condition'
@@ -264,8 +297,9 @@ export default function ImportWizard() {
                     boxRootProps={{ miw: rem(100) }}
                   />
                 </Grid.Col>
-                <Grid.Col xs='auto' sm={9} style={{ alignSelf: 'flex-start' }}>
+                <Grid.Col sm={9} style={{ alignSelf: 'flex-start' }}>
                   <FloatingLabelMultiSelect
+                    // TODO: make 'tags' work
                     searchable
                     creatable
                     disabled={!selectedCard}
@@ -274,10 +308,19 @@ export default function ImportWizard() {
                     {...form.getInputProps('tags')}
                   />
                 </Grid.Col>
-                <Grid.Col pt='sm' xs='auto' sm={3}>
+                <Grid.Col pt='sm' sm={3}>
                   <Stack>
                     <Checkbox
-                      disabled={!selectedCard}
+                      disabled={
+                        !selectedCard
+                        || Object.values(
+                          _getFinishes(
+                            cardPrintsData?.data?.find(item =>
+                              `${item.set}:${item.collector_number}` === form.values.set
+                            )
+                          )
+                        ).filter(Boolean).length < 2
+                      }
                       label='Foil'
                       checked={form.values.foil}
                       {...form.getInputProps('foil')}
@@ -306,7 +349,21 @@ export default function ImportWizard() {
             </Grid.Col>
           </Grid>
 
-          <Divider />
+          <Divider
+            labelPosition='center'
+            label={
+              smallerThanSm
+                ? <ActionIcon
+                  disabled={!selectedCard}
+                  variant='filled'
+                  color='theme'
+                  onClick={() => handleAddCurrentValuesToStagingArea({ resetForm: true })}
+                >
+                  <IconPlus />
+                </ActionIcon>
+                : undefined
+            }
+          />
 
           {
             stagingArea.length === 0
@@ -315,7 +372,7 @@ export default function ImportWizard() {
               )
               : (
                 <List>
-                  <Tooltip.Group openDelay={250} closeDelay={100}>
+                  <Tooltip.Group openDelay={500} closeDelay={100}>
                     {
                       stagingArea.map((item, index) => (
                         <List.Item key={index}>
@@ -332,7 +389,7 @@ export default function ImportWizard() {
                               />
                             }
                           >
-                            <Group spacing={rem(7.5)}>
+                            <Group spacing={rem(7.5)} sx={{ cursor: 'help' }}>
                               <Text>
                                 {[
                                   `x${item.formValues.amount}`,

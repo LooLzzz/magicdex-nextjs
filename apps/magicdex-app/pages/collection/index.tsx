@@ -13,7 +13,7 @@ import { authOptions } from '../api/auth/[...nextauth]'
 
 export default function CollectionPage() {
   const router = useRouter()
-  const isSmallerThanLg = useMediaQuery('(max-width: 1100px)', false)
+  const isSmallerThanLg = useMediaQuery('(max-width: 1225px)', false)
   const [hoveredRow, setHoveredRow] = useState<MRT_Row<UserCardData>>()
 
   function handleExportClick() {
@@ -48,6 +48,7 @@ export default function CollectionPage() {
 
           <Grid.Col offset={0.3} span={2} hidden={isSmallerThanLg}>
             <CardImage
+              displayPrice
               card={hoveredRow?.original}
               aspectRatioProps={{
                 maw: CardImage.defaultWidth,

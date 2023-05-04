@@ -52,6 +52,7 @@ export function useScryfallAutocompleteQuery(
     },
     {
       enabled: typeof query === 'string' && query.length > 0,
+      refetchOnWindowFocus: false,
       ...options
     }
   )
@@ -110,6 +111,7 @@ export function useScryfallCardPrintsQuery(
     },
     {
       enabled: name?.length > 0 || set?.length > 0 || collector_number?.length > 0,
+      refetchOnWindowFocus: false,
       ...options
     }
   )

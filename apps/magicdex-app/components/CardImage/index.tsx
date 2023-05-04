@@ -1,5 +1,16 @@
+import { CardPrice } from '@/components/CardsTable/CardText'
 import { UserCardData } from '@/types/supabase'
-import { AspectRatio, AspectRatioProps, Box, BoxProps, LoadingOverlay, Overlay, useMantineTheme } from '@mantine/core'
+import {
+  AspectRatio,
+  AspectRatioProps,
+  Center,
+  Group,
+  LoadingOverlay,
+  Overlay,
+  Stack,
+  StackProps,
+  useMantineTheme
+} from '@mantine/core'
 import Image, { ImageProps } from 'next/image'
 import { useEffect, useState } from 'react'
 import Tilt, { GlareProps, TiltProps } from 'react-parallax-tilt'
@@ -17,6 +28,8 @@ const defaultGlareMaxOpacity = 0.15
 
 export default function CardImage({
   card,
+  displayPrice = false,
+  openPriceTooltipToSides = false,
   width = defaultWidth,
   height = defaultHeight,
   ratio = defaultAspectRatio,
@@ -34,8 +47,10 @@ export default function CardImage({
   imageProps = {},
   ...rootProps
 }:
-  BoxProps & {
+  StackProps & {
     card?: UserCardData,
+    displayPrice?: boolean,
+    openPriceTooltipToSides?: boolean,
     width?: ImageProps['width'],
     height?: ImageProps['height'],
     placeholder?: ImageProps['placeholder'],
@@ -63,7 +78,7 @@ export default function CardImage({
   }, [card?.image_uris?.png])
 
   return (
-    <Box {...rootProps}>
+    <Stack {...rootProps}>
       <AspectRatio
         ratio={ratio}
         {...aspectRatioProps}
@@ -112,7 +127,20 @@ export default function CardImage({
           />
         </Tilt>
       </AspectRatio>
-    </Box>
+
+      {
+        displayPrice
+          ? (
+            <Center component={Group} noWrap>
+              <CardPrice
+                openTooltipToSides={openPriceTooltipToSides}
+                data={card}
+              />
+            </Center>
+          )
+          : undefined
+      }
+    </Stack>
   )
 }
 

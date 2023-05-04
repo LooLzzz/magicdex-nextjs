@@ -20,7 +20,7 @@ export type FloatingLabelAutocompleteProps = AutocompleteProps & {
 
 const FloatingLabelAutocomplete = forwardRef<HTMLInputElement, FloatingLabelAutocompleteProps>(
   function FloatingLabelAutocomplete(
-    { loading = false, loaderProps, boxRootProps, onFocus, onBlur, classNames, ...props }: FloatingLabelAutocompleteProps,
+    { loading = false, loaderProps, boxRootProps, onFocus, onBlur, onChange, classNames, ...props }: FloatingLabelAutocompleteProps,
     ref
   ) {
     const [focused, setFocused] = useState(false)
@@ -42,11 +42,12 @@ const FloatingLabelAutocomplete = forwardRef<HTMLInputElement, FloatingLabelAuto
           }}
           onFocus={event => { setFocused(true); onFocus?.(event) }}
           onBlur={event => { setFocused(false); onBlur?.(event) }}
+          onChange={onChange}
           rightSection={
             loading
               ? <Loader m={rem(7.5)} {...loaderProps} />
               : props.value
-                ? <CloseButton onClick={() => props.onChange?.('')} />
+                ? <CloseButton onClick={() => onChange?.('')} />
                 : undefined
           }
         />

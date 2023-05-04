@@ -17,7 +17,7 @@ export default function DetailsPanel<T extends UserCardData>(
   }) {
   const theme = useMantineTheme()
   const [embla, setEmbla] = useState<Embla>(null)
-  const isSmallerThanLg = useMediaQuery('(max-width: 1100px)', false)
+  const isLargerThanLg = useMediaQuery('(min-width: 1226px)', false)
   const tableContainerWidth = table.refs.tableContainerRef?.current?.clientWidth
   const containerWidth = tableContainerWidth * 0.925
 
@@ -29,7 +29,7 @@ export default function DetailsPanel<T extends UserCardData>(
       emblaAutoHeightEffect(embla)
   }, [embla])
 
-  // TODO: handle double-face cards
+  // TODO: handle multi-faced cards
   return (
     <Paper
       bg={(
@@ -63,8 +63,10 @@ export default function DetailsPanel<T extends UserCardData>(
               </ActionIcon>
             </div>
 
-            <Center sx={{ display: !isSmallerThanLg ? 'none' : undefined }}>
+            <Center sx={{ display: isLargerThanLg ? 'none' : undefined }}>
               <CardImage
+                displayPrice
+                openPriceTooltipToSides
                 card={row.original}
                 aspectRatioProps={{
                   maw: CardImage.defaultWidth,

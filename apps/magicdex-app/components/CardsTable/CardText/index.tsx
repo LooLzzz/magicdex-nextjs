@@ -1,6 +1,6 @@
 import { UserCardData } from '@/types/supabase'
-import { toTitleCase } from '@/utils'
-import { clsx, Text, TextProps } from '@mantine/core'
+import { roundPrecision, toTitleCase } from '@/utils'
+import { clsx, Text, TextProps, Tooltip } from '@mantine/core'
 import React from 'react'
 
 
@@ -196,5 +196,71 @@ CardText.Set = function CardTextSet({
         ...classes
       ])}
     />
+  )
+}
+
+export function CardPrice({
+  openTooltipToSides = false,
+  data: {
+    amount,
+    price_usd,
+    foil,
+    prices,
+  } = {} as undefined
+}: {
+  openTooltipToSides?: boolean,
+  data?: UserCardData
+}) {
+  if (typeof price_usd === 'undefined') {
+    price_usd = Number(
+      foil
+        ? prices?.usd_foil
+        : prices?.usd
+    )
+
+    if (!price_usd)
+      price_usd = undefined
+  }
+
+  return (
+    <Text align='center'>
+      {
+        typeof price_usd === 'number'
+          ? (amount ?? 1) === 1
+            ? `$${price_usd}`
+            : <>
+              <Tooltip
+                events={{ hover: true, focus: true, touch: true }}
+                label='Price for x1'
+                {...(
+                  !openTooltipToSides
+                    ? {}
+                    : {
+                      position: 'left',
+                      transitionProps: { transition: 'fade' }
+                    }
+                )}
+              >
+                <span>${price_usd}</span>
+              </Tooltip>
+              {' / '}
+              <Tooltip
+                events={{ hover: true, focus: true, touch: true }}
+                label={`Price for x${amount}`}
+                {...(
+                  !openTooltipToSides
+                    ? {}
+                    : {
+                      position: 'right',
+                      transitionProps: { transition: 'fade' }
+                    }
+                )}
+              >
+                <span>${roundPrecision(price_usd * amount, 2)}</span>
+              </Tooltip>
+            </>
+          : <Text italic>N/A</Text>
+      }
+    </Text>
   )
 }
