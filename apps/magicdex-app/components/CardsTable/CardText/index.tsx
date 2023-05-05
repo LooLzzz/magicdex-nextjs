@@ -1,6 +1,6 @@
 import { UserCardData } from '@/types/supabase'
 import { roundPrecision, toTitleCase } from '@/utils'
-import { clsx, Text, TextProps, Tooltip } from '@mantine/core'
+import { Text, TextProps, Tooltip, clsx } from '@mantine/core'
 import React from 'react'
 
 
@@ -206,8 +206,9 @@ export function CardPrice({
     price_usd,
     foil,
     prices,
-  } = {} as undefined
-}: {
+  } = {} as undefined,
+  ...rest
+}: TextProps & {
   openTooltipToSides?: boolean,
   data?: UserCardData
 }) {
@@ -223,7 +224,10 @@ export function CardPrice({
   }
 
   return (
-    <Text align='center'>
+    <Text
+      align='center'
+      {...rest}
+    >
       {
         typeof price_usd === 'number'
           ? (amount ?? 1) === 1
