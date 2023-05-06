@@ -1,9 +1,9 @@
 import {
   CardImage,
   FloatingLabelAutocomplete,
-  FloatingLabelMultiSelect,
-  FloatingLabelNumberInput,
   FloatingLabelSelect,
+  FloatingLabelTagsSelect,
+  QuantityInput,
 } from '@/components'
 import {
   useScryfallAutocompleteQuery,
@@ -97,7 +97,8 @@ export default function ImportWizard() {
     if (includeStagingArea)
       stagingAreaHandlers.setState([])
 
-    focusNameInput()
+    if (!smallerThanSm)
+      focusNameInput()
   }
 
   function handleAddCurrentValuesToStagingArea({ resetForm: _resetForm = false } = {}) {
@@ -214,6 +215,7 @@ export default function ImportWizard() {
                       ref={nameInputRef}
                       hoverOnSearchChange
                       label='Card Name'
+                      description='At least 2 characters are required.'
                       placeholder='Search for a card...'
                       data={autocompleteData?.data ?? []}
                       loading={autocompleteFetching}
@@ -243,9 +245,10 @@ export default function ImportWizard() {
                   </Flex>
                 </Grid.Col>
                 <Grid.Col sm={3}>
-                  <FloatingLabelNumberInput
+                  <QuantityInput
                     min={1}
                     disabled={!selectedCard}
+                    actionIconSize='sm'
                     label='Amount'
                     {...form.getInputProps('amount')}
                   />
@@ -298,12 +301,8 @@ export default function ImportWizard() {
                   />
                 </Grid.Col>
                 <Grid.Col sm={9} style={{ alignSelf: 'flex-start' }}>
-                  <FloatingLabelMultiSelect
-                    // TODO: make 'tags' work
-                    searchable
-                    creatable
+                  <FloatingLabelTagsSelect
                     disabled={!selectedCard}
-                    data={['TODO']}
                     label='Tags'
                     {...form.getInputProps('tags')}
                   />
@@ -379,7 +378,7 @@ export default function ImportWizard() {
                           <Tooltip
                             events={{ hover: true, focus: true, touch: true }}
                             bg='transparent'
-                            position='right'
+                            position={smallerThanSm ? 'top' : 'right'}
                             label={
                               <CardImage
                                 tiltEnabled={false}

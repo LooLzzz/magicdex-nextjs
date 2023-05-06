@@ -51,7 +51,7 @@ export function useScryfallAutocompleteQuery(
       } as undefined
     },
     {
-      enabled: typeof query === 'string' && query.length > 0,
+      enabled: typeof query === 'string' && query.length > 1,
       refetchOnWindowFocus: false,
       ...options
     }

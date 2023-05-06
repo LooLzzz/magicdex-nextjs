@@ -92,18 +92,22 @@ export default function DetailsPanel<T extends UserCardData>(
                 </Flex>
                 <Flex gap='sm' justify='center'>
                   <CardText replaceHyphen>{row.original.type_line}</CardText>
-                  <CardText.Set fontSize={'1.25rem'} data={row.original} />
+                  <CardText.Set fontSize={'1.75rem'} data={row.original} />
                 </Flex>
                 <Stack spacing={7}>
-                  <CardText oracleText containsManaSymbols ta='left'>{row.original.oracle_text}</CardText>
+                  <CardText oracleText containsManaSymbols manaSymbolSize='0.8em' ta='left'>{row.original.oracle_text}</CardText>
                   <CardText flavorText ta='left'>{row.original.flavor_text}</CardText>
                 </Stack>
-                <Flex gap='sm' justify='left'>
+                <Flex gap='sm' justify='left' align='center'>
                   <CardText ff='monospace'>{'#' + row.original.collector_number}</CardText>
-                  <Flex gap={3} align='center'>
-                    <span className='ms ms-shadow ms-artist-nib' />
-                    <CardText weight={400} ff='monospace' tt='uppercase'>{row.original.artist}</CardText>
-                  </Flex>
+                  <CardText.Artist data={row.original}/>
+                  <CardText.PowerToughness
+                    data={row.original}
+                    sx={{
+                      flex: 1,
+                      textAlign: 'right'
+                    }}
+                  />
                 </Flex>
               </Stack>
             </Center>

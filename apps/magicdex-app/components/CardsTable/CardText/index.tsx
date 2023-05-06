@@ -1,6 +1,6 @@
 import { UserCardData } from '@/types/supabase'
 import { roundPrecision, toTitleCase } from '@/utils'
-import { Text, TextProps, Tooltip, clsx } from '@mantine/core'
+import { Flex, FlexProps, Text, TextProps, Tooltip, clsx } from '@mantine/core'
 import React from 'react'
 
 
@@ -60,6 +60,7 @@ function matchAndReplace({
 
 export default function CardText({
   containsManaSymbols = false,
+  manaSymbolSize = 'inherit',
   oracleText = false,
   flavorText = false,
   replaceHyphen = false,
@@ -69,6 +70,7 @@ export default function CardText({
   Omit<TextProps, 'children'> & {
     title?: string,
     containsManaSymbols?: boolean,
+    manaSymbolSize?: string | number,
     oracleText?: boolean,
     flavorText?: boolean,
     replaceHyphen?: boolean,
@@ -124,7 +126,7 @@ export default function CardText({
       regexp: /\{([^{}]*)\}/g,
       replacer: match => (
         <span
-          style={{ fontSize: 'inherit', margin: '0 1px' }}
+          style={{ fontSize: manaSymbolSize }}
           key={match.index}
           className={clsx([
             'ms',
@@ -196,6 +198,72 @@ CardText.Set = function CardTextSet({
         ...classes
       ])}
     />
+  )
+}
+
+CardText.Artist = function Artist({
+  data: {
+    artist,
+  },
+  fontSize = '1.25rem',
+  classes = [],
+  ...rest
+}: FlexProps & {
+  data: UserCardData,
+  fontSize?: TextProps['style']['fontSize'],
+  classes?: string[],
+}) {
+  return (
+    <Flex
+      gap={3}
+      align='center'
+      {...rest}
+    >
+      <span
+        className={clsx([
+          'ms',
+          'ms-shadow',
+          'ms-artist-nib',
+          ...classes
+        ])}
+      />
+      <CardText
+        weight={400}
+        ff='monospace'
+        tt='uppercase'
+      >
+        {artist}
+      </CardText>
+    </Flex>
+  )
+}
+
+CardText.PowerToughness = function PowerToughness({
+  data: {
+    power,
+    toughness,
+  },
+  fontSize = '1.25rem',
+  ...rest
+}: TextProps & {
+  data: UserCardData,
+  fontSize?: TextProps['style']['fontSize'],
+}) {
+  const nullValues = [null, undefined]
+  if (nullValues.includes(power) && nullValues.includes(toughness))
+    return undefined
+
+  return (
+    <Text
+      ff='monospace'
+      {...rest}
+      style={{
+        fontSize,
+        ...rest?.style
+      }}
+    >
+      {power}/{toughness}
+    </Text>
   )
 }
 

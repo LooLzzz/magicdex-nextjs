@@ -78,7 +78,7 @@ export default function CardImage({
   }, [card?.image_uris?.png])
 
   return (
-    <Stack {...rootProps}>
+    <Center component={Stack} {...rootProps}>
       <AspectRatio
         ratio={ratio}
         {...aspectRatioProps}
@@ -141,7 +141,7 @@ export default function CardImage({
           )
           : undefined
       }
-    </Stack>
+    </Center>
   )
 }
 

@@ -13,7 +13,9 @@ import {
   FloatingLabelNumberInput,
   FloatingLabelPasswordInput,
   FloatingLabelSelect,
+  FloatingLabelTagsSelect,
   FloatingLabelTextInput,
+  QuantityInput,
 } from './CustomMantineInputs'
 import * as ImportComponents from './ImportComponents'
 
@@ -32,6 +34,8 @@ export {
   FloatingLabelNumberInput,
   FloatingLabelPasswordInput,
   FloatingLabelSelect,
+  FloatingLabelTagsSelect,
   FloatingLabelTextInput,
   ImportComponents,
+  QuantityInput,
 }
