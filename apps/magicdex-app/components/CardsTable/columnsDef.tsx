@@ -15,7 +15,7 @@ import {
 } from '@mantine/core'
 import { MRT_ColumnDef } from 'mantine-react-table'
 import { useMemo } from 'react'
-import CardText from './CardText'
+import CardText, { CardTextPrice, CardTextSet } from './CardText'
 
 
 const cardRarityMap = {
@@ -38,6 +38,13 @@ export default function useColumnsDef(allSets: { set_name: string, set_id: strin
     mana_cost: 170,
     price: 125,
     set: 140,
+    lang: 140,
+  }
+
+  const initialColumnVisibility = {
+    lang: false,
+    rarity: false,
+    color_identity: false,
   }
 
   const columns = useMemo<MRT_ColumnDef<UserCardData>[]>(() => [
@@ -119,7 +126,7 @@ export default function useColumnsDef(allSets: { set_name: string, set_id: strin
             label={<>{cell.row.original.set_name} - <Text span italic>{toTitleCase(cell.row.original.rarity)}</Text></>}
           >
             <span>
-              <CardText.Set
+              <CardTextSet
                 disableTitle
                 data={cell.row.original}
                 classes={['ss-2x']}
@@ -289,6 +296,17 @@ export default function useColumnsDef(allSets: { set_name: string, set_id: strin
     },
 
     {
+      accessorKey: 'lang',
+      header: 'Language',
+      columnFilterModeOptions: ['equals', 'notEquals'],
+      enableFilterMatchHighlighting: false,
+      filterFn: 'equals',
+      mantineFilterTextInputProps: {
+        placeholder: 'by Language',
+      },
+    },
+
+    {
       accessorKey: 'price_usd',
       header: 'Price',
       filterFn: 'equals',
@@ -297,37 +315,9 @@ export default function useColumnsDef(allSets: { set_name: string, set_id: strin
       mantineFilterTextInputProps: {
         placeholder: 'by Price',
       },
-      Cell: ({ cell }) => {
-        const { amount, price_usd } = cell.row.original
-
-        return (
-          <Text align='center'>
-            {
-              typeof price_usd === 'number'
-                ? amount === 1
-                  ? `$${price_usd}`
-                  : <>
-                    <Tooltip
-                      events={{ hover: true, focus: true, touch: true }}
-                      label='Price for x1'
-                    >
-                      <span>${price_usd}</span>
-                    </Tooltip>
-                    {' / '}
-                    <Tooltip
-                      events={{ hover: true, focus: true, touch: true }}
-                      label={`Price for x${amount}`}
-                    >
-                      <span>${price_usd * amount}</span>
-                    </Tooltip>
-                  </>
-                : <Text italic>N/A</Text>
-            }
-          </Text>
-        )
-      }
+      Cell: ({ cell }) => <CardTextPrice data={cell.row.original} />
     },
   ], [allSets])
 
-  return { columns, initialColumnSizing }
+  return { columns, initialColumnSizing, initialColumnVisibility }
 }

@@ -4,8 +4,12 @@ import { NextApiRequest, NextApiResponse } from 'next'
 import { getServerSession } from 'next-auth'
 
 
+type JsonObject = {
+  [key: string]: string | number | boolean | null | JsonObject | JsonObject[]
+}
+
 export default async function handler(
-  req: NextApiRequest & { query: { [key: string]: undefined } },
+  req: Omit<NextApiRequest, 'body'> & { query: JsonObject, body: JsonObject },
   res: NextApiResponse
 ) {
   const session = await getServerSession(req, res, authOptions)
@@ -22,10 +26,10 @@ export default async function handler(
   if (method === 'GET') {
     try {
       const { pagination, filters, globalFilter, sort } = {
-        pagination: JSON.parse(query.pagination ?? '{}'),
-        filters: JSON.parse(query.filters ?? '{}'),
-        globalFilter: query.globalFilter,
-        sort: JSON.parse(query.sort ?? '[]'),
+        pagination: JSON.parse(query.pagination as string ?? '{}'),
+        filters: JSON.parse(query.filters as string ?? '{}'),
+        globalFilter: query.globalFilter as string,
+        sort: JSON.parse(query.sort as string ?? '[]'),
       }
 
       // replace '-' with '—' for 'type_line' filter
@@ -56,14 +60,18 @@ export default async function handler(
     }
   }
 
-  // TODO: implement POST method
   else if (method === 'POST') {
-    res.status(200).json({
-      success: false,
-      message: 'Method not implemented yet',
-      body,
-      session,
-    })
+    try {
+      res.status(200).json(
+        await cardHandlers.updateCardsDataByUserSessionHandler(session, body as undefined)
+      )
+    } catch (error) {
+      console.error(error)
+      res.status(400).json({
+        success: false,
+        message: error.toString(),
+      })
+    }
   }
 
   else {

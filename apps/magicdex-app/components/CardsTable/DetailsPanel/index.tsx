@@ -7,7 +7,7 @@ import { useMediaQuery } from '@mantine/hooks'
 import { IconChevronLeft, IconChevronRight } from '@tabler/icons-react'
 import { MRT_Row, MRT_TableInstance } from 'mantine-react-table'
 import { useEffect, useState } from 'react'
-import CardText from '../CardText'
+import CardText, { CardTextArtist, CardTextPowerToughness, CardTextSet } from '../CardText'
 
 
 export default function DetailsPanel<T extends UserCardData>(
@@ -17,7 +17,7 @@ export default function DetailsPanel<T extends UserCardData>(
   }) {
   const theme = useMantineTheme()
   const [embla, setEmbla] = useState<Embla>(null)
-  const isSmallerThanLg = useMediaQuery('(max-width: 1100px)', false)
+  const isLargerThanLg = useMediaQuery('(min-width: 1226px)', false)
   const tableContainerWidth = table.refs.tableContainerRef?.current?.clientWidth
   const containerWidth = tableContainerWidth * 0.925
 
@@ -29,7 +29,7 @@ export default function DetailsPanel<T extends UserCardData>(
       emblaAutoHeightEffect(embla)
   }, [embla])
 
-  // TODO: handle double-face cards
+  // TODO: handle multi-faced cards
   return (
     <Paper
       bg={(
@@ -63,8 +63,10 @@ export default function DetailsPanel<T extends UserCardData>(
               </ActionIcon>
             </div>
 
-            <Center sx={{ display: !isSmallerThanLg ? 'none' : undefined }}>
+            <Center sx={{ display: isLargerThanLg ? 'none' : undefined }}>
               <CardImage
+                displayPrice
+                openPriceTooltipToSides
                 card={row.original}
                 aspectRatioProps={{
                   maw: CardImage.defaultWidth,
@@ -90,18 +92,22 @@ export default function DetailsPanel<T extends UserCardData>(
                 </Flex>
                 <Flex gap='sm' justify='center'>
                   <CardText replaceHyphen>{row.original.type_line}</CardText>
-                  <CardText.Set fontSize={'1.25rem'} data={row.original} />
+                  <CardTextSet fontSize={'1.75rem'} data={row.original} />
                 </Flex>
                 <Stack spacing={7}>
-                  <CardText oracleText containsManaSymbols ta='left'>{row.original.oracle_text}</CardText>
+                  <CardText oracleText containsManaSymbols manaSymbolSize='0.8em' ta='left'>{row.original.oracle_text}</CardText>
                   <CardText flavorText ta='left'>{row.original.flavor_text}</CardText>
                 </Stack>
-                <Flex gap='sm' justify='left'>
+                <Flex gap='sm' justify='left' align='center'>
                   <CardText ff='monospace'>{'#' + row.original.collector_number}</CardText>
-                  <Flex gap={3} align='center'>
-                    <span className='ms ms-shadow ms-artist-nib' />
-                    <CardText weight={400} ff='monospace' tt='uppercase'>{row.original.artist}</CardText>
-                  </Flex>
+                  <CardTextArtist data={row.original} />
+                  <CardTextPowerToughness
+                    data={row.original}
+                    sx={{
+                      flex: 1,
+                      textAlign: 'right'
+                    }}
+                  />
                 </Flex>
               </Stack>
             </Center>

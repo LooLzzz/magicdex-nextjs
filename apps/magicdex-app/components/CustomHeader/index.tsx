@@ -175,7 +175,7 @@ export default function CustomHeader({
           <Divider my='sm' />
 
           <Group grow position='center' pb='xl' px='md'>
-            <LoginLogoutButtons afterOnClick={closeDrawer} />
+            <LoginLogoutButtons afterOnClick={closeDrawer} logoutProps={{ color: 'red' }} />
           </Group>
         </ScrollArea>
       </Drawer>

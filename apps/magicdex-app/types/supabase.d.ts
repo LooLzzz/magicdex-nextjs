@@ -1,12 +1,11 @@
 import { ScryfallCardData } from './scryfall'
 
 
-export type CardCondition = 'NM' | 'LP' | 'MP' | 'HP' | 'DMG'
+export type CardCondition = '' | 'NM' | 'LP' | 'MP' | 'HP' | 'DMG'
 
-export interface UserCardData extends ScryfallCardData {
+export interface UserCardBaseData {
   altered: boolean
   amount: number
-  // card_data: ScryfallCardData
   condition: CardCondition
   created_at: Date
   foil: boolean
@@ -18,5 +17,9 @@ export interface UserCardData extends ScryfallCardData {
   signed: boolean
   tags: string[]
   updated_at: Date
+}
+
+export interface UserCardData extends UserCardBaseData, ScryfallCardData {
+  // card_data: ScryfallCardData
   price_usd: number
 }

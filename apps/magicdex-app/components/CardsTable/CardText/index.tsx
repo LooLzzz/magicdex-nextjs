@@ -1,6 +1,6 @@
 import { UserCardData } from '@/types/supabase'
-import { toTitleCase } from '@/utils'
-import { clsx, Text, TextProps } from '@mantine/core'
+import { roundPrecision, toTitleCase } from '@/utils'
+import { Flex, FlexProps, Text, TextProps, Tooltip, clsx } from '@mantine/core'
 import React from 'react'
 
 
@@ -58,8 +58,9 @@ function matchAndReplace({
   return value
 }
 
-export default function CardText({
+function CardTextComponent({
   containsManaSymbols = false,
+  manaSymbolSize = 'inherit',
   oracleText = false,
   flavorText = false,
   replaceHyphen = false,
@@ -69,6 +70,7 @@ export default function CardText({
   Omit<TextProps, 'children'> & {
     title?: string,
     containsManaSymbols?: boolean,
+    manaSymbolSize?: string | number,
     oracleText?: boolean,
     flavorText?: boolean,
     replaceHyphen?: boolean,
@@ -124,7 +126,7 @@ export default function CardText({
       regexp: /\{([^{}]*)\}/g,
       replacer: match => (
         <span
-          style={{ fontSize: 'inherit', margin: '0 1px' }}
+          style={{ fontSize: manaSymbolSize }}
           key={match.index}
           className={clsx([
             'ms',
@@ -162,39 +164,186 @@ export default function CardText({
 }
 
 
-CardText.Set = function CardTextSet({
-  data: {
-    rarity,
-    set,
-    set_name
-  },
-  fontSize,
-  classes = [],
-  disableTitle = false,
-  ...rest
-}: TextProps & {
-  data: UserCardData,
-  fontSize?: TextProps['style']['fontSize'],
-  classes?: string[],
-  disableTitle?: boolean
-}) {
-  return (
-    <Text
-      {...rest}
-      title={!disableTitle ? `${set_name} - ${toTitleCase(rarity)}` : undefined}
-      style={{
-        fontSize,
-        lineHeight: '1.5rem',
-        ...rest?.style
-      }}
-      className={clsx([
-        'ss',
-        'ss-fw',
-        // 'ss-2x',
-        `ss-${rarity.toLowerCase()}`,
-        `ss-${set.toLowerCase()}`,
-        ...classes
-      ])}
-    />
-  )
-}
+export const CardTextSet = React.memo(
+  function CardTextSet({
+    data: {
+      rarity,
+      set,
+      set_name
+    },
+    fontSize,
+    classes = [],
+    disableTitle = false,
+    ...rest
+  }: TextProps & {
+    data: UserCardData,
+    fontSize?: TextProps['style']['fontSize'],
+    classes?: string[],
+    disableTitle?: boolean
+  }) {
+    return (
+      <Text
+        {...rest}
+        title={!disableTitle ? `${set_name} - ${toTitleCase(rarity)}` : undefined}
+        style={{
+          fontSize,
+          lineHeight: '1.5rem',
+          ...rest?.style
+        }}
+        className={clsx([
+          'ss',
+          'ss-fw',
+          // 'ss-2x',
+          `ss-${rarity.toLowerCase()}`,
+          `ss-${set.toLowerCase()}`,
+          ...classes
+        ])}
+      />
+    )
+  }
+)
+
+export const CardTextArtist = React.memo(
+  function Artist({
+    data: {
+      artist,
+    },
+    fontSize = '1.25rem',
+    classes = [],
+    ...rest
+  }: FlexProps & {
+    data: UserCardData,
+    fontSize?: TextProps['style']['fontSize'],
+    classes?: string[],
+  }) {
+    return (
+      <Flex
+        gap={3}
+        align='center'
+        {...rest}
+      >
+        <span
+          className={clsx([
+            'ms',
+            'ms-shadow',
+            'ms-artist-nib',
+            ...classes
+          ])}
+        />
+        <CardTextComponent
+          weight={400}
+          ff='monospace'
+          tt='uppercase'
+        >
+          {artist}
+        </CardTextComponent>
+      </Flex>
+    )
+  }
+)
+
+export const CardTextPowerToughness = React.memo(
+  function PowerToughness({
+    data: {
+      power,
+      toughness,
+    },
+    fontSize = '1.25rem',
+    ...rest
+  }: TextProps & {
+    data: UserCardData,
+    fontSize?: TextProps['style']['fontSize'],
+  }) {
+    const nullValues = [null, undefined]
+    if (nullValues.includes(power) && nullValues.includes(toughness))
+      return undefined
+
+    return (
+      <Text
+        ff='monospace'
+        {...rest}
+        style={{
+          fontSize,
+          ...rest?.style
+        }}
+      >
+        {power}/{toughness}
+      </Text>
+    )
+  }
+)
+
+export const CardTextPrice = React.memo(
+  function CardPrice({
+    openTooltipToSides = false,
+    data: {
+      amount,
+      price_usd,
+      foil,
+      prices,
+    } = {} as undefined,
+    ...rest
+  }: TextProps & {
+    openTooltipToSides?: boolean,
+    data?: UserCardData
+  }) {
+    if (typeof price_usd === 'undefined') {
+      price_usd = Number(
+        foil
+          ? prices?.usd_foil
+          : prices?.usd
+      )
+
+      if (!price_usd)
+        price_usd = undefined
+    }
+
+    return (
+      <Text
+        align='center'
+        {...rest}
+      >
+        {
+          typeof price_usd === 'number'
+            ? (amount ?? 1) === 1
+              ? `$${price_usd}`
+              : <>
+                <Tooltip
+                  events={{ hover: true, focus: true, touch: true }}
+                  label='Price for x1'
+                  {...(
+                    !openTooltipToSides
+                      ? {}
+                      : {
+                        position: 'left',
+                        transitionProps: { transition: 'fade' }
+                      }
+                  )}
+                >
+                  <span>${price_usd}</span>
+                </Tooltip>
+                {' / '}
+                <Tooltip
+                  events={{ hover: true, focus: true, touch: true }}
+                  label={`Price for x${amount}`}
+                  {...(
+                    !openTooltipToSides
+                      ? {}
+                      : {
+                        position: 'right',
+                        transitionProps: { transition: 'fade' }
+                      }
+                  )}
+                >
+                  <span>${roundPrecision(price_usd * amount, 2)}</span>
+                </Tooltip>
+              </>
+            : <Text italic>N/A</Text>
+        }
+      </Text>
+    )
+  }
+)
+
+const CardText = React.memo(CardTextComponent)
+export default CardText

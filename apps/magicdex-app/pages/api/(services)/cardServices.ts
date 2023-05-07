@@ -1,6 +1,9 @@
 import { applyVerboseOperator, createClientWithRLS } from '@/api/(services)/supabase'
 import { QueryProps } from '@/api/(types)'
+import { UserCardMutationVariables } from '@/services/hooks/types'
+import { UserCardBaseData } from '@/types/supabase'
 import { Session } from 'next-auth'
+import { Client as PgClient } from 'pg'
 
 
 /**
@@ -40,7 +43,7 @@ export async function getCardsDataByUserSession(session: Session, options: Query
   // EXECUTE
   const { data, error } = await builder
   if (error)
-    throw new Error(error.message)
+    throw error
   return data
 }
 
@@ -54,7 +57,7 @@ export async function getTotalCardsCountByUserSession(session: Session) {
   )
 
   if (error)
-    throw new Error(error.message)
+    throw error
   return count
 }
 
@@ -72,6 +75,50 @@ export async function getAllSetsByUserSession(session: Session) {
   )
 
   if (error)
-    throw new Error(error.message)
+    throw error
   return data
+}
+
+// TODO: make this work with 'SupabaseClient' somehow
+export async function updateCardsDataByUserSession(session: Session, cards: UserCardMutationVariables) {
+  const pgClient = new PgClient({
+    connectionString: process.env.SUPABASE_POSTGRES_CONNECTION_URI,
+  })
+  pgClient.connect()
+  const { rows: affectedRows, rowCount: affectedRowCount } = await pgClient.query(`
+    INSERT INTO user_cards(owner_id, amount, altered, condition, foil, misprint, scryfall_id, signed, tags, override_card_data)
+    VALUES
+      ${cards.map(card => `(
+        '${session.user.id}',
+        ${card.amount},
+        ${card.altered},
+        '${card.condition}',
+        ${card.foil},
+        ${card.misprint},
+        '${card.scryfall_id}',
+        ${card.signed},
+        '{${card.tags.join(',')}}',
+        '${JSON.stringify(card.override_card_data)}'
+      )`).join(',')}
+    ON CONFLICT (owner_id, altered, condition, foil, misprint, scryfall_id, signed, tags, override_card_data)
+    DO UPDATE SET amount = user_cards.amount + EXCLUDED.amount
+    RETURNING *;
+  `) as { rows: UserCardBaseData[], rowCount: number }
+  pgClient.end()
+
+  let [insertedRowCount, updatedRowCount] = [0, 0]
+  for (const row of affectedRows)
+    row.created_at.getTime() === row.updated_at.getTime() ? insertedRowCount++ : updatedRowCount++
+
+  return {
+    affectedRows,
+    affectedRowCount,
+    insertedRowCount,
+    updatedRowCount,
+  } as {
+    affectedRows: UserCardBaseData[],
+    affectedRowCount: number,
+    insertedRowCount: number,
+    updatedRowCount: number,
+  }
 }

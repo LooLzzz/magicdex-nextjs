@@ -26,6 +26,15 @@ const getMantineTheme = (colorScheme: ColorScheme): MantineThemeOverride => ({
   white: '#F8F9FA',
 
   components: {
+    Divider: {
+      defaultProps: theme => ({
+        color: (
+          theme.colorScheme === 'dark'
+            ? theme.colors.gray[7]
+            : theme.colors.gray[4]
+        )
+      }),
+    },
     SegmentedControl: {
       defaultProps: theme => ({
         bg: (
@@ -127,6 +136,10 @@ const getMantineTheme = (colorScheme: ColorScheme): MantineThemeOverride => ({
       transition: 'height 0.2s',
       display: 'flex',
       alignItems: 'flex-start',
+    },
+
+    '.mantine-Checkbox-input': {
+      cursor: 'pointer',
     },
 
   }),

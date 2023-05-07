@@ -1,6 +1,6 @@
 import { VerboseOperator } from '@/api/(types)'
 import { PostgrestFilterBuilder } from '@supabase/postgrest-js'
-import { createClient, SupabaseClient } from '@supabase/supabase-js'
+import { createClient } from '@supabase/supabase-js'
 
 
 const supabase = createClient(

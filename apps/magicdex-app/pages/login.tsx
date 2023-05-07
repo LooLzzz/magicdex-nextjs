@@ -1,6 +1,6 @@
 import { authOptions } from '@/api/auth/[...nextauth]'
-import { AuthErrorText, AuthProviderIcon, FloatingLabelInput } from '@/components'
-import { Box, Button, Divider, Container, Group, LoadingOverlay, rem, Stack, Title } from '@mantine/core'
+import { AuthErrorText, AuthProviderIcon, FloatingLabelPasswordInput, FloatingLabelTextInput } from '@/components'
+import { Box, Button, Container, Divider, Group, LoadingOverlay, Stack, Title, rem } from '@mantine/core'
 import { isEmail, useForm } from '@mantine/form'
 import type { GetServerSidePropsContext } from 'next'
 import { getServerSession } from 'next-auth'
@@ -37,7 +37,7 @@ export default function LoginPage({
       setLoadingOverlay(false)
       resolve(null)
     }, 2000))
-    console.log(values)
+    // console.log(values)
     setLoginError('Login is not implemented yet')
 
     form.setValues({ password: '' })
@@ -66,12 +66,12 @@ export default function LoginPage({
             onReset={handleReset}
           >
             <Stack spacing='xl'>
-              <FloatingLabelInput required
+              <FloatingLabelTextInput required
                 id='email'
                 label='Email'
                 {...form.getInputProps('email')}
               />
-              <FloatingLabelInput password required
+              <FloatingLabelPasswordInput required
                 label='Password'
                 {...form.getInputProps('password')}
               />

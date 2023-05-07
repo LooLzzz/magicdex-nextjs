@@ -1,7 +1,7 @@
 import { useUserCardsQuery } from '@/services/hooks'
 import { UserCardData } from '@/types/supabase'
 import { ActionIcon, Tooltip, useMantineTheme } from '@mantine/core'
-import { useWindowEvent } from '@mantine/hooks'
+import { useHotkeys, useMediaQuery } from '@mantine/hooks'
 import { IconRefresh } from '@tabler/icons-react'
 import { OnChangeFn } from '@tanstack/react-table'
 import {
@@ -26,6 +26,7 @@ export default function CardsTable({
 }) {
   const theme = useMantineTheme()
   const tableInstanceRef = useRef<MRT_TableInstance<UserCardData>>(null)
+  const isLargerThanLg = useMediaQuery('(min-width: 1226px)', false)
   const [expandedRows, setExpandedRows] = useState<MRT_ExpandedState>({})
   const [columnFilters, setColumnFilters] = useState<MRT_ColumnFiltersState>([])
   const [globalFilter, setGlobalFilter] = useState('')
@@ -46,13 +47,12 @@ export default function CardsTable({
       sorting
     },
   })
-  const { columns, initialColumnSizing } = useColumnsDef(data?.metadata?.allSets || [])
+  const { columns, initialColumnSizing, initialColumnVisibility } = useColumnsDef(data?.metadata?.allSets || [])
 
-  useWindowEvent('keydown', e => {
+  useHotkeys([
     // close expanded row on Escape
-    if (e.key === 'Escape')
-      tableInstanceRef.current?.setExpanded({})
-  })
+    ['Escape', () => tableInstanceRef.current?.setExpanded({})],
+  ])
 
   return (
     <MantineReactTable
@@ -62,11 +62,8 @@ export default function CardsTable({
       initialState={{
         // showColumnFilters: true
         columnSizing: initialColumnSizing,
+        columnVisibility: initialColumnVisibility,
         density: 'sm',
-        columnVisibility: {
-          rarity: false,
-          color_identity: false,
-        },
       }}
       rowCount={data?.metadata?.totalRowCount ?? 0}
       state={{
@@ -109,7 +106,6 @@ export default function CardsTable({
       )}
 
       mantineTableProps={({ table }) => ({
-        // onMouseLeave: () => table.setHoveredRow(null),
         sx: {
           // hide 'Edit' & 'Expand' labels (first 2 columns)
           '& th:nth-of-type(-n+1)': {
@@ -148,7 +144,7 @@ export default function CardsTable({
       }}
       mantineTableBodyRowProps={({ table, row }) => ({
         style: { cursor: 'pointer' },
-        onMouseEnter: () => table.setHoveredRow(row),
+        onMouseEnter: () => isLargerThanLg && onHoveredRowChange?.(row),
         onClick: () => table.setExpanded({ [row.id]: !table.getState().expanded[row.id] }),
       })}
       mantineDetailPanelProps={{
@@ -180,7 +176,7 @@ export default function CardsTable({
       onGlobalFilterChange={setGlobalFilter}
       onPaginationChange={setPagination}
       onSortingChange={setSorting}
-      onHoveredRowChange={onHoveredRowChange}
+      // onHoveredRowChange={onHoveredRowChange}
       onExpandedChange={expandedUpdater => {
         if (typeof expandedUpdater === 'boolean' || typeof expandedUpdater === 'object') {
           // expand/close all

@@ -1,7 +1,8 @@
 import { apiRoutes } from '@/routes'
 import { UserCardData } from '@/types/supabase'
-import { useQuery } from '@tanstack/react-query'
+import { UseMutationOptions, useMutation, useQuery } from '@tanstack/react-query'
 import axios, { AxiosError } from 'axios'
+import { UserCardMutationData, UserCardMutationVariables } from './types'
 
 
 const fieldNameMap = {
@@ -76,5 +77,22 @@ export function useUserCardsQuery({
         throw new Error(`HTTP status code: ${axiosError.response?.status}, message: ${errorMessage}`)
       }
     },
+  })
+}
+
+export function useUserCardsMutation(
+  options: Omit<UseMutationOptions<UserCardMutationData, Error, UserCardMutationVariables, unknown>, 'mutationFn'>
+) {
+  return useMutation<
+    UserCardMutationData, // TData -> return type
+    Error, //TError
+    UserCardMutationVariables, // TVariables -> mutation arguments
+    unknown // TContext
+  >({
+    mutationFn: async (variables) => {
+      const { data } = await axios.post(apiRoutes.userCards, variables)
+      return data
+    },
+    ...options
   })
 }
