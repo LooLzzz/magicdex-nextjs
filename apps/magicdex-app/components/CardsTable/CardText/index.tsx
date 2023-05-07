@@ -132,6 +132,8 @@ function CardTextComponent({
             'ms',
             'ms-shadow',
             'ms-cost',
+            // TODO: handle scryfall mana symbols to ManaFont symbols
+            // such as: 'ms-t' -> 'ms-tap'
             `ms-${match[1].replace(/[/]/g, '').toLowerCase()}`,
           ])}
         />
