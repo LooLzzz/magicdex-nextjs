@@ -85,3 +85,30 @@ export function emblaAutoHeightEffect(embla: Embla) {
     embla.rootNode().style.height = `${slideClientHeight}px`
   })
 }
+
+export function renameObjectKeys<T extends Record<string, unknown> | Record<string, unknown>[]>(obj: T, keyMap: Record<string, string>): T {
+  if (Array.isArray(obj))
+    return obj.map(item => renameObjectKeys(item, keyMap)) as T
+
+  return Object.fromEntries(
+    Object
+      .entries(obj)
+      .map(([key, value]) => [keyMap[key] ?? key, value])
+  ) as T
+}
+
+export function filterObject<T extends Record<string, unknown> | Record<string, unknown>[]>(obj: T, filter: (value: [string, unknown], index: number, array: [string, unknown][]) => boolean): T {
+  if (Array.isArray(obj))
+    return obj.map(item => filterObject(item, filter)) as T
+
+  return Object.fromEntries(
+    Object
+      .entries(obj)
+      .filter(filter)
+  ) as T
+}
+
+export function uniqueArray<T>(array: T[]) {
+  return array.filter((value, index, self) => self.indexOf(value) === index)
+  // return [...new Set(array)]
+}

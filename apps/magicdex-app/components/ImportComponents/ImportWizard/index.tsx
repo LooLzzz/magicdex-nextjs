@@ -10,6 +10,7 @@ import {
   useScryfallCardPrintsQuery,
   useUserCardsMutation
 } from '@/services/hooks'
+import { UserCardMutationVariables } from '@/services/hooks/types'
 import { ScryfallCardData } from '@/types/scryfall'
 import {
   ActionIcon,
@@ -59,13 +60,25 @@ export default function ImportWizard() {
   const focusNameInput = () => nameInputRef.current?.focus()
   const form = useForm({ initialValues: placeholderFormValues.empty })
   const [selectedCard, setSelectedCard] = useState<string>()
-  const [stagingArea, stagingAreaHandlers] = useListState<{ cardData: ScryfallCardData, formValues: BaseCardData }>([])
+  const [stagingArea, stagingAreaHandlers] = useListState<{ cardData: ScryfallCardData, formValues: BaseCardData, overrides: { lang?: string } }>([])
   const { mutate: userCardsMutate, isLoading: isMutating } = useUserCardsMutation({
-    onSuccess: () => {
+    onSuccess: ({ metadata: { updatedRowCount, insertedRowCount } }) => {
       notifications.show({
         title: 'Success',
         color: 'green',
-        message: `${stagingArea.length} card(s) were successfully added to your collection`,
+        message: (
+          updatedRowCount && insertedRowCount
+            ? (
+              <>
+                {insertedRowCount} card(s) were ADDED.
+                <br />
+                {updatedRowCount} card(s) were UPDATED.
+              </>
+            )
+            : insertedRowCount
+              ? <>{insertedRowCount} card(s) were ADDED.</>
+              : <>{updatedRowCount} card(s) were UPDATED.</>
+        ),
       })
       stagingAreaHandlers.setState([])
     },
@@ -102,24 +115,37 @@ export default function ImportWizard() {
   }
 
   function handleAddCurrentValuesToStagingArea({ resetForm: _resetForm = false } = {}) {
-    const cardData = (
-      cardLangsData?.data?.find(item => item.lang === form.values.lang)
-      ?? cardPrintsData?.data?.find(item => form.values.set === `${item.set}:${item.collector_number}`)
-    )
+    const cardLangData = cardLangsData?.data?.find(item => item.lang === form.values.lang)
+    const cardPrintData = cardPrintsData?.data?.find(item => form.values.set === `${item.set}:${item.collector_number}`)
+    const cardData = cardLangData ?? cardPrintData
+
     if (!cardData)
       return
 
     stagingAreaHandlers.append({
-      cardData,
+      cardData: cardPrintData,
       formValues: form.values,
+      overrides: cardLangData?.lang !== 'en' ? { lang: cardLangData?.lang } : {},
     })
 
     if (_resetForm)
       resetForm()
   }
 
-  function handleSubmit(values: BaseCardData) {
-    userCardsMutate(stagingArea)
+  function handleSubmit() {
+    userCardsMutate(
+      stagingArea.map(item => ({
+        altered: item.formValues.altered,
+        amount: item.formValues.amount,
+        condition: item.formValues.condition,
+        foil: item.formValues.foil,
+        misprint: item.formValues.misprint,
+        scryfall_id: item.cardData.id,
+        signed: item.formValues.signed,
+        tags: item.formValues.tags,
+        override_card_data: item.overrides,
+      }))
+    )
   }
 
   useHotkeys([
@@ -199,6 +225,7 @@ export default function ImportWizard() {
                   ...cardLangsData?.data?.find(item => item.lang === form.values.lang),
                   foil: form.values.foil,
                   amount: form.values.amount,
+                  prices: cardPrintsData?.data?.find(item => form.values.set === `${item.set}:${item.collector_number}`)?.prices ?? {},
                 } as undefined}
                 aspectRatioProps={{
                   maw: CardImage.defaultWidth,
@@ -366,9 +393,7 @@ export default function ImportWizard() {
 
           {
             stagingArea.length === 0
-              ? (
-                <Text italic>New cards will be displayed here.</Text>
-              )
+              ? <Text italic>New cards will be displayed here.</Text>
               : (
                 <List>
                   <Tooltip.Group openDelay={500} closeDelay={100}>

@@ -25,6 +25,7 @@ const FloatingLabelTagsSelect = forwardRef<HTMLInputElement, FloatingLabelTagsSe
       <FloatingLabelMultiSelect
         searchable
         creatable
+        clearSearchOnBlur
         ref={ref}
         data={data}
         value={value}

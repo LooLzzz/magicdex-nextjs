@@ -333,7 +333,8 @@ CREATE TABLE "public"."user_cards" (
     "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL,
     "override_card_data" "jsonb" DEFAULT '{}'::"jsonb",
     CONSTRAINT "condition_in" CHECK (("condition" = ANY (ARRAY['NM'::"text", 'LP'::"text", 'MP'::"text", 'HP'::"text", 'DMG'::"text"]))),
-    CONSTRAINT "user_cards_amount_check" CHECK (("amount" > 0))
+    CONSTRAINT "user_cards_amount_check" CHECK (("amount" > 0)),
+    CONSTRAINT "unique_cards" UNIQUE ("owner_id","altered","condition","foil","misprint","scryfall_id","signed","tags","override_card_data")
 );
 
 
@@ -388,7 +389,6 @@ CREATE VIEW "public"."user_cards_with_mtg_cards" WITH ("security_invoker"='on') 
     "mtg_cards"."illustration_id",
     "mtg_cards"."image_status",
     "mtg_cards"."keywords",
-    "mtg_cards"."lang",
     "mtg_cards"."layout",
     "mtg_cards"."legalities",
     "mtg_cards"."life_modifier",
@@ -443,14 +443,33 @@ CREATE VIEW "public"."user_cards_with_mtg_cards" WITH ("security_invoker"='on') 
     "mtg_cards"."printed_type_line",
     "mtg_cards"."variation_of",
         CASE
-            WHEN "user_cards"."foil" THEN ("mtg_cards"."prices" -> 'usd_foil'::"text")
-            ELSE ("mtg_cards"."prices" -> 'usd'::"text")
-        END AS "price_usd"
+            WHEN "user_cards"."foil" THEN ("mtg_cards"."prices" ->> 'usd_foil')::"numeric"
+            ELSE ("mtg_cards"."prices" ->> 'usd')::"numeric"
+        END AS "price_usd",
+        CASE
+            WHEN ("user_cards"."override_card_data" ? 'lang') THEN ("user_cards"."override_card_data" ->> 'lang')::"text"
+            ELSE "mtg_cards"."lang"
+        END AS "lang"
    FROM ("public"."user_cards"
      LEFT JOIN "public"."mtg_cards" ON (("user_cards"."scryfall_id" = "mtg_cards"."id")));
 
 
 ALTER TABLE "public"."user_cards_with_mtg_cards" OWNER TO "postgres";
+
+--
+-- Name: user_cards_with_mtg_cards; Type: VIEW; Schema: public; Owner: postgres
+--
+
+CREATE VIEW "public"."distinct_user_cards_sets" WITH ("security_invoker"='on') AS
+ SELECT DISTINCT
+    "mtg_cards"."set_name",
+    "mtg_cards"."set",
+    "mtg_cards"."released_at"
+ FROM "public"."user_cards"
+    LEFT JOIN "public"."mtg_cards" ON "public"."user_cards"."scryfall_id" = "public"."mtg_cards"."id";
+
+
+ALTER TABLE "public"."distinct_user_cards_sets" OWNER TO "postgres";
 
 --
 -- Name: accounts accounts_pkey; Type: CONSTRAINT; Schema: next_auth; Owner: postgres

@@ -1,4 +1,4 @@
-import { CardPrice } from '@/components/CardsTable/CardText'
+import { CardTextPrice } from '@/components/CardsTable/CardText'
 import { UserCardData } from '@/types/supabase'
 import {
   AspectRatio,
@@ -132,7 +132,7 @@ export default function CardImage({
         displayPrice
           ? (
             <Center component={Group} noWrap>
-              <CardPrice
+              <CardTextPrice
                 sx={{ cursor: 'text' }}
                 openTooltipToSides={openPriceTooltipToSides}
                 data={card}

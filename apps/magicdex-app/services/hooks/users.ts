@@ -1,9 +1,8 @@
-import { BaseCardData } from '@/components/ImportComponents/ImportWizard/types'
 import { apiRoutes } from '@/routes'
-import { ScryfallCardData } from '@/types/scryfall'
 import { UserCardData } from '@/types/supabase'
-import { useMutation, useQuery } from '@tanstack/react-query'
+import { UseMutationOptions, useMutation, useQuery } from '@tanstack/react-query'
 import axios, { AxiosError } from 'axios'
+import { UserCardMutationData, UserCardMutationVariables } from './types'
 
 
 const fieldNameMap = {
@@ -81,29 +80,19 @@ export function useUserCardsQuery({
   })
 }
 
-export function useUserCardsMutation({ onMutate, onError, onSuccess }: {
-  onMutate?: (variables: { cardData: ScryfallCardData, formValues: BaseCardData }[]) => unknown,
-  onError?: (error: Error, variables: { cardData: ScryfallCardData, formValues: BaseCardData }[]) => unknown,
-  onSuccess?: (data: { data: UserCardData[] }, variables: { cardData: ScryfallCardData, formValues: BaseCardData }[]) => unknown,
-} = {}) {
+export function useUserCardsMutation(
+  options: Omit<UseMutationOptions<UserCardMutationData, Error, UserCardMutationVariables, unknown>, 'mutationFn'>
+) {
   return useMutation<
-    { data: UserCardData[] }, // TData -> return type
+    UserCardMutationData, // TData -> return type
     Error, //TError
-    { cardData: ScryfallCardData, formValues: BaseCardData }[], // TVariables -> mutation arguments
+    UserCardMutationVariables, // TVariables -> mutation arguments
     unknown // TContext
   >({
-    mutationFn: async (data) => {
-      // TODO: useUserCardsMutation
-      // return await axios.post(apiRoutes.userCards, data)
-
-      await new Promise(resolve => setTimeout(resolve, 500))
-      // DEBUG: fail randomly 50% of the time
-      if (Math.random() > 0.5)
-        throw new Error('Failed to add cards')
-      return { data: [] }
+    mutationFn: async (variables) => {
+      const { data } = await axios.post(apiRoutes.userCards, variables)
+      return data
     },
-    onMutate,
-    onError,
-    onSuccess,
+    ...options
   })
 }

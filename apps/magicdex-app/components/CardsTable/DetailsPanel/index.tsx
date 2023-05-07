@@ -7,7 +7,7 @@ import { useMediaQuery } from '@mantine/hooks'
 import { IconChevronLeft, IconChevronRight } from '@tabler/icons-react'
 import { MRT_Row, MRT_TableInstance } from 'mantine-react-table'
 import { useEffect, useState } from 'react'
-import CardText from '../CardText'
+import CardText, { CardTextArtist, CardTextPowerToughness, CardTextSet } from '../CardText'
 
 
 export default function DetailsPanel<T extends UserCardData>(
@@ -92,7 +92,7 @@ export default function DetailsPanel<T extends UserCardData>(
                 </Flex>
                 <Flex gap='sm' justify='center'>
                   <CardText replaceHyphen>{row.original.type_line}</CardText>
-                  <CardText.Set fontSize={'1.75rem'} data={row.original} />
+                  <CardTextSet fontSize={'1.75rem'} data={row.original} />
                 </Flex>
                 <Stack spacing={7}>
                   <CardText oracleText containsManaSymbols manaSymbolSize='0.8em' ta='left'>{row.original.oracle_text}</CardText>
@@ -100,8 +100,8 @@ export default function DetailsPanel<T extends UserCardData>(
                 </Stack>
                 <Flex gap='sm' justify='left' align='center'>
                   <CardText ff='monospace'>{'#' + row.original.collector_number}</CardText>
-                  <CardText.Artist data={row.original}/>
-                  <CardText.PowerToughness
+                  <CardTextArtist data={row.original} />
+                  <CardTextPowerToughness
                     data={row.original}
                     sx={{
                       flex: 1,
