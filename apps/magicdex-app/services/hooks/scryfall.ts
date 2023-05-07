@@ -67,8 +67,9 @@ export function useScryfallCardPrintsQuery(
     set?: string,
     unique?: '' | 'prints' | 'art' | 'cards',
   } = {},
-  options: Omit<UseQueryOptions<ScryfallCardPrintsReturnType>, 'queryKey' | 'queryFn' | 'initialData'> = {},
+  options: Omit<UseQueryOptions<ScryfallCardPrintsReturnType>, 'queryFn' | 'initialData'> = {},
 ) {
+  const { queryKey = [], ...restOptions } = options
   const {
     collector_number,
     lang,
@@ -79,7 +80,7 @@ export function useScryfallCardPrintsQuery(
   } = params
 
   return useQuery<ScryfallCardPrintsReturnType>(
-    ['scryfall', 'card-prints', name, set, collector_number, unique, order, lang],
+    ['scryfall', 'card-prints', name, set, collector_number, unique, order, lang, ...queryKey],
     async () => {
       const { data }: {
         data: {
@@ -112,7 +113,7 @@ export function useScryfallCardPrintsQuery(
     {
       enabled: name?.length > 0 || set?.length > 0 || collector_number?.length > 0,
       refetchOnWindowFocus: false,
-      ...options
+      ...restOptions
     }
   )
 }

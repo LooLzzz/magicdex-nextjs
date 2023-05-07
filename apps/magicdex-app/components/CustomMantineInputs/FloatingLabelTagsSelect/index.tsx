@@ -1,7 +1,7 @@
 import { FloatingLabelMultiSelect } from '@/components'
 import { FloatingLabelMultiSelectProps } from '@/components/CustomMantineInputs'
 import { useListState } from '@mantine/hooks'
-import { forwardRef, useEffect } from 'react'
+import { forwardRef } from 'react'
 
 
 export type FloatingLabelTagsSelectProps = Omit<FloatingLabelMultiSelectProps, 'data' | 'searchable' | 'creatable'>
@@ -16,10 +16,6 @@ const FloatingLabelTagsSelect = forwardRef<HTMLInputElement, FloatingLabelTagsSe
     ref
   ) {
     const [data, dataHandlers] = useListState([])
-
-    useEffect(() => {
-      console.log({ value })
-    }, [value])
 
     return (
       <FloatingLabelMultiSelect

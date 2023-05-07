@@ -37,7 +37,7 @@ export default function LoginPage({
       setLoadingOverlay(false)
       resolve(null)
     }, 2000))
-    console.log(values)
+    // console.log(values)
     setLoginError('Login is not implemented yet')
 
     form.setValues({ password: '' })

@@ -1,4 +1,5 @@
 import { CardTextPrice } from '@/components/CardsTable/CardText'
+import { useScryfallCardPrintsQuery } from '@/services/hooks'
 import { UserCardData } from '@/types/supabase'
 import {
   AspectRatio,
@@ -70,12 +71,41 @@ export default function CardImage({
 ) {
   const theme = useMantineTheme()
   const [isLoaded, setLoaded] = useState(false)
+  const {
+    data: cardLangData,
+    isFetching: cardLangFetching,
+  } = useScryfallCardPrintsQuery(
+    card,
+    {
+      enabled: card?.lang !== undefined && card?.lang !== 'en',
+      queryKey: ['card-image'],
+    },
+  )
+
+  const getCardImageUrl = ({ image_uris }: { image_uris?: UserCardData['image_uris'] } = {}) => (
+    image_uris?.png
+    ?? image_uris?.large
+    ?? image_uris?.normal
+    ?? image_uris?.small
+  )
 
   // TODO: handle multi-faced cards
 
   useEffect(() => {
-    setLoaded(false)
-  }, [card?.image_uris?.png])
+    setLoaded(!(
+      card?.lang
+      || card?.image_uris?.png
+      || card?.image_uris?.large
+      || card?.image_uris?.normal
+      || card?.image_uris?.small
+    ))
+  }, [
+    card?.lang,
+    card?.image_uris?.png,
+    card?.image_uris?.large,
+    card?.image_uris?.normal,
+    card?.image_uris?.small
+  ])
 
   return (
     <Center component={Stack} {...rootProps}>
@@ -96,14 +126,14 @@ export default function CardImage({
           {...tiltProps}
         >
           <Image
-            src={card?.image_uris?.png ?? '/cardback.png'}
+            src={getCardImageUrl(card?.lang === 'en' ? card : cardLangData?.data?.[0]) ?? '/cardback.png'}
             alt={card?.name ?? 'cardback'}
             width={width}
             height={height}
             placeholder={placeholder}
             blurDataURL={blurDataURL}
             {...imageProps}
-            onLoad={event => { setLoaded(true); imageProps?.onLoad?.(event) }}
+            onLoadingComplete={event => { setLoaded(true); imageProps?.onLoadingComplete?.(event) }}
             style={{
               width: '100%',
               height: '100%',
@@ -121,7 +151,7 @@ export default function CardImage({
             />
           )}
           <LoadingOverlay
-            visible={card?.image_uris && !isLoaded}
+            visible={((card?.image_uris ?? false) && !isLoaded) || cardLangFetching}
             opacity={0.9}
             radius={glareBorderRadius}
           />
