@@ -142,6 +142,9 @@ export default function CardsTable({
           ),
         }
       }}
+      mantinePaginationProps={{
+        rowsPerPageOptions: ['5', '10', '25', '50', '100'],
+      }}
       mantineTableBodyRowProps={({ table, row }) => ({
         style: { cursor: 'pointer' },
         onMouseEnter: () => isLargerThanLg && onHoveredRowChange?.(row),

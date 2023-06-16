@@ -10,7 +10,6 @@ import {
   useScryfallCardPrintsQuery,
   useUserCardsMutation
 } from '@/services/hooks'
-import { UserCardMutationVariables } from '@/services/hooks/types'
 import { ScryfallCardData } from '@/types/scryfall'
 import {
   ActionIcon,
@@ -51,6 +50,16 @@ function _getFinishes(cardData: ScryfallCardData, mergeEtchedWithFoil = true) {
   }
 
   return finishes
+}
+
+function scryfallDataToUserCardData(card: ScryfallCardData): BaseCardData {
+  if (card?.['card_faces']) {
+    // in case of double faced cards
+    // ignore some fields from the first card face and merge them with the base card
+    const { object, type_line, name, ...rest } = card['card_faces'][0]
+    card = { ...card, ...rest }
+  }
+  return card
 }
 
 export default function ImportWizard() {
@@ -222,7 +231,9 @@ export default function ImportWizard() {
                 displayPrice
                 openPriceTooltipToSides
                 card={{
-                  ...cardLangsData?.data?.find(item => item.lang === form.values.lang),
+                  ...scryfallDataToUserCardData(
+                    cardLangsData?.data?.find(item => item.lang === form.values.lang)
+                  ),
                   foil: form.values.foil,
                   amount: form.values.amount,
                   prices: cardPrintsData?.data?.find(item => form.values.set === `${item.set}:${item.collector_number}`)?.prices ?? {},

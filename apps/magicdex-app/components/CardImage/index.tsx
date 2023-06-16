@@ -133,7 +133,10 @@ export default function CardImage({
             placeholder={placeholder}
             blurDataURL={blurDataURL}
             {...imageProps}
-            onLoadingComplete={event => { setLoaded(true); imageProps?.onLoadingComplete?.(event) }}
+            onLoadingComplete={event => {
+              setLoaded(true)
+              imageProps?.onLoadingComplete?.(event)
+            }}
             style={{
               width: '100%',
               height: '100%',

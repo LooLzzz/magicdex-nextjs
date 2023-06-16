@@ -96,7 +96,7 @@ export default function DetailsPanel<T extends UserCardData>(
                 </Flex>
                 <Stack spacing={7}>
                   <CardText oracleText containsManaSymbols manaSymbolSize='0.8em' ta='left'>{row.original.oracle_text}</CardText>
-                  <CardText flavorText ta='left'>{row.original.flavor_text}</CardText>
+                  <CardText flavorText phyrexian={row.original.lang == 'ph'} ta='left'>{row.original.flavor_text}</CardText>
                 </Stack>
                 <Flex gap='sm' justify='left' align='center'>
                   <CardText ff='monospace'>{'#' + row.original.collector_number}</CardText>

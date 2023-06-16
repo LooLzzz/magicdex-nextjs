@@ -59,6 +59,7 @@ function matchAndReplace({
 }
 
 function CardTextComponent({
+  phyrexian = false,
   containsManaSymbols = false,
   manaSymbolSize = 'inherit',
   oracleText = false,
@@ -69,6 +70,7 @@ function CardTextComponent({
 }:
   Omit<TextProps, 'children'> & {
     title?: string,
+    phyrexian?: boolean,
     containsManaSymbols?: boolean,
     manaSymbolSize?: string | number,
     oracleText?: boolean,
@@ -89,6 +91,9 @@ function CardTextComponent({
 
   if (flavorText) {
     rest.ff = rest.ff ?? 'Georgia, fangsong, "Times New Roman"'
+    if (phyrexian)
+      rest.ff = rest.ff ? `PhyrexianHorizontal, ${rest.ff}` : 'PhyrexianHorizontal'
+
     rest.italic = rest.italic ?? true
 
     value = matchAndReplace({

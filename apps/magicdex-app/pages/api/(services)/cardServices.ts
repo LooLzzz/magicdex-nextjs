@@ -1,6 +1,7 @@
 import { applyVerboseOperator, createClientWithRLS } from '@/api/(services)/supabase'
 import { QueryProps } from '@/api/(types)'
 import { UserCardMutationVariables } from '@/services/hooks/types'
+import scryfall from '@/services/scryfall'
 import { UserCardBaseData } from '@/types/supabase'
 import { Session } from 'next-auth'
 import { Client as PgClient } from 'pg'
@@ -81,6 +82,8 @@ export async function getAllSetsByUserSession(session: Session) {
 
 // TODO: make this work with 'SupabaseClient' somehow
 export async function updateCardsDataByUserSession(session: Session, cards: UserCardMutationVariables) {
+  await createMissingMtgCards(session, cards.map(card => card.scryfall_id))
+
   const pgClient = new PgClient({
     connectionString: process.env.SUPABASE_POSTGRES_CONNECTION_URI,
   })
@@ -121,4 +124,39 @@ export async function updateCardsDataByUserSession(session: Session, cards: User
     insertedRowCount: number,
     updatedRowCount: number,
   }
+}
+
+export async function createMissingMtgCards(session: Session, scryfallIds: string[]) {
+  const supabaseClient = await createClientWithRLS(session.supabaseAccessToken)
+
+  const { data: presentCardsData } = (
+    await supabaseClient
+      .from('mtg_cards')
+      .select('id')
+      .in('id', scryfallIds)
+  )
+
+  const missingCardIds = scryfallIds.filter(id =>
+    !presentCardsData.find(card => card.id === id)
+  )
+
+  if (!missingCardIds)
+    return {}
+
+  const { data: newCardsData } = await scryfall.getCardsDataByIds(missingCardIds)
+  const processedNewCardsData = newCardsData.map(card => {
+    if (card['card_faces']) {
+      // in case of double faced cards
+      // ignore some fields from the first card face and merge them with the base card
+      const { object, type_line, name, ...rest } = card['card_faces'][0]
+      card = { ...card, ...rest }
+    }
+    return card
+  })
+
+  return (
+    await supabaseClient
+      .from('mtg_cards')
+      .insert(processedNewCardsData)
+  )
 }
