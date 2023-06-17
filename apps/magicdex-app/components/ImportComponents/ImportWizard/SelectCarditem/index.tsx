@@ -8,21 +8,24 @@ export interface ItemProps extends ComponentPropsWithoutRef<'div'> {
   label: string,
   value: string,
   cardData: ScryfallCardData,
+  displayPrice?: boolean,
   floatingTooltipPosition?: FloatingPosition,
 }
 
 
 const SelectCarditem = forwardRef<HTMLDivElement, ItemProps>(
-  function SelectCarditem({ label, value, cardData, floatingTooltipPosition, ...props }: ItemProps, ref) {
+  function SelectCarditem({ label, value, cardData, floatingTooltipPosition, displayPrice = false, ...props }: ItemProps, ref) {
     return (
       <Tooltip.Floating
         position={floatingTooltipPosition}
         bg='transparent'
         label={
           <CardImage
+            displayPrice={displayPrice}
             tiltEnabled={false}
             glareEnabled={false}
             aspectRatioProps={{ w: CardImage.defaultWidth * 0.7 }}
+            priceTextProps={{ color: 'white' }}
             card={{ ...cardData, foil: false } as undefined}
           />
         }>

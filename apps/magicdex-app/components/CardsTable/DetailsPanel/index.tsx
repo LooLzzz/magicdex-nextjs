@@ -65,6 +65,7 @@ export default function DetailsPanel<T extends UserCardData>(
 
             <Center sx={{ display: isLargerThanLg ? 'none' : undefined }}>
               <CardImage
+                displayTransform
                 displayPrice
                 openPriceTooltipToSides
                 card={row.original}

@@ -48,6 +48,7 @@ export default function CollectionPage() {
 
           <Grid.Col offset={0.3} span={2} hidden={isSmallerThanLg}>
             <CardImage
+              displayTransform
               displayPrice
               card={hoveredRow?.original}
               aspectRatioProps={{

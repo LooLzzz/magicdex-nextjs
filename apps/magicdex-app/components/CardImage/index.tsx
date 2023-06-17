@@ -1,15 +1,19 @@
 import { CardTextPrice } from '@/components/CardsTable/CardText'
 import { useScryfallCardPrintsQuery } from '@/services/hooks'
+import { CardLayout } from '@/types/scryfall'
 import { UserCardData } from '@/types/supabase'
 import {
   AspectRatio,
   AspectRatioProps,
+  Box,
+  Button,
   Center,
   Group,
   LoadingOverlay,
   Overlay,
   Stack,
   StackProps,
+  TextProps,
   useMantineTheme
 } from '@mantine/core'
 import Image, { ImageProps } from 'next/image'
@@ -26,9 +30,46 @@ const defaultTiltMaxAngle = 10
 const defaultGlareBorderRadius = '4.75% / 3.5%'
 const defaultGlarePosition = 'all'
 const defaultGlareMaxOpacity = 0.15
+const defaultTransitionSpeedMs = 330
+
+enum CardTransformEnum {
+  None,
+  DFC, // Double Faced Card
+  Rotate90Clockwise,
+  Rotate90Anticlockwise,
+  Rotate180,
+}
+
+function parseCardTransformType({ layout, keywords }: {
+  layout?: CardLayout,
+  keywords?: string[]
+} = {}): CardTransformEnum {
+  switch (layout) {
+    case 'transform':
+    case 'modal_dfc':
+    case 'double_faced_token':
+    case 'reversible_card':
+      return CardTransformEnum.DFC
+
+    case 'split':
+    case 'planar':
+      return (
+        keywords.find(keyword => keyword.toLowerCase() === 'aftermath')
+          ? CardTransformEnum.Rotate90Anticlockwise
+          : CardTransformEnum.Rotate90Clockwise
+      )
+
+    case 'flip':
+      return CardTransformEnum.Rotate180
+
+    default:
+      return CardTransformEnum.None
+  }
+}
 
 export default function CardImage({
   card,
+  displayTransform = false,
   displayPrice = false,
   openPriceTooltipToSides = false,
   width = defaultWidth,
@@ -43,6 +84,7 @@ export default function CardImage({
   glareBorderRadius = defaultGlareBorderRadius,
   glarePosition = defaultGlarePosition,
   glareMaxOpacity = defaultGlareMaxOpacity,
+  priceTextProps = {},
   tiltProps = {},
   aspectRatioProps = {},
   imageProps = {},
@@ -50,6 +92,7 @@ export default function CardImage({
 }:
   StackProps & {
     card?: UserCardData,
+    displayTransform?: boolean,
     displayPrice?: boolean,
     openPriceTooltipToSides?: boolean,
     width?: ImageProps['width'],
@@ -66,10 +109,12 @@ export default function CardImage({
     glareMaxOpacity?: GlareProps['glareMaxOpacity']
     tiltProps?: Omit<TiltProps & GlareProps, 'tiltEnable' | 'glareEnable' | 'tiltMaxAngleX' | 'tiltMaxAngleY' | 'glareBorderRadius' | 'glarePosition' | 'glareMaxOpacity'>,
     imageProps?: Omit<ImageProps, 'src' | 'alt' | 'width' | 'height' | 'placeholder' | 'blurDataURL'>,
+    priceTextProps?: TextProps,
     aspectRatioProps?: Omit<AspectRatioProps, 'ratio'> & { ratio?: number },
   }
 ) {
   const theme = useMantineTheme()
+  const [isCardTransformed, setCardTransformed] = useState(false)
   const [isLoaded, setLoaded] = useState(false)
   const {
     data: cardLangData,
@@ -81,17 +126,57 @@ export default function CardImage({
       queryKey: ['card-image'],
     },
   )
+  const [imageCssTransform, setImageCssTransform] = useState<string>()
+  const cardTransformType = parseCardTransformType(card ?? {})
 
-  const getCardImageUrl = ({ image_uris }: { image_uris?: UserCardData['image_uris'] } = {}) => (
-    image_uris?.png
-    ?? image_uris?.large
-    ?? image_uris?.normal
-    ?? image_uris?.small
-  )
+  const getCardImageUrl = ({ card_faces, image_uris }: {
+    card_faces?: UserCardData['card_faces']
+    image_uris?: UserCardData['image_uris']
+  } = {}) => {
+    if (card_faces && cardTransformType === CardTransformEnum.DFC)
+      image_uris = card_faces[isCardTransformed ? 1 : 0].image_uris
 
-  // TODO: handle multi-faced cards
+    return (
+      image_uris?.png
+      ?? image_uris?.large
+      ?? image_uris?.normal
+      ?? image_uris?.small
+      ?? '/cardback.png'
+    )
+  }
+
+  const handleTransformCard = () => {
+    // TODO: add animations
+    switch (cardTransformType) {
+      case CardTransformEnum.DFC:
+        setImageCssTransform('scaleX(0)')
+        setTimeout(() => {
+          setImageCssTransform('scaleX(1)')
+          setCardTransformed(!isCardTransformed)
+          setLoaded(false)
+        }, defaultTransitionSpeedMs / 2)
+        break
+
+      case CardTransformEnum.Rotate180:
+        setImageCssTransform(!isCardTransformed ? 'rotate(180deg)' : undefined)
+        setCardTransformed(!isCardTransformed)
+        break
+
+      case CardTransformEnum.Rotate90Clockwise:
+        setImageCssTransform(!isCardTransformed ? 'rotate(90deg) scale(0.825) translateX(-35%) translateY(7%)' : undefined)
+        setCardTransformed(!isCardTransformed)
+        break
+
+      case CardTransformEnum.Rotate90Anticlockwise:
+        setImageCssTransform(!isCardTransformed ? 'rotate(-90deg) scale(0.825) translateX(35%) translateY(-7%)' : undefined)
+        setCardTransformed(!isCardTransformed)
+        break
+    }
+  }
 
   useEffect(() => {
+    setCardTransformed(false)
+    setImageCssTransform(undefined)
     setLoaded(!(
       card?.lang
       || card?.image_uris?.png
@@ -108,72 +193,104 @@ export default function CardImage({
   ])
 
   return (
-    <Center component={Stack} {...rootProps}>
-      <AspectRatio
-        ratio={ratio}
-        {...aspectRatioProps}
+    <Center component={Stack} spacing={10} {...rootProps}>
+      <Box style={{
+        transition: `all ${cardTransformType === CardTransformEnum.DFC ? defaultTransitionSpeedMs / 2 : defaultTransitionSpeedMs}ms cubic-bezier(0.75, 0, 0.25, 1)`,
+        transform: imageCssTransform,
+      }}
       >
-        <Tilt
-          gyroscope
-          tiltReverse
-          tiltEnable={tiltEnabled}
-          glareEnable={glareEnabled}
-          tiltMaxAngleX={tiltMaxAngleX}
-          tiltMaxAngleY={tiltMaxAngleY}
-          glareBorderRadius={glareBorderRadius}
-          glarePosition={glarePosition}
-          glareMaxOpacity={glareMaxOpacity}
-          {...tiltProps}
+        <AspectRatio
+          ratio={ratio}
+          {...aspectRatioProps}
         >
-          <Image
-            src={getCardImageUrl(card?.lang === 'en' ? card : cardLangData?.data?.[0]) ?? '/cardback.png'}
-            alt={card?.name ?? 'cardback'}
-            width={width}
-            height={height}
-            placeholder={placeholder}
-            blurDataURL={blurDataURL}
-            {...imageProps}
-            onLoadingComplete={event => {
-              setLoaded(true)
-              imageProps?.onLoadingComplete?.(event)
-            }}
-            style={{
-              width: '100%',
-              height: '100%',
-              ...imageProps?.style,
-            }}
-          />
-          {card?.foil && (
-            <Overlay
+          <Tilt
+            // gyroscope
+            tiltReverse
+            tiltEnable={tiltEnabled}
+            glareEnable={glareEnabled}
+            tiltMaxAngleX={tiltMaxAngleX}
+            tiltMaxAngleY={tiltMaxAngleY}
+            glareBorderRadius={glareBorderRadius}
+            glarePosition={glarePosition}
+            glareMaxOpacity={glareMaxOpacity}
+            {...tiltProps}
+          >
+            <Image
+              src={getCardImageUrl(card?.lang === 'en' ? card : cardLangData?.data?.[0])}
+              alt={card?.name ?? 'cardback'}
+              width={width}
+              height={height}
+              placeholder={placeholder}
+              blurDataURL={blurDataURL}
+              {...imageProps}
+              onLoadingComplete={event => {
+                setLoaded(true)
+                imageProps?.onLoadingComplete?.(event)
+              }}
               style={{
-                backgroundImage: 'URL(/card-foil-overlay.png)',
-                mixBlendMode: theme.colorScheme === 'dark' ? 'lighten' : 'hard-light',
-                opacity: theme.colorScheme === 'dark' ? 0.75 : 0.5,
-                borderRadius: glareBorderRadius,
+                width: '100%',
+                height: '100%',
+                ...imageProps?.style,
               }}
             />
-          )}
-          <LoadingOverlay
-            visible={((card?.image_uris ?? false) && !isLoaded) || cardLangFetching}
-            opacity={0.9}
-            radius={glareBorderRadius}
-          />
-        </Tilt>
-      </AspectRatio>
-
-      {
-        displayPrice
-          ? (
-            <Center component={Group} noWrap>
-              <CardTextPrice
-                sx={{ cursor: 'text' }}
-                openTooltipToSides={openPriceTooltipToSides}
-                data={card}
+            {card?.foil && (
+              <Overlay
+                style={{
+                  backgroundImage: 'URL(/card-foil-overlay.png)',
+                  mixBlendMode: theme.colorScheme === 'dark' ? 'lighten' : 'hard-light',
+                  opacity: theme.colorScheme === 'dark' ? 0.75 : 0.5,
+                  borderRadius: glareBorderRadius,
+                }}
               />
-            </Center>
-          )
-          : undefined
-      }
+            )}
+            <LoadingOverlay
+              visible={((card?.image_uris ?? false) && !isLoaded) || cardLangFetching}
+              opacity={0.9}
+              radius={glareBorderRadius}
+            />
+          </Tilt>
+        </AspectRatio>
+      </Box>
+
+      <Stack spacing={7.5}>
+        {
+          displayPrice
+            ? (
+              <Center component={Group} noWrap>
+                <CardTextPrice
+                  sx={{ cursor: 'text' }}
+                  {...priceTextProps}
+                  openTooltipToSides={openPriceTooltipToSides}
+                  data={card}
+                />
+              </Center>
+            )
+            : undefined
+        }
+
+        {
+          displayTransform && cardTransformType !== CardTransformEnum.None
+            ? (
+              <Button compact
+                sx={{ 'box-shadow': '0px 3px 1px -2px rgba(0,0,0,0.2), 0px 2px 2px 0px rgba(0,0,0,0.14), 0px 1px 5px 0px rgba(0,0,0,0.12)' }}
+                onClick={handleTransformCard}
+              >
+                {
+                  cardTransformType === CardTransformEnum.DFC
+                    ? 'Transform'
+                    : cardTransformType === CardTransformEnum.Rotate180
+                      ? 'Flip'
+                      : 'Rotate'
+                }
+                {
+                  isCardTransformed ? ' ↪' : ' ↩'
+                }
+              </Button>
+            )
+            : undefined
+        }
+      </Stack>
+
     </Center>
   )
 }

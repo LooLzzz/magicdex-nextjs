@@ -228,6 +228,7 @@ export default function ImportWizard() {
           <Grid align='center' gutter='xl'>
             <Grid.Col sm={12} md={3} {...{ align: 'center' }}>
               <CardImage
+                displayTransform
                 displayPrice
                 openPriceTooltipToSides
                 card={{
@@ -294,12 +295,13 @@ export default function ImportWizard() {
                 <Grid.Col sm={7}>
                   <FloatingLabelSelect
                     loading={cardPrintsFetching}
-                    disabled={!selectedCard || cardPrintsFetching}
+                    disabled={!selectedCard || cardPrintsFetching || cardPrintsData?.data?.length <= 1}
                     label='Set'
                     data={cardPrintsData?.data?.map(item => ({
                       value: `${item.set}:${item.collector_number}`,
                       label: `${item.set_name} [#${item.collector_number}]`,
                       cardData: item,
+                      displayPrice: true,
                     })) ?? []}
                     {...form.getInputProps('set')}
                     onChange={value => {
@@ -315,13 +317,14 @@ export default function ImportWizard() {
                 </Grid.Col>
                 <Grid.Col sm={2}>
                   <FloatingLabelSelect
-                    disabled={!selectedCard || cardLangsFetching}
+                    disabled={!selectedCard || cardLangsFetching || cardLangsData?.data?.length <= 1}
                     label='Lang'
                     data={cardLangsData?.data?.map(item => ({
                       value: item.lang,
                       label: item.lang,
                       cardData: item,
                       floatingTooltipPosition: 'left',
+                      displayPrice: false,
                     })) ?? []}
                     loading={cardLangsFetching}
                     {...form.getInputProps('lang')}
