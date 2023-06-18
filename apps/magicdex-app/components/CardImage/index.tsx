@@ -258,8 +258,8 @@ export default function CardImage({
             ? (
               <Center component={Group} noWrap>
                 <CardTextPrice
-                  sx={{ cursor: 'text' }}
                   {...priceTextProps}
+                  style={{ cursor: 'text', ...priceTextProps?.style }}
                   openTooltipToSides={openPriceTooltipToSides}
                   data={card}
                 />

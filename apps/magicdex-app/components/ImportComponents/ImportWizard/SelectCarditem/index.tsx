@@ -25,7 +25,11 @@ const SelectCarditem = forwardRef<HTMLDivElement, ItemProps>(
             tiltEnabled={false}
             glareEnabled={false}
             aspectRatioProps={{ w: CardImage.defaultWidth * 0.7 }}
-            priceTextProps={{ color: 'white' }}
+            priceTextProps={{
+              sx: theme => ({
+                color: theme.colorScheme === 'dark' ? theme.colors.gray[0] : theme.colors.gray[9]
+              })
+            }}
             card={{ ...cardData, foil: false } as undefined}
           />
         }>
