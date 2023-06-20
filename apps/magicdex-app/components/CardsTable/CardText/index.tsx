@@ -4,6 +4,10 @@ import { Flex, FlexProps, Text, TextProps, Tooltip, clsx } from '@mantine/core'
 import React from 'react'
 
 
+const SCRYFALL_SYMBOL_TO_MANA_FONT = {
+  't': 'tap',
+}
+
 function matchAndReplace({
   value,
   regexp,
@@ -91,8 +95,10 @@ function CardTextComponent({
 
   if (flavorText) {
     rest.ff = rest.ff ?? 'Georgia, fangsong, "Times New Roman"'
-    if (phyrexian)
+    if (phyrexian) {
       rest.ff = rest.ff ? `PhyrexianHorizontal, ${rest.ff}` : 'PhyrexianHorizontal'
+      rest['lineHeight'] = 1
+    }
 
     rest.italic = rest.italic ?? true
 
@@ -129,7 +135,9 @@ function CardTextComponent({
     value = matchAndReplace({
       value: value as string,
       regexp: /\{([^{}]*)\}/g,
-      replacer: match => (
+      replacer: match => {
+        const symbolName = match[1].replace(/[/]/g, '').toLowerCase()
+        return (
         <span
           style={{ fontSize: manaSymbolSize }}
           key={match.index}
@@ -137,12 +145,11 @@ function CardTextComponent({
             'ms',
             'ms-shadow',
             'ms-cost',
-            // TODO: handle scryfall mana symbols to ManaFont symbols
-            // such as: 'ms-t' -> 'ms-tap'
-            `ms-${match[1].replace(/[/]/g, '').toLowerCase()}`,
+            `ms-${SCRYFALL_SYMBOL_TO_MANA_FONT[symbolName] || symbolName}`,
           ])}
         />
       )
+    }
     })
   }
 
@@ -150,8 +157,6 @@ function CardTextComponent({
     <Text
       {...rest}
       style={{
-        // lineHeight: '1.5rem',
-        // baselineShift: 'sub',
         whiteSpace: 'pre-wrap',
         cursor: 'text',
         ...rest?.style

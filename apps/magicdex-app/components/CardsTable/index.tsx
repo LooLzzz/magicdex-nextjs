@@ -1,7 +1,7 @@
 import { useUserCardsInfiniteQuery } from '@/services/hooks/users'
 import { UserCardData } from '@/types/supabase'
 import { ActionIcon, Text, Tooltip } from '@mantine/core'
-import { useHotkeys, useMediaQuery } from '@mantine/hooks'
+import { useHotkeys, useMediaQuery, useViewportSize } from '@mantine/hooks'
 import { IconRefresh } from '@tabler/icons-react'
 import { OnChangeFn } from '@tanstack/react-table'
 import {
@@ -26,6 +26,7 @@ export default function CardsTable({
   onHoveredRowChange?: OnChangeFn<MRT_Row<UserCardData>>
 }) {
   const { theme, classes } = useStyles()
+  const { height: vheight } = useViewportSize()
   const tableInstanceRef = useRef<MRT_TableInstance<UserCardData>>(null)
   const tableContainerRef = useRef<HTMLDivElement>(null)
   const rowVirtualizerInstanceRef = useRef<MRT_Virtualizer<HTMLDivElement, HTMLTableRowElement>>(null)
@@ -42,7 +43,8 @@ export default function CardsTable({
       columnFilterFns: tableInstanceRef.current?.getState().columnFilterFns,
       columnFilters,
       globalFilter,
-      sorting
+      pageSize: Math.max(10, Math.floor((vheight - 250) / 60)),
+      sorting,
     },
   })
   const { columns, initialColumnSizing, initialColumnVisibility } = useColumnsDef(
@@ -67,12 +69,12 @@ export default function CardsTable({
     rowVirtualizerInstanceRef?.current?.scrollToIndex(0)
   }, [sorting, columnFilters, globalFilter])
 
-  const fetchMoreOnBottomReached = useCallback(
-    (containerRefElement?: HTMLDivElement | null) => {
+  const handleScroll = useCallback(
+    (containerRefElement?: HTMLDivElement) => {
       if (containerRefElement) {
-        const { scrollHeight, scrollTop, clientHeight } = containerRefElement
-        // once the user has scrolled within 400px of the bottom of the table, fetch more data if we can
-        if (scrollHeight - scrollTop - clientHeight < 400
+        const { scrollTop, scrollHeight, clientHeight } = containerRefElement
+        // once the user has scrolled within 250px of the bottom of the table, fetch more data if we can
+        if (scrollHeight - scrollTop - clientHeight <= 250
           && !isFetching
           && totalFetched < totalRowCount) {
           fetchNextPage()
@@ -114,7 +116,7 @@ export default function CardsTable({
 
         // enableColumnOrdering
         // enablePinning
-        autoResetExpanded
+        // autoResetExpanded
         enableColumnFilterModes
         enableColumnResizing
         enableDensityToggle={false}
@@ -135,19 +137,19 @@ export default function CardsTable({
           </Tooltip>
         )}
         renderBottomToolbarCustomActions={() => (
-          <Text ta='right'>
-            Fetched {totalFetched} of {totalRowCount} total rows.
+          <Text>
+            Fetched {totalFetched} of {totalRowCount} total cards.
           </Text>
         )}
 
-        rowVirtualizerProps={{ overscan: 10 }}
+        rowVirtualizerProps={{ overscan: 8 }}
         mantineTableContainerProps={{
           className: classes.tableContainer,
           ref: tableContainerRef,
-          sx: { maxHeight: '500px' },
-          onScroll: event => fetchMoreOnBottomReached(event.target as HTMLDivElement),
+          sx: {maxHeight: vheight - 250 ?? 500},
+          onScroll: event => handleScroll(event.target as HTMLDivElement),
         }}
-        mantineTableProps={({ table }) => ({
+        mantineTableProps={() => ({
           sx: {
             // hide 'Edit' & 'Expand' labels (first 2 columns)
             '& th:nth-of-type(-n+1)': {

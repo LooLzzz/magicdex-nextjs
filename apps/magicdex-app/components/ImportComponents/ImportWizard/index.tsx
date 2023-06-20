@@ -241,7 +241,7 @@ export default function ImportWizard() {
                 } as undefined}
                 aspectRatioProps={{
                   maw: CardImage.defaultWidth,
-                  miw: CardImage.defaultWidth * 0.8,
+                  miw: CardImage.defaultWidth * 0.9,
                 }}
               />
             </Grid.Col>

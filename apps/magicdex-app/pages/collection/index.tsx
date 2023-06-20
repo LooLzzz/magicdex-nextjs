@@ -50,10 +50,11 @@ export default function CollectionPage() {
             <CardImage
               displayTransform
               displayPrice
+              shouldTransfromTranslateImage={false}
               card={hoveredRow?.original}
               aspectRatioProps={{
                 maw: CardImage.defaultWidth,
-                miw: CardImage.defaultWidth * 0.8,
+                miw: CardImage.defaultWidth,
               }}
               style={{
                 top: rem(20),

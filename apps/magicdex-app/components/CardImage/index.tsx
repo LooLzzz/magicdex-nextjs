@@ -71,6 +71,7 @@ export default function CardImage({
   card,
   displayTransform = false,
   displayPrice = false,
+  shouldTransfromTranslateImage = true,
   openPriceTooltipToSides = false,
   width = defaultWidth,
   height = defaultHeight,
@@ -94,6 +95,7 @@ export default function CardImage({
     card?: UserCardData,
     displayTransform?: boolean,
     displayPrice?: boolean,
+    shouldTransfromTranslateImage?: boolean,
     openPriceTooltipToSides?: boolean,
     width?: ImageProps['width'],
     height?: ImageProps['height'],
@@ -146,7 +148,6 @@ export default function CardImage({
   }
 
   const handleTransformCard = () => {
-    // TODO: add animations
     switch (cardTransformType) {
       case CardTransformEnum.DFC:
         setImageCssTransform('scaleX(0)')
@@ -163,12 +164,12 @@ export default function CardImage({
         break
 
       case CardTransformEnum.Rotate90Clockwise:
-        setImageCssTransform(!isCardTransformed ? 'rotate(90deg) scale(0.825) translateX(-35%) translateY(7%)' : undefined)
+        setImageCssTransform(!isCardTransformed ? `rotate(90deg) scale(0.825) ${shouldTransfromTranslateImage ? 'translateX(-35%) translateY(7%)' : ''}` : undefined)
         setCardTransformed(!isCardTransformed)
         break
 
       case CardTransformEnum.Rotate90Anticlockwise:
-        setImageCssTransform(!isCardTransformed ? 'rotate(-90deg) scale(0.825) translateX(35%) translateY(-7%)' : undefined)
+        setImageCssTransform(!isCardTransformed ? `rotate(-90deg) scale(0.825) ${shouldTransfromTranslateImage ? 'translateX(35%) translateY(-7%)' : ''}` : undefined)
         setCardTransformed(!isCardTransformed)
         break
     }
