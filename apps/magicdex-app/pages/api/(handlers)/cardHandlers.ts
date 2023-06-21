@@ -1,21 +1,21 @@
 import { cardServices } from '@/api/(services)'
-import { QueryProps } from '@/api/(types)'
+import { UserCardQueryProps } from '@/api/(types)'
 import { UserCardMutationVariables } from '@/services/hooks/types'
 import { Session } from 'next-auth'
 
 
-export async function getCardsDataByUserSessionHandler(session: Session, options: QueryProps = {}) {
-  const [data, totalRowCount, getAllSets] = [
+export async function getCardsDataByUserSessionHandler(session: Session, options: UserCardQueryProps = {}) {
+  const [data, totalRowCount, allSets] = await Promise.all([
     cardServices.getCardsDataByUserSession(session, options),
-    cardServices.getTotalCardsCountByUserSession(session),
+    cardServices.getTotalCardsCountByUserSession(session, options),
     cardServices.getAllSetsByUserSession(session),
-  ]
+  ])
 
   return {
-    data: await data,
+    data,
     metadata: {
-      totalRowCount: await totalRowCount,
-      allSets: await getAllSets,
+      totalRowCount,
+      allSets,
     },
   }
 }

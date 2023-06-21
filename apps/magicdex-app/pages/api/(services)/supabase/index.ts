@@ -77,7 +77,21 @@ function applyVerboseOperator(
   }
 }
 
+function applyScryfallGlobalFilter(
+  builder: PostgrestFilterBuilder<undefined, undefined, { [x: string]: undefined }[]>,
+  globalFilter: string,
+) {
+  // TODO: implement scryfall's search syntax for globalFilter
+  builder = builder.or(
+    `name.ilike.%${globalFilter}%`
+    + `, type_line.ilike.%${globalFilter}%`
+    + `, oracle_text.ilike.%${globalFilter}%`
+  )
+  return builder
+}
+
 export {
+  applyScryfallGlobalFilter,
   applyVerboseOperator,
   createClientWithRLS,
   supabaseAuthClient,

@@ -1,5 +1,5 @@
-import { applyVerboseOperator, createClientWithRLS } from '@/api/(services)/supabase'
-import { QueryProps } from '@/api/(types)'
+import { applyScryfallGlobalFilter, applyVerboseOperator, createClientWithRLS } from '@/api/(services)/supabase'
+import { UserCardQueryProps } from '@/api/(types)'
 import { UserCardMutationVariables } from '@/services/hooks/types'
 import scryfall from '@/services/scryfall'
 import { UserCardBaseData } from '@/types/supabase'
@@ -13,7 +13,7 @@ import { Client as PgClient } from 'pg'
  *
  * #TODO: handle 'options.globalFilter', maybe implement scryfall's search syntax
  */
-export async function getCardsDataByUserSession(session: Session, options: QueryProps = {}) {
+export async function getCardsDataByUserSession(session: Session, options: UserCardQueryProps = {}) {
   const supabaseClient = await createClientWithRLS(session.supabaseAccessToken)
 
   // SELECT
@@ -22,6 +22,11 @@ export async function getCardsDataByUserSession(session: Session, options: Query
       .from('user_cards_with_mtg_cards')
       .select('*')
   )
+
+  // WHERE - globalFilter
+  // TODO: remove the `!filters?.name` check once scryfall's search syntax is implemented
+  if (options.globalFilter && !options.filters?.name)
+    builder = applyScryfallGlobalFilter(builder, options.globalFilter)
 
   // WHERE
   Object
@@ -48,15 +53,33 @@ export async function getCardsDataByUserSession(session: Session, options: Query
   return data
 }
 
-export async function getTotalCardsCountByUserSession(session: Session) {
+export async function getTotalCardsCountByUserSession(session: Session, { globalFilter, filters }: UserCardQueryProps = {}) {
   const supabaseClient = await createClientWithRLS(session.supabaseAccessToken)
 
-  const { count, error } = (
-    await supabaseClient
-      .from('user_cards')
-      .select('*', { count: 'exact', head: true }) // {head: true} means only return the count, no actual row fetching is performed
+  // SELECT
+  // {head: true} means only return the count, no actual row fetching is performed
+  let builder = (
+    supabaseClient
+      .from('user_cards_with_mtg_cards')
+      .select('*', { count: 'exact', head: true })
   )
 
+  // WHERE - globalFilter
+  // TODO: remove the `!filters?.name` check once scryfall's search syntax is implemented
+  if (globalFilter && !filters?.name)
+    builder = applyScryfallGlobalFilter(builder, globalFilter)
+
+  // WHERE
+  Object
+    .entries(filters || {})
+    // use 'Object.filter()' to drop empty values
+    .filter(([_key, { value }]) => !(value === null || value === '' || (Array.isArray(value) && value.length === 0)))
+    .forEach(([key, { operator, value }]) => {
+      builder = applyVerboseOperator(builder, { key, operator, value })
+    })
+
+  // EXECUTE
+  const { count, error } = await builder
   if (error)
     throw error
   return count
@@ -80,7 +103,6 @@ export async function getAllSetsByUserSession(session: Session) {
   return data
 }
 
-// TODO: make this work with 'SupabaseClient' somehow
 export async function updateCardsDataByUserSession(session: Session, cards: UserCardMutationVariables) {
   await createMissingMtgCards(session, cards.map(card => card.scryfall_id))
 

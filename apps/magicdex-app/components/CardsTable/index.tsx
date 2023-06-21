@@ -93,6 +93,7 @@ export default function CardsTable({
         data={flatData}
         initialState={{
           // showColumnFilters: true
+          showGlobalFilter: true,
           columnSizing: initialColumnSizing,
           columnVisibility: initialColumnVisibility,
           density: 'sm',
@@ -114,9 +115,10 @@ export default function CardsTable({
         // enableEditing
         // editingMode='row'
 
+        // autoResetExpanded
         // enableColumnOrdering
         // enablePinning
-        // autoResetExpanded
+        // enableRowVirtualization  // doesnt work as well i thought it would
         enableColumnFilterModes
         enableColumnResizing
         enableDensityToggle={false}
@@ -124,7 +126,7 @@ export default function CardsTable({
         enableFullScreenToggle={false}
         enableMultiSort
         enablePagination={false}
-        // enableRowVirtualization
+        enableStickyHeader
         manualFiltering
         manualSorting
 

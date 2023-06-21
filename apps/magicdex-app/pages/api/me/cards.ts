@@ -49,7 +49,10 @@ export default async function handler(
         )
 
       res.status(200).json(
-        await cardHandlers.getCardsDataByUserSessionHandler(session, { pagination, globalFilter, filters, sort })
+        await cardHandlers.getCardsDataByUserSessionHandler(
+          session,
+          { pagination, globalFilter, filters, sort }
+        )
       )
     } catch (error) {
       console.error(error)

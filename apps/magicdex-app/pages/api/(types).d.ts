@@ -1,7 +1,7 @@
 
 export type VerboseOperator = 'equals' | 'notEquals' | 'fuzzy' | 'arrIncludesAny' | 'arrIncludesAll' | 'arrExcludesAny' | 'lessThanOrEqualTo' | 'greaterThanOrEqualTo' | 'lessThan' | 'greaterThan'
 
-export type QueryProps = {
+export type UserCardQueryProps = {
   pagination?: {
     from: number,
     to: number,
