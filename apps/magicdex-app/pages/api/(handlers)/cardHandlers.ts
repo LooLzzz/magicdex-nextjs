@@ -11,6 +11,10 @@ export async function getCardsDataByUserSessionHandler(session: Session, options
     cardServices.getAllSetsByUserSession(session),
   ])
 
+  // background process to update card prices,
+  // if older than 'priceUpdatedAtThreshold' (default: 7 days)
+  cardServices.updateCardPricesByIds(session, data)
+
   return {
     data,
     metadata: {

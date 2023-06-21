@@ -2,7 +2,7 @@ import { applyScryfallGlobalFilter, applyVerboseOperator, createClientWithRLS } 
 import { UserCardQueryProps } from '@/api/(types)'
 import { UserCardMutationVariables } from '@/services/hooks/types'
 import scryfall from '@/services/scryfall'
-import { UserCardBaseData } from '@/types/supabase'
+import { UserCardBaseData, UserCardData } from '@/types/supabase'
 import { Session } from 'next-auth'
 import { Client as PgClient } from 'pg'
 
@@ -10,10 +10,8 @@ import { Client as PgClient } from 'pg'
 /**
  * Get all cards data of user using the access token stored in the user session.
  * This uses the RLS feature of Supabase to filter the data by the user id.
- *
- * #TODO: handle 'options.globalFilter', maybe implement scryfall's search syntax
  */
-export async function getCardsDataByUserSession(session: Session, options: UserCardQueryProps = {}) {
+export async function getCardsDataByUserSession(session: Session, options: UserCardQueryProps = {}): Promise<UserCardData[]> {
   const supabaseClient = await createClientWithRLS(session.supabaseAccessToken)
 
   // SELECT
@@ -50,7 +48,7 @@ export async function getCardsDataByUserSession(session: Session, options: UserC
   const { data, error } = await builder
   if (error)
     throw error
-  return data
+  return data as UserCardData[]
 }
 
 export async function getTotalCardsCountByUserSession(session: Session, { globalFilter, filters }: UserCardQueryProps = {}) {
@@ -140,11 +138,6 @@ export async function updateCardsDataByUserSession(session: Session, cards: User
     affectedRowCount,
     insertedRowCount,
     updatedRowCount,
-  } as {
-    affectedRows: UserCardBaseData[],
-    affectedRowCount: number,
-    insertedRowCount: number,
-    updatedRowCount: number,
   }
 }
 
@@ -181,4 +174,42 @@ export async function createMissingMtgCards(session: Session, scryfallIds: strin
       .from('mtg_cards')
       .insert(processedNewCardsData)
   )
+}
+
+export async function updateCardPricesByIds(
+  session: Session,
+  cards: UserCardData[],
+  { priceUpdatedAtThreshold = 1000 * 60 * 60 * 24 * 7 /* 7 days */ } = {}
+) {
+  const supabaseClient = await createClientWithRLS(session.supabaseAccessToken)
+  const utcNow = new Date()
+
+  const { data: newCards } = await scryfall.getCardsDataByIds(
+    cards
+      .filter(card => new Date(card.prices_updated_at).getTime() < utcNow.getTime() - priceUpdatedAtThreshold)
+      .map(card => card.scryfall_id)
+  )
+
+  const res = await Promise.all(
+    newCards.map(async (item) =>
+      await supabaseClient
+        .from('mtg_cards')
+        .update({
+          prices_updated_at: utcNow.toISOString(),
+          prices: item.prices,
+        })
+        .eq('id', item.id)
+        .select('id')
+    )
+  )
+
+  const { data, error } = res.reduce((acc, { data, error }) => {
+    error && acc.error.push(error)
+    data && acc.data.push(data)
+    return acc
+  }, { data: [], error: [] })
+
+  if (error.length > 0)
+    throw error
+  return data
 }

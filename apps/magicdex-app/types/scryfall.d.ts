@@ -116,6 +116,7 @@ export interface ScryfallCardData extends BaseCardProps {
   oracle_id: string,
   oversized: boolean,
   penny_rank: number,
+  prices_updated_at: string,
   prices: CardPrices,
   prints_search_uri: string,
   promo: boolean,
