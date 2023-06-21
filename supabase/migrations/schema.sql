@@ -193,6 +193,7 @@ CREATE TABLE "next_auth"."users" (
     "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
     "name" "text",
     "email" "text",
+    "password" "text",
     "emailVerified" timestamp with time zone,
     "image" "text"
 );

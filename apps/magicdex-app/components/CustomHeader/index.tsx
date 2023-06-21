@@ -18,6 +18,7 @@ import { useDisclosure } from '@mantine/hooks'
 import { IconMoonFilled, IconSunFilled } from '@tabler/icons-react'
 import { useSession } from 'next-auth/react'
 import Link from 'next/link'
+import { useRouter } from 'next/router'
 import { useState } from 'react'
 import LoginLogoutButtons from './LoginLogoutButtons'
 import NavbarLink from './NavbarLink'
@@ -30,8 +31,10 @@ export default function CustomHeader({
   headerHeight?: number
 }) {
   const session = useSession()
+  const router = useRouter()
   const { classes, cx } = useStyles()
   const { colorScheme, toggleColorScheme } = useMantineColorScheme()
+  const isUserAuthenticated = session.status === 'authenticated'
 
   const [avatarIconHovering, setAvatarIconHovering] = useState(false)
   const [menuOpened, setMenuOpened] = useState(false)
@@ -73,7 +76,7 @@ export default function CustomHeader({
             >
               <Menu.Target>
                 {
-                  session.status === 'authenticated' && session.data?.user?.image
+                  isUserAuthenticated && session.data?.user?.image
                     ? <Box pos='relative' p={rem(4)}>
                       <Image
                         radius='xl'
@@ -102,6 +105,13 @@ export default function CustomHeader({
               </Menu.Target>
 
               <Menu.Dropdown>
+                {
+                  isUserAuthenticated &&
+                  <Menu.Item closeMenuOnClick onClick={() => router.push('/profile')}>
+                    Profile
+                  </Menu.Item>
+                }
+
                 <LoginLogoutButtons
                   component={({ children, ...props }) => (
                     <Menu.Item closeMenuOnClick {...props}>
@@ -132,7 +142,7 @@ export default function CustomHeader({
               onClick={toggleDrawer}
             >
               {
-                session.status === 'authenticated' && session.data?.user?.image
+                isUserAuthenticated && session.data?.user?.image
                   ? <Image
                     radius='xl'
                     className={cx({
@@ -175,7 +185,11 @@ export default function CustomHeader({
           <Divider my='sm' />
 
           <Group grow position='center' pb='xl' px='md'>
-            <LoginLogoutButtons afterOnClick={closeDrawer} logoutProps={{ color: 'red' }} />
+            <LoginLogoutButtons
+              reversed
+              afterOnClick={closeDrawer}
+              logoutProps={{ color: 'red' }}
+            />
           </Group>
         </ScrollArea>
       </Drawer>

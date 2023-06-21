@@ -32,15 +32,12 @@ export default function LoginPage({
 
   const handleSubmit = async (values) => {
     setLoadingOverlay(true)
-
-    await new Promise(resolve => setTimeout(() => {
-      setLoadingOverlay(false)
-      resolve(null)
-    }, 2000))
-    // console.log(values)
-    setLoginError('Login is not implemented yet')
-
     form.setValues({ password: '' })
+    await signIn('credentials',
+    {
+      email: values.email,
+      password: values.password,
+    })
   }
 
   const handleReset = (event) => {
@@ -97,7 +94,7 @@ export default function LoginPage({
           />
 
           <Stack>
-            {Object.values(providers || {}).map(provider => (
+            {Object.values(providers || {}).filter(provider => provider.id !== 'credentials').map(provider => (
               <Button
                 styles={{
                   root: {

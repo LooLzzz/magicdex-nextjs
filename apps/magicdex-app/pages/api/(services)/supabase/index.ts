@@ -3,9 +3,19 @@ import { PostgrestFilterBuilder } from '@supabase/postgrest-js'
 import { createClient } from '@supabase/supabase-js'
 
 
-const supabase = createClient(
+const supabasePublicClient = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+)
+
+const supabaseAuthClient = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY,
+  {
+    db: {
+      schema: 'next_auth',
+    }
+  }
 )
 
 const createClientWithRLS = async (supabaseAccessToken: string) => {
@@ -68,7 +78,8 @@ function applyVerboseOperator(
 }
 
 export {
-  createClientWithRLS,
-  supabase as default,
   applyVerboseOperator,
+  createClientWithRLS,
+  supabaseAuthClient,
+  supabasePublicClient as default,
 }

@@ -18,3 +18,8 @@ export type QueryProps = {
     desc: boolean,
   }>,
 }
+
+export interface UserCredentials {
+  email: string,
+  password: string,
+}
