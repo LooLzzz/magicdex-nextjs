@@ -1,6 +1,6 @@
 import { UserCardData } from '@/types/supabase'
 import { roundPrecision, toTitleCase } from '@/utils'
-import { Flex, FlexProps, Text, TextProps, Tooltip, clsx } from '@mantine/core'
+import { Box, Flex, FlexProps, Text, TextProps, Tooltip, clsx } from '@mantine/core'
 import React from 'react'
 
 
@@ -65,6 +65,7 @@ function matchAndReplace({
 function CardTextComponent({
   phyrexian = false,
   containsManaSymbols = false,
+  containsLoyaltySymbols = false,
   manaSymbolSize = 'inherit',
   oracleText = false,
   flavorText = false,
@@ -76,6 +77,7 @@ function CardTextComponent({
     title?: string,
     phyrexian?: boolean,
     containsManaSymbols?: boolean,
+    containsLoyaltySymbols?: boolean,
     manaSymbolSize?: string | number,
     oracleText?: boolean,
     flavorText?: boolean,
@@ -97,7 +99,10 @@ function CardTextComponent({
     rest.ff = rest.ff ?? 'Georgia, fangsong, "Times New Roman"'
     if (phyrexian) {
       rest.ff = rest.ff ? `PhyrexianHorizontal, ${rest.ff}` : 'PhyrexianHorizontal'
-      rest['lineHeight'] = 1
+      rest.style = {
+        lineHeight: 1,
+        ...rest.style
+      }
     }
 
     rest.italic = rest.italic ?? true
@@ -138,18 +143,44 @@ function CardTextComponent({
       replacer: match => {
         const symbolName = match[1].replace(/[/]/g, '').toLowerCase()
         return (
-        <span
-          style={{ fontSize: manaSymbolSize }}
-          key={match.index}
-          className={clsx([
-            'ms',
-            'ms-shadow',
-            'ms-cost',
-            `ms-${SCRYFALL_SYMBOL_TO_MANA_FONT[symbolName] || symbolName}`,
-          ])}
-        />
-      )
-    }
+          <span
+            style={{ fontSize: manaSymbolSize }}
+            key={[symbolName, match.index].join(' ')}
+            className={clsx([
+              'ms',
+              'ms-shadow',
+              'ms-cost',
+              `ms-${SCRYFALL_SYMBOL_TO_MANA_FONT[symbolName] || symbolName}`,
+            ])}
+          />
+        )
+      }
+    })
+  }
+
+  if (containsLoyaltySymbols) {
+    value = matchAndReplace({
+      value: value as string,
+      regexp: /^([+−-]?)([\dXx]+):/gm,
+      replacer: match => {
+        const classes = [
+          match.index,
+          `ms-loyalty-${match[2] === '0' ? 'zero' : match[1] === '+' ? 'up' : 'down'}`,
+          `ms-loyalty-${match[2].toLowerCase()}`,
+        ]
+        return (
+          <React.Fragment key={classes.join(' ')}>
+            <span
+              className={clsx([
+                'ms',
+                'ms-shadow',
+                ...classes,
+              ])}
+            />
+            :
+          </React.Fragment>
+        )
+      }
     })
   }
 
@@ -259,6 +290,7 @@ export const CardTextPowerToughness = React.memo(
     data: {
       power,
       toughness,
+      loyalty,
     },
     fontSize = '1.25rem',
     ...rest
@@ -267,8 +299,23 @@ export const CardTextPowerToughness = React.memo(
     fontSize?: TextProps['style']['fontSize'],
   }) {
     const nullValues = [null, undefined]
-    if (nullValues.includes(power) && nullValues.includes(toughness))
+    if (nullValues.includes(power) && nullValues.includes(toughness) && nullValues.includes(loyalty))
       return undefined
+
+    if (loyalty)
+      return (
+        <Box {...rest}>
+          <Text
+            style={{ fontSize: '2.25rem' }}
+            className={clsx([
+              'ms',
+              'ms-shadow',
+              'ms-loyalty-start',
+              `ms-loyalty-${loyalty.toLowerCase()}`,
+            ])}
+          />
+        </Box>
+      )
 
     return (
       <Text
@@ -353,6 +400,45 @@ export const CardTextPrice = React.memo(
             : <Text italic>N/A</Text>
         }
       </Text>
+    )
+  }
+)
+
+
+export const CardTextColorIndicator = React.memo(
+  function CardTextSet({
+    data: { color_indicator },
+    fontSize,
+    classes = [],
+    disableTitle = false,
+    ...rest
+  }: TextProps & {
+    data: UserCardData,
+    fontSize?: TextProps['style']['fontSize'],
+    classes?: string[],
+    disableTitle?: boolean
+  }) {
+    if (!(color_indicator?.length > 0))
+      return <></>
+
+    return (
+      <Text
+        {...rest}
+        title={!disableTitle ? color_indicator.join('') : undefined}
+        style={{
+          marginTop: '0.25rem',
+          paddingTop: 1,
+          fontSize,
+          ...rest?.style
+        }}
+        className={clsx([
+          'ms',
+          'ms-ci',
+          `ms-ci-${color_indicator.length}`,
+          `ms-ci-${color_indicator.join('').toLowerCase()}`,
+          ...classes
+        ])}
+      />
     )
   }
 )

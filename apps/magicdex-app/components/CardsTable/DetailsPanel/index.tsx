@@ -7,7 +7,7 @@ import { useMediaQuery } from '@mantine/hooks'
 import { IconChevronLeft, IconChevronRight } from '@tabler/icons-react'
 import { MRT_Row, MRT_TableInstance } from 'mantine-react-table'
 import React, { useEffect, useState } from 'react'
-import CardText, { CardTextArtist, CardTextPowerToughness, CardTextSet } from '../CardText'
+import CardText, { CardTextArtist, CardTextColorIndicator, CardTextPowerToughness, CardTextSet } from '../CardText'
 
 
 function CardInfo({ containerWidth, card }: {
@@ -30,12 +30,13 @@ function CardInfo({ containerWidth, card }: {
         <CardText containsManaSymbols>{card.mana_cost}</CardText>
       </Flex>
       <Flex gap='sm' justify='center'>
+        <CardTextColorIndicator data={card} />
         <CardText replaceHyphen>{card.type_line}</CardText>
-        <CardTextSet fontSize={'1.75rem'} data={card} />
+        <CardTextSet fontSize='1.75rem' data={card} />
       </Flex>
       <Stack spacing={7}>
-        <CardText oracleText containsManaSymbols manaSymbolSize='0.8em' ta='left'>{card.oracle_text}</CardText>
-        <CardText flavorText phyrexian={card.lang == 'ph'} ta='left'>{card.flavor_text}</CardText>
+        <CardText oracleText containsManaSymbols containsLoyaltySymbols manaSymbolSize='0.8em' ta='left'>{card.oracle_text}</CardText>
+        <CardText flavorText phyrexian={card.lang === 'ph'} ta='left'>{card.flavor_text}</CardText>
       </Stack>
       <Flex gap='sm' justify='left' align='center'>
         <CardText ff='monospace'>{'#' + card.collector_number}</CardText>

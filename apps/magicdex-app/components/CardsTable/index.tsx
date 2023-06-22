@@ -148,7 +148,7 @@ export default function CardsTable({
         mantineTableContainerProps={{
           className: classes.tableContainer,
           ref: tableContainerRef,
-          sx: {maxHeight: vheight - 250 ?? 500},
+          sx: { maxHeight: vheight - 210 ?? 500 },
           onScroll: event => handleScroll(event.target as HTMLDivElement),
         }}
         mantineTableProps={() => ({
