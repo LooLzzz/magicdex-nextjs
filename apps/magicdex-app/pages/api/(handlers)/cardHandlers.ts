@@ -26,7 +26,7 @@ export async function getCardsDataByUserSessionHandler(session: Session, options
 
 export async function updateCardsDataByUserSessionHandler(session: Session, cards: UserCardMutationVariables) {
   // remove duplicates from 'card.tags' & sort it
-  cards = cards.map(({ tags, ...rest }) => ({
+  cards = cards.map(({ tags = [], ...rest }) => ({
     ...rest,
     tags: [...new Set(tags)].sort()
   }))
@@ -34,19 +34,18 @@ export async function updateCardsDataByUserSessionHandler(session: Session, card
   // sum 'card.amount' of cards with same key-fields
   cards = Object.values(
     cards.reduce((acc, card) => {
-      const { amount, ...keys } = card
-      const { scryfall_id, condition, foil, signed, altered, misprint, tags, override_card_data } = keys
+      const { amount, scryfall_id, condition, foil, signed, altered, misprint, tags, override_card_data } = card
 
       const overridesSortedByKey = (
         Object
-          .entries(override_card_data)
+          .entries(override_card_data ?? {})
           .sort(([a], [b]) => a.localeCompare(b))
           .map(([key, value]) => `${key}:"${value}"`)
           .join(',')
       )
 
       const key = [scryfall_id, condition, foil, signed, altered, misprint, tags, overridesSortedByKey].join('|')
-      if (acc[key])
+      if (acc[key]?.amount !== undefined)
         acc[key].amount += amount
       else
         acc[key] = card
@@ -56,17 +55,17 @@ export async function updateCardsDataByUserSessionHandler(session: Session, card
 
   const {
     affectedRows,
-    affectedRowCount,
     insertedRowCount,
     updatedRowCount,
+    deletedRowCount,
   } = await cardServices.updateCardsDataByUserSession(session, cards)
 
   return {
     affectedRows,
     metadata: {
-      affectedRowCount,
       insertedRowCount,
       updatedRowCount,
+      deletedRowCount,
     },
   }
 }

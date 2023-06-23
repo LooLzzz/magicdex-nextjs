@@ -335,12 +335,25 @@ CREATE TABLE "public"."user_cards" (
     "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL,
     "override_card_data" "jsonb" DEFAULT '{}'::"jsonb",
     CONSTRAINT "condition_in" CHECK (("condition" = ANY (ARRAY['NM'::"text", 'LP'::"text", 'MP'::"text", 'HP'::"text", 'DMG'::"text"]))),
-    CONSTRAINT "user_cards_amount_check" CHECK (("amount" > 0)),
     CONSTRAINT "unique_cards" UNIQUE ("owner_id","altered","condition","foil","misprint","scryfall_id","signed","tags","override_card_data")
 );
 
 
 ALTER TABLE "public"."user_cards" OWNER TO "postgres";
+
+CREATE FUNCTION delete_empty_cards() RETURNS trigger
+  LANGUAGE plpgsql
+  AS $$
+    BEGIN
+      DELETE FROM user_cards
+      WHERE amount <= 0;
+      RETURN NULL;
+    END;
+  $$;
+
+CREATE TRIGGER trigger_delete_empty_cards
+  AFTER INSERT OR UPDATE ON user_cards
+  EXECUTE PROCEDURE delete_empty_cards();
 
 --
 -- Name: user_cards_with_mtg_cards; Type: VIEW; Schema: public; Owner: postgres

@@ -11,7 +11,7 @@ export interface UserCardBaseData {
   foil: boolean
   id: string
   misprint: boolean
-  override_card_data: object
+  override_card_data: Record<string, unknown>
   owner_id: string
   scryfall_id: string
   signed: boolean

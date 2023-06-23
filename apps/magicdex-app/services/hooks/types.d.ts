@@ -2,6 +2,7 @@ import { CardCondition } from '@/types/supabase'
 
 
 export type UserCardMutationVariable = {
+  id?: string,
   altered: boolean,
   amount: number,
   condition: CardCondition,
@@ -10,7 +11,7 @@ export type UserCardMutationVariable = {
   scryfall_id: string,
   signed: boolean,
   tags: string[],
-  override_card_data: object,
+  override_card_data: Record<string, unknown>,
 }
 
 /**
@@ -24,8 +25,17 @@ export type UserCardMutationVariables = Array<UserCardMutationVariable>
 export type UserCardMutationData = {
   affectedRows: UserCardMutationVariables,
   metadata: {
-    affectedRowCount: number,
     insertedRowCount: number,
     updatedRowCount: number,
+    deletedRowCount: number,
   },
+}
+
+export type UserCardMetadata = {
+  totalRowCount: number,
+  allSets: Array<{
+    set_name: string,
+    set_id: string,
+    released_at: string,
+  }>,
 }

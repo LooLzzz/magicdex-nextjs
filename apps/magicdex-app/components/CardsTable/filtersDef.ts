@@ -1,22 +1,33 @@
 import { UserCardData } from '@/types/supabase'
 import { FilterFn } from '@tanstack/table-core'
+import { MRT_ColumnFiltersState } from 'mantine-react-table'
+import { Dispatch, SetStateAction, createContext } from 'react'
 
 
-export const filterFns = {
+const filterFns = {
   arrIncludesAll: () => undefined,
   arrIncludesAny: () => undefined,
   arrExcludesAny: () => undefined,
 } as { [key: string]: FilterFn<UserCardData> }
 
-export const localization = {
+const localization = {
   filterArrIncludesAll: 'Include All',
   filterArrIncludesAny: 'Include Any',
   filterArrExcludesAny: 'Exclude Any',
 }
 
-export const filtersDef = {
+const filtersDef = {
   filterFns,
   localization,
 }
 
-export default filtersDef
+const ColumnFiltersContext = createContext<[MRT_ColumnFiltersState, Dispatch<SetStateAction<MRT_ColumnFiltersState>>]>([[], prev => prev])
+
+export {
+  ColumnFiltersContext,
+  filterFns,
+  filtersDef as default,
+  filtersDef,
+  localization,
+}
+

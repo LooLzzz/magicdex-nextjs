@@ -70,39 +70,7 @@ export default function ImportWizard() {
   const form = useForm({ initialValues: placeholderFormValues.empty })
   const [selectedCard, setSelectedCard] = useState<string>()
   const [stagingArea, stagingAreaHandlers] = useListState<{ cardData: ScryfallCardData, formValues: BaseCardData, overrides: { lang?: string } }>([])
-  const { mutate: userCardsMutate, isLoading: isMutating } = useUserCardsMutation({
-    onSuccess: ({ metadata: { updatedRowCount, insertedRowCount } }) => {
-      notifications.show({
-        title: 'Success',
-        color: 'green',
-        message: (
-          updatedRowCount && insertedRowCount
-            ? (
-              <>
-                {insertedRowCount} card(s) were ADDED.
-                <br />
-                {updatedRowCount} card(s) were UPDATED.
-              </>
-            )
-            : insertedRowCount
-              ? <>{insertedRowCount} card(s) were ADDED.</>
-              : <>{updatedRowCount} card(s) were UPDATED.</>
-        ),
-      })
-      stagingAreaHandlers.setState([])
-    },
-    onError: (error) => {
-      notifications.show({
-        title: 'Error',
-        color: 'red',
-        message: (<>
-          Something went wrong while adding cards to your collection.
-          <br />
-          Error Message: {error.message}
-        </>),
-      })
-    },
-  })
+  const { mutate: userCardsMutate, isLoading: isMutating } = useUserCardsMutation()
 
   const { data: autocompleteData, isFetching: autocompleteFetching } = useScryfallAutocompleteQuery(form.values.name)
   const { data: cardPrintsData, isFetching: cardPrintsFetching } = useScryfallCardPrintsQuery({ name: selectedCard })

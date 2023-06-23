@@ -112,3 +112,15 @@ export function uniqueArray<T>(array: T[]) {
   return array.filter((value, index, self) => self.indexOf(value) === index)
   // return [...new Set(array)]
 }
+
+export function isSubset(superObj: object, subObj: object) {
+  return (
+    Object
+      .entries(subObj)
+      .every(([key, value]) => (
+        typeof value === 'object' && value !== null
+          ? isSubset(superObj[key], value)
+          : superObj[key] === value
+      ))
+  )
+}

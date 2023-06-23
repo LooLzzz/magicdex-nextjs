@@ -1,10 +1,9 @@
-import { applyScryfallGlobalFilter, applyVerboseOperator, createClientWithRLS } from '@/api/(services)/supabase'
+import { applyScryfallGlobalFilter, applyVerboseOperator, createClientWithRLS, createPgClient } from '@/api/(services)/supabase'
 import { UserCardQueryProps } from '@/api/(types)'
 import { UserCardMutationVariables } from '@/services/hooks/types'
 import scryfall from '@/services/scryfall'
 import { UserCardBaseData, UserCardData } from '@/types/supabase'
 import { Session } from 'next-auth'
-import { Client as PgClient } from 'pg'
 
 
 /**
@@ -22,8 +21,7 @@ export async function getCardsDataByUserSession(session: Session, options: UserC
   )
 
   // WHERE - globalFilter
-  // TODO: remove the `!filters?.name` check once scryfall's search syntax is implemented
-  if (options.globalFilter && !options.filters?.name)
+  if (options.globalFilter)
     builder = applyScryfallGlobalFilter(builder, options.globalFilter)
 
   // WHERE
@@ -63,8 +61,7 @@ export async function getTotalCardsCountByUserSession(session: Session, { global
   )
 
   // WHERE - globalFilter
-  // TODO: remove the `!filters?.name` check once scryfall's search syntax is implemented
-  if (globalFilter && !filters?.name)
+  if (globalFilter)
     builder = applyScryfallGlobalFilter(builder, globalFilter)
 
   // WHERE
@@ -104,40 +101,25 @@ export async function getAllSetsByUserSession(session: Session) {
 export async function updateCardsDataByUserSession(session: Session, cards: UserCardMutationVariables) {
   await createMissingMtgCards(session, cards.map(card => card.scryfall_id))
 
-  const pgClient = new PgClient({
-    connectionString: process.env.SUPABASE_POSTGRES_CONNECTION_URI,
-  })
-  pgClient.connect()
-  const { rows: affectedRows, rowCount: affectedRowCount } = await pgClient.query(`
-    INSERT INTO user_cards(owner_id, amount, altered, condition, foil, misprint, scryfall_id, signed, tags, override_card_data)
-    VALUES
-      ${cards.map(card => `(
-        '${session.user.id}',
-        ${card.amount},
-        ${card.altered},
-        '${card.condition}',
-        ${card.foil},
-        ${card.misprint},
-        '${card.scryfall_id}',
-        ${card.signed},
-        '{${card.tags.join(',')}}',
-        '${JSON.stringify(card.override_card_data)}'
-      )`).join(',')}
-    ON CONFLICT (owner_id, altered, condition, foil, misprint, scryfall_id, signed, tags, override_card_data)
-    DO UPDATE SET amount = user_cards.amount + EXCLUDED.amount
-    RETURNING *;
-  `) as { rows: UserCardBaseData[], rowCount: number }
-  pgClient.end()
+  const { affectedRows: affectedRowsUpsert } = await _upsertUserCardsDataPgql(session, cards.filter(item => !item.id))
+  const { affectedRows: affectedRowsUpdate } = await _updateUserCardPgql(session, cards.filter(item => item.id))
+  const affectedRows = [...affectedRowsUpsert, ...affectedRowsUpdate]
 
-  let [insertedRowCount, updatedRowCount] = [0, 0]
-  for (const row of affectedRows)
-    row.created_at.getTime() === row.updated_at.getTime() ? insertedRowCount++ : updatedRowCount++
+  let [insertedRowCount, updatedRowCount, deletedRowCount] = [0, 0, 0]
+  for (const row of affectedRows) {
+    if (row.amount <= 0)
+      deletedRowCount++
+    else if (new Date(row.created_at).getTime() !== new Date(row.updated_at).getTime())
+      updatedRowCount++
+    else
+      insertedRowCount++
+  }
 
   return {
     affectedRows,
-    affectedRowCount,
     insertedRowCount,
     updatedRowCount,
+    deletedRowCount,
   }
 }
 
@@ -212,4 +194,103 @@ export async function updateCardPricesByIds(
   if (error.length > 0)
     throw error
   return data
+}
+
+async function _upsertUserCardsDataPgql(session: Session, cards: UserCardMutationVariables) {
+  if (cards?.length === 0)
+    return { affectedRows: [], affectedRowCount: 0 }
+
+  const pgClient = createPgClient()
+  const queryText = `
+    INSERT INTO user_cards(owner_id, scryfall_id, amount, altered, condition, foil, misprint, signed, tags, override_card_data)
+    VALUES
+      ${cards.map(card => `(
+        '${session.user.id}',
+        '${card.scryfall_id}',
+        ${card.amount ?? 0},
+        ${card.altered ?? false},
+        '${card.condition ?? 'NM'}',
+        ${card.foil ?? false},
+        ${card.misprint ?? false},
+        ${card.signed ?? false},
+        '{${card.tags?.join(',') ?? ''}}',
+        '${JSON.stringify(card.override_card_data ?? {})}'
+      )`).join(',')}
+    ON CONFLICT (owner_id, scryfall_id, altered, condition, foil, misprint, signed, tags, override_card_data)
+    DO UPDATE SET amount = user_cards.amount + EXCLUDED.amount
+    RETURNING *;
+  `
+  pgClient.connect()
+  const {
+    rows: affectedRows,
+    rowCount: affectedRowCount
+  } = await pgClient.query(queryText) as { rows: UserCardBaseData[], rowCount: number }
+  pgClient.end()
+
+  return { affectedRows, affectedRowCount }
+}
+
+async function _updateUserCardPgql(session: Session, cards: UserCardMutationVariables) {
+  const supabaseClient = await createClientWithRLS(session.supabaseAccessToken)
+  const affectedRows: UserCardBaseData[] = []
+  let affectedRowCount = 0
+
+  for (const newCard of cards) {
+    const { data, error } = (
+      await supabaseClient
+        .from('user_cards')
+        .update(newCard)
+        .eq('id', newCard.id)
+        .select('*')
+    )
+
+    if (error?.message.match(/violates unique constraint/i)) {
+      // merge with existing card
+      const oldCard = (
+        await supabaseClient
+          .from('user_cards')
+          .select('id, scryfall_id, amount, altered, condition, foil, misprint, signed, tags, override_card_data')
+          .eq('scryfall_id', newCard.scryfall_id)
+          .eq('altered', newCard.altered)
+          .eq('condition', newCard.condition)
+          .eq('foil', newCard.foil)
+          .eq('misprint', newCard.misprint)
+          .eq('signed', newCard.signed)
+          .contains('tags', newCard.tags)
+          .containedBy('tags', newCard.tags)
+          .contains('override_card_data', newCard.override_card_data)
+      ).data[0]
+
+      const mergedCard = {
+        ...newCard,
+        amount: oldCard.amount + newCard.amount,
+      }
+
+      const { data: deletedData } = (
+        await supabaseClient
+          .from('user_cards')
+          .delete()
+          .eq('id', oldCard.id)
+          .select('*')
+      )
+
+      const { data: updatedData } = (
+        await supabaseClient
+          .from('user_cards')
+          .update(mergedCard)
+          .eq('id', mergedCard.id)
+          .select('*')
+      )
+
+      affectedRows.push(...deletedData as UserCardBaseData[], ...updatedData as UserCardBaseData[])
+      affectedRowCount++
+    }
+
+    else if (data) {
+      affectedRows.push(...data as UserCardBaseData[])
+      affectedRowCount++
+    }
+  }
+
+  return { affectedRows, affectedRowCount }
 }

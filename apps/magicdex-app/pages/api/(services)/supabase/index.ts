@@ -1,6 +1,7 @@
 import { VerboseOperator } from '@/api/(types)'
 import { PostgrestFilterBuilder } from '@supabase/postgrest-js'
 import { createClient } from '@supabase/supabase-js'
+import { Client as PgClient } from 'pg'
 
 
 const supabasePublicClient = createClient(
@@ -31,6 +32,12 @@ const createClientWithRLS = async (supabaseAccessToken: string) => {
     }
   )
 }
+
+const createPgClient = () => (
+  new PgClient({
+    connectionString: process.env.SUPABASE_POSTGRES_CONNECTION_URI,
+  })
+)
 
 function applyVerboseOperator(
   builder: PostgrestFilterBuilder<undefined, undefined, { [x: string]: undefined }[]>,
@@ -86,6 +93,7 @@ function applyScryfallGlobalFilter(
     `name.ilike.%${globalFilter}%`
     + `, type_line.ilike.%${globalFilter}%`
     + `, oracle_text.ilike.%${globalFilter}%`
+    + `, tags.cs.{"${globalFilter}"}`
   )
   return builder
 }
@@ -94,6 +102,7 @@ export {
   applyScryfallGlobalFilter,
   applyVerboseOperator,
   createClientWithRLS,
+  createPgClient,
   supabaseAuthClient,
   supabasePublicClient as default,
 }

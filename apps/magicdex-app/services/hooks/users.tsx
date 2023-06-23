@@ -1,5 +1,6 @@
 import { apiRoutes } from '@/routes'
 import { UserCardData } from '@/types/supabase'
+import { notifications } from '@mantine/notifications'
 import { UseMutationOptions, useInfiniteQuery, useMutation, useQuery } from '@tanstack/react-query'
 import axios, { AxiosError } from 'axios'
 import { UserCardMutationData, UserCardMutationVariables } from './types'
@@ -147,7 +148,7 @@ export function useUserCardsInfiniteQuery({
 }
 
 export function useUserCardsMutation(
-  options: Omit<UseMutationOptions<UserCardMutationData, Error, UserCardMutationVariables, unknown>, 'mutationFn'>
+  options: Omit<UseMutationOptions<UserCardMutationData, Error, UserCardMutationVariables, unknown>, 'mutationFn'> = {}
 ) {
   return useMutation<
     UserCardMutationData, // TData -> return type
@@ -159,6 +160,44 @@ export function useUserCardsMutation(
       const { data } = await axios.post(apiRoutes.userCards, variables)
       return data
     },
+
+    onSuccess: ({ metadata: { updatedRowCount, insertedRowCount, deletedRowCount } }) => {
+      notifications.show({
+        title: 'Success',
+        color: 'green',
+        message: (() => {
+          const messages = []
+
+          if (insertedRowCount)
+            messages.push(`${insertedRowCount} card(s) were ADDED.`)
+          if (updatedRowCount)
+            messages.push(`${updatedRowCount} card(s) were UPDATED.`)
+          if (deletedRowCount)
+            messages.push(`${deletedRowCount} card(s) were DELETED.`)
+
+          return (
+            messages.map((message, idx) =>
+              <div key={idx}>{message}</div>
+            )
+          )
+        })(),
+      })
+    },
+
+    onError: (error) => {
+      notifications.show({
+        title: 'Error',
+        color: 'red',
+        message: (
+          <>
+            Something went wrong while adding cards to your collection.
+            <br />
+            Error Message: {error.message}
+          </>
+        ),
+      })
+    },
+
     ...options
   })
 }
