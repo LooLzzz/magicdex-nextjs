@@ -1,3 +1,5 @@
+import { BaseCardData } from '@/components/ImportComponents/ImportWizard/types'
+import { ScryfallCardData } from '@/types/scryfall'
 import { Embla } from '@mantine/carousel'
 
 
@@ -122,5 +124,42 @@ export function isSubset(superObj: object, subObj: object) {
           ? isSubset(superObj[key], value)
           : superObj[key] === value
       ))
+  )
+}
+
+export function getCardFinishes(cardData: ScryfallCardData, mergeEtchedWithFoil = true) {
+  const finishes = Object.fromEntries(
+    cardData?.finishes?.map(item => ([item, true]))
+    ?? []
+  )
+
+  if (mergeEtchedWithFoil) {
+    finishes.foil = finishes.foil || finishes.etched || false
+    delete finishes.etched
+  }
+
+  return finishes
+}
+
+export function scryfallDataToUserCardData(card: ScryfallCardData): BaseCardData {
+  if (card?.['card_faces']) {
+    // in case of double faced cards
+    // ignore some fields from the first card face and merge them with the base card
+    const { object, type_line, name, ...rest } = card['card_faces'][0]
+    card = { ...card, ...rest }
+  }
+  return card
+}
+
+export function translateRanges(
+  value: number,
+  targetRange: [start: number, end: number],
+  originRange: [start: number, end: number] = [0, 1],
+) {
+  const [originStart, originEnd] = originRange
+  const [targetStart, targetEnd] = targetRange
+
+  return (
+    (value - originStart) * (targetEnd - targetStart) / (originEnd - originStart) + targetStart
   )
 }

@@ -1,13 +1,14 @@
 import { CardImage } from '@/components'
 import { UserCardData } from '@/types/supabase'
-import { emblaAutoHeightEffect } from '@/utils'
+import { emblaAutoHeightEffect, translateRanges } from '@/utils'
 import { Carousel, Embla } from '@mantine/carousel'
-import { ActionIcon, Box, Center, Flex, Group, JsonInput, Paper, Stack, useMantineTheme } from '@mantine/core'
-import { useMediaQuery } from '@mantine/hooks'
+import { ActionIcon, Box, Center, Flex, Group, Paper, Stack, useMantineTheme } from '@mantine/core'
+import { useMediaQuery, useViewportSize } from '@mantine/hooks'
 import { IconChevronLeft, IconChevronRight } from '@tabler/icons-react'
 import { MRT_Row, MRT_TableInstance } from 'mantine-react-table'
 import React, { useEffect, useState } from 'react'
 import CardText, { CardTextArtist, CardTextColorIndicator, CardTextPowerToughness, CardTextSet } from '../CardText'
+import EditPanel from './EditPanel'
 
 
 function CardInfo({ containerWidth, card }: {
@@ -60,6 +61,7 @@ export default function DetailsPanel<T extends UserCardData>(
   }) {
   const theme = useMantineTheme()
   const [embla, setEmbla] = useState<Embla>(null)
+  const { width: vwidth } = useViewportSize()
   const isLargerThanLg = useMediaQuery('(min-width: 1226px)', false)
   const isLargerThanMd = useMediaQuery('(min-width: 768px)', false)
   const tableContainerWidth = table.refs.tableContainerRef?.current?.clientWidth
@@ -75,6 +77,12 @@ export default function DetailsPanel<T extends UserCardData>(
 
   return (
     <Paper
+      component={Flex}
+      wrap={isLargerThanMd ? 'nowrap' : 'wrap'}
+      gap='xl'
+      align='flex-start'
+      justify='center'
+
       bg={(
         theme.colorScheme === 'dark'
           ? theme.colors.gray[7]
@@ -86,6 +94,26 @@ export default function DetailsPanel<T extends UserCardData>(
       left={(tableContainerWidth - containerWidth) / 2}
       w={containerWidth}
     >
+      <Center
+        sx={theme => ({
+          display: isLargerThanLg ? 'none' : undefined,
+          paddingBottom: theme.spacing.md,
+        })}
+      >
+        <CardImage
+          displayTransform
+          displayPrice
+          openPriceTooltipToSides
+          shouldTransfromTranslateImage={isLargerThanMd}
+          shouldTransfromShrinkImage={isLargerThanMd}
+          card={row.original}
+          aspectRatioProps={{
+            maw: CardImage.defaultWidth,
+            miw: CardImage.defaultWidth * (isLargerThanMd ? translateRanges(vwidth, [0.8, 0.9], [768, 1226]) : 0.9),
+          }}
+        />
+      </Center>
+
       <Carousel
         getEmblaApi={setEmbla}
         withControls={false}
@@ -105,20 +133,6 @@ export default function DetailsPanel<T extends UserCardData>(
                 <IconChevronRight />
               </ActionIcon>
             </div>
-
-            <Center sx={{ display: isLargerThanLg ? 'none' : undefined }}>
-              <CardImage
-                displayTransform
-                displayPrice
-                openPriceTooltipToSides
-                shouldTransfromTranslateImage={false}
-                card={row.original}
-                aspectRatioProps={{
-                  maw: CardImage.defaultWidth * 1.1,
-                  miw: CardImage.defaultWidth,
-                }}
-              />
-            </Center>
 
             <Center>
               {
@@ -157,12 +171,7 @@ export default function DetailsPanel<T extends UserCardData>(
 
         <Carousel.Slide>
           <Stack pos='relative'>
-            {/* TODO: make an info panel with edit functionality */}
-            <JsonInput
-              formatOnBlur
-              minRows={20}
-              defaultValue={JSON.stringify(row.original, null, 2)}
-            />
+            <EditPanel card={row.original} />
 
             <div style={{
               position: 'absolute',

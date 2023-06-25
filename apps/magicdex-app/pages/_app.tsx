@@ -30,8 +30,10 @@ const getMantineTheme = (colorScheme: ColorScheme): MantineThemeOverride => ({
       defaultProps: theme => ({
         color: (
           theme.colorScheme === 'dark'
-            ? theme.colors.gray[7]
-            : theme.colors.gray[4]
+            ? '#69737d'
+            // ? theme.colors.gray[7]
+            : '#acafb3'
+            // : theme.colors.gray[4]
         )
       }),
     },

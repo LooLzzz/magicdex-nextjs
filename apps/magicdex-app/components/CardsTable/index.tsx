@@ -34,7 +34,7 @@ export default function CardsTable({
   const [expandedRows, setExpandedRows] = useState<MRT_ExpandedState>({})
   const [columnFilters, setColumnFilters] = useState<MRT_ColumnFiltersState>([])
   const columnFilterFns = tableInstanceRef.current?.getState().columnFilterFns
-  const [globalFilter, setGlobalFilter] = useState('')
+  const [globalFilter, setGlobalFilter] = useState(undefined)
   const [sorting, setSorting] = useState<MRT_SortingState>([{
     id: 'price_usd',
     desc: true
@@ -158,7 +158,7 @@ export default function CardsTable({
               {
                 (globalFilter || columnFilters.length > 0) &&
                 <Tooltip withArrow label='Clear all Filters'>
-                  <ActionIcon onClick={() => { setColumnFilters([]); setGlobalFilter('') }}>
+                  <ActionIcon onClick={() => { setColumnFilters([]); setGlobalFilter(undefined) }}>
                     <IconEraser />
                   </ActionIcon>
                 </Tooltip>

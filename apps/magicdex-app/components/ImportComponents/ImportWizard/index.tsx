@@ -11,6 +11,7 @@ import {
   useUserCardsMutation
 } from '@/services/hooks'
 import { ScryfallCardData } from '@/types/scryfall'
+import { getCardFinishes, scryfallDataToUserCardData } from '@/utils'
 import {
   ActionIcon,
   Button,
@@ -30,37 +31,12 @@ import {
 } from '@mantine/core'
 import { useForm } from '@mantine/form'
 import { getHotkeyHandler, useHotkeys, useListState, useMediaQuery } from '@mantine/hooks'
-import { notifications } from '@mantine/notifications'
 import { IconEdit, IconPlus, IconTrash } from '@tabler/icons-react'
 import { useEffect, useRef, useState } from 'react'
 import SelectCarditem from './SelectCarditem'
 import useStyles from './styles'
 import { BaseCardData, placeholderFormValues } from './types'
 
-
-function _getFinishes(cardData: ScryfallCardData, mergeEtchedWithFoil = true) {
-  const finishes = Object.fromEntries(
-    cardData?.finishes?.map(item => ([item, true]))
-    ?? []
-  )
-
-  if (mergeEtchedWithFoil) {
-    finishes.foil = finishes.foil || finishes.etched || false
-    delete finishes.etched
-  }
-
-  return finishes
-}
-
-function scryfallDataToUserCardData(card: ScryfallCardData): BaseCardData {
-  if (card?.['card_faces']) {
-    // in case of double faced cards
-    // ignore some fields from the first card face and merge them with the base card
-    const { object, type_line, name, ...rest } = card['card_faces'][0]
-    card = { ...card, ...rest }
-  }
-  return card
-}
 
 export default function ImportWizard() {
   const { classes, theme } = useStyles()
@@ -156,7 +132,7 @@ export default function ImportWizard() {
   }, [selectedCard, cardPrintsData])
 
   useEffect(() => {
-    const finishes = _getFinishes(
+    const finishes = getCardFinishes(
       cardPrintsData?.data?.find(item =>
         `${item.set}:${item.collector_number}` === form.values.set
       )
@@ -322,7 +298,7 @@ export default function ImportWizard() {
                       disabled={
                         !selectedCard
                         || Object.values(
-                          _getFinishes(
+                          getCardFinishes(
                             cardPrintsData?.data?.find(item =>
                               `${item.set}:${item.collector_number}` === form.values.set
                             )
