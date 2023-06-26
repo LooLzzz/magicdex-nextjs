@@ -6,7 +6,7 @@ import { ActionIcon, Box, Center, Flex, Group, Paper, Stack, useMantineTheme } f
 import { useMediaQuery, useViewportSize } from '@mantine/hooks'
 import { IconChevronLeft, IconChevronRight } from '@tabler/icons-react'
 import { MRT_Row, MRT_TableInstance } from 'mantine-react-table'
-import React, { useEffect, useState } from 'react'
+import React, { createContext, useEffect, useState } from 'react'
 import CardText, { CardTextArtist, CardTextColorIndicator, CardTextPowerToughness, CardTextSet } from '../CardText'
 import EditPanel from './EditPanel'
 
@@ -121,71 +121,79 @@ export default function DetailsPanel<T extends UserCardData>(
         slideGap='md'
         align='center'
       >
+        <EmblaContext.Provider value={embla}>
 
-        <Carousel.Slide>
-          <Stack pos='relative'>
-            <div style={{
-              position: 'absolute',
-              top: 0,
-              right: 0,
-            }}>
-              <ActionIcon variant='transparent' onClick={() => embla.scrollNext()}>
-                <IconChevronRight />
-              </ActionIcon>
-            </div>
+          <Carousel.Slide>
+            <Stack pos='relative'>
+              <div style={{
+                position: 'absolute',
+                top: 0,
+                right: 0,
+              }}>
+                <ActionIcon variant='transparent' onClick={() => embla.scrollNext()}>
+                  <IconChevronRight />
+                </ActionIcon>
+              </div>
 
-            <Center>
-              {
-                row.original?.card_faces
-                  ? (
-                    <Box
-                      component={isLargerThanMd && row.original.card_faces.length === 2 ? Group : Stack}
-                      spacing='md'
-                      align='center'
-                      position='center'
-                    >
-                      {
-                        row.original.card_faces.map((card_face, idx) => (
-                          <CardInfo
-                            key={idx}
-                            containerWidth={containerWidth}
-                            card={{
-                              ...row.original,
-                              ...card_face,
-                            }}
-                          />
-                        ))
-                      }
-                    </Box>
-                  )
-                  : (
-                    <CardInfo
-                      containerWidth={containerWidth}
-                      card={row.original}
-                    />
-                  )
-              }
-            </Center>
-          </Stack>
-        </Carousel.Slide>
+              <Center>
+                {
+                  row.original?.card_faces
+                    ? (
+                      <Box
+                        component={isLargerThanMd && row.original.card_faces.length === 2 ? Group : Stack}
+                        spacing='md'
+                        align='center'
+                        position='center'
+                      >
+                        {
+                          row.original.card_faces.map((card_face, idx) => (
+                            <CardInfo
+                              key={idx}
+                              containerWidth={containerWidth}
+                              card={{
+                                ...row.original,
+                                ...card_face,
+                              }}
+                            />
+                          ))
+                        }
+                      </Box>
+                    )
+                    : (
+                      <CardInfo
+                        containerWidth={containerWidth}
+                        card={row.original}
+                      />
+                    )
+                }
+              </Center>
+            </Stack>
+          </Carousel.Slide>
 
-        <Carousel.Slide>
-          <Stack pos='relative'>
-            <EditPanel card={row.original} />
+          <Carousel.Slide>
+            <Stack pos='relative'>
+              <EditPanel card={row.original} />
 
-            <div style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-            }}>
-              <ActionIcon variant='transparent' onClick={() => embla.scrollPrev()}>
-                <IconChevronLeft />
-              </ActionIcon>
-            </div>
-          </Stack>
-        </Carousel.Slide>
+              <div style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+              }}>
+                <ActionIcon variant='transparent' onClick={() => embla.scrollPrev()}>
+                  <IconChevronLeft />
+                </ActionIcon>
+              </div>
+            </Stack>
+          </Carousel.Slide>
 
+        </EmblaContext.Provider>
       </Carousel>
     </Paper>
   )
+}
+
+const EmblaContext = createContext<Embla>(null)
+
+export {
+  EmblaContext
 }

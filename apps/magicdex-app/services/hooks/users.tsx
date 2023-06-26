@@ -1,9 +1,9 @@
 import { apiRoutes } from '@/routes'
 import { UserCardData } from '@/types/supabase'
 import { notifications } from '@mantine/notifications'
-import { UseMutationOptions, useInfiniteQuery, useMutation, useQuery } from '@tanstack/react-query'
+import { UseMutationOptions, useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import axios, { AxiosError } from 'axios'
-import { UserCardMutationData, UserCardMutationVariables } from './types'
+import { UserCardInfiniteData, UserCardMutationData, UserCardMutationVariables } from './types'
 
 
 const fieldNameMap = {
@@ -150,6 +150,8 @@ export function useUserCardsInfiniteQuery({
 export function useUserCardsMutation(
   options: Omit<UseMutationOptions<UserCardMutationData, Error, UserCardMutationVariables, unknown>, 'mutationFn'> = {}
 ) {
+  const queryClient = useQueryClient()
+
   return useMutation<
     UserCardMutationData, // TData -> return type
     Error, //TError
@@ -157,8 +159,48 @@ export function useUserCardsMutation(
     unknown // TContext
   >({
     mutationFn: async (variables) => {
+      variables = variables?.map(card => ({
+        id: card?.id,
+        altered: card?.altered,
+        amount: card?.amount,
+        condition: card?.condition,
+        foil: card?.foil,
+        misprint: card?.misprint,
+        scryfall_id: card?.scryfall_id,
+        signed: card?.signed,
+        tags: card?.tags,
+        override_card_data: card?.override_card_data,
+      }))
+
+      const deletedCards = variables?.filter(card => card.amount <= 0)
+      if (deletedCards?.length) {
+        const latestsUserCardQuery = (
+          queryClient
+            .getQueryCache()
+            .findAll({ predicate: item => item.queryKey.includes('user-card-data') })
+            .sort((a, b) => a.state.dataUpdatedAt - b.state.dataUpdatedAt)
+            .pop()
+        )
+        queryClient.setQueryData<UserCardInfiniteData>(latestsUserCardQuery.queryKey, prevData => ({
+          ...prevData,
+          pages: prevData.pages.map(page => ({
+            ...page,
+            data: page.data.filter(card => !deletedCards.some(deletedCard => deletedCard.id === card.id)),
+            metadata: {
+              ...page.metadata,
+              totalRowCount: page.metadata.totalRowCount - page.data.filter(card => deletedCards.some(deletedCard => deletedCard.id === card.id)).length,
+            },
+          }))
+        }))
+      }
       const { data } = await axios.post(apiRoutes.userCards, variables)
       return data
+    },
+
+    onSettled: async () => {
+      await queryClient.invalidateQueries({
+        predicate: query => query.queryKey.includes('user-card-data')
+      })
     },
 
     onSuccess: ({ metadata: { updatedRowCount, insertedRowCount, deletedRowCount } }) => {
@@ -173,7 +215,7 @@ export function useUserCardsMutation(
           if (updatedRowCount)
             messages.push(`${updatedRowCount} card(s) were UPDATED.`)
           if (deletedRowCount)
-            messages.push(`${deletedRowCount} card(s) were DELETED.`)
+            messages.push(`${deletedRowCount} card(s) were YEETED AWAY.`)
 
           return (
             messages.map((message, idx) =>

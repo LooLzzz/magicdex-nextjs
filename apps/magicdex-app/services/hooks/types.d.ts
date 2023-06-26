@@ -1,6 +1,14 @@
 import { CardCondition } from '@/types/supabase'
 
 
+export type UserCardInfiniteData = {
+  pageParams: Array<number>,
+  pages: Array<{
+    data: UserCardMutationVariables,
+    metadata: UserCardMetadata,
+  }>,
+}
+
 export type UserCardMutationVariable = {
   id?: string,
   altered: boolean,
