@@ -163,3 +163,7 @@ export function translateRanges(
     (value - originStart) * (targetEnd - targetStart) / (originEnd - originStart) + targetStart
   )
 }
+
+export async function setAsyncTimeout(delay: number) {
+  return new Promise(resolve => setTimeout(resolve, delay))
+}

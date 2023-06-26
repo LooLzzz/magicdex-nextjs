@@ -34,10 +34,10 @@ export default function LoginPage({
     setLoadingOverlay(true)
     form.setValues({ password: '' })
     await signIn('credentials',
-    {
-      email: values.email,
-      password: values.password,
-    })
+      {
+        email: values.email,
+        password: values.password,
+      })
   }
 
   const handleReset = (event) => {
@@ -83,8 +83,12 @@ export default function LoginPage({
               }
             </Stack>
             <Group position='right' mt='md'>
-              <Button type='reset' variant='default'>Reset</Button>
-              <Button type='submit'>Submit</Button>
+              <Button type='reset' variant='default'>
+                Reset
+              </Button>
+              <Button type='submit'>
+                Submit
+              </Button>
             </Group>
           </form>
 
@@ -96,7 +100,8 @@ export default function LoginPage({
           <Stack>
             {Object.values(providers || {}).filter(provider => provider.id !== 'credentials').map(provider => (
               <Button
-                styles={{
+                sx={{
+                  boxShadow: '0px 3px 1px -2px rgba(0,0,0,0.2), 0px 2px 2px 0px rgba(0,0,0,0.14), 0px 1px 5px 0px rgba(0,0,0,0.12)',
                   root: {
                     paddingLeft: rem(5),
                   },

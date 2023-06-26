@@ -23,6 +23,11 @@ export default class _Document extends Document {
             rel='stylesheet'
             type='text/css'
           />
+          <link
+            href='//undertalefonts.duodecima.technology/webfonts/stylesheet.css'
+            rel='stylesheet'
+            type='text/css'
+          />
         </Head>
 
         <body>

@@ -31,6 +31,7 @@ export default function CardsTable({
   const tableContainerRef = useRef<HTMLDivElement>(null)
   const rowVirtualizerInstanceRef = useRef<MRT_Virtualizer<HTMLDivElement, HTMLTableRowElement>>(null)
   const isLargerThanLg = useMediaQuery('(min-width: 1226px)', false)
+  const isLargerThanMd = useMediaQuery('(min-width: 768px)', false)
   const [expandedRows, setExpandedRows] = useState<MRT_ExpandedState>({})
   const [columnFilters, setColumnFilters] = useState<MRT_ColumnFiltersState>([])
   const columnFilterFns = tableInstanceRef.current?.getState().columnFilterFns
@@ -143,7 +144,7 @@ export default function CardsTable({
           enableFullScreenToggle={false}
           enableMultiSort
           enablePagination={false}
-          enableStickyHeader
+          enableStickyHeader={isLargerThanMd}
           manualFiltering
           manualSorting
 

@@ -419,6 +419,7 @@ export default function ImportWizard() {
             <Grid.Col span='auto' />
             <Grid.Col span='content'>
               <Button
+                sx={{ boxShadow: '0px 3px 1px -2px rgba(0,0,0,0.2), 0px 2px 2px 0px rgba(0,0,0,0.14), 0px 1px 5px 0px rgba(0,0,0,0.12)' }}
                 type='reset'
                 variant='filled'
                 color='orange'
@@ -429,6 +430,7 @@ export default function ImportWizard() {
             </Grid.Col>
             <Grid.Col span='content'>
               <Button
+                sx={{ boxShadow: stagingArea.length ? '0px 3px 1px -2px rgba(0,0,0,0.2), 0px 2px 2px 0px rgba(0,0,0,0.14), 0px 1px 5px 0px rgba(0,0,0,0.12)': undefined }}
                 disabled={stagingArea.length === 0}
                 onClick={() => form.onSubmit(handleSubmit)()}
                 classNames={{ root: classes.buttonRoot }}
