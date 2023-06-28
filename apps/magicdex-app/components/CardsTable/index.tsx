@@ -104,7 +104,7 @@ export default function CardsTable({
 
   return (
     <>
-      <ColumnFiltersContext.Provider value={[columnFilters, tableInstanceRef?.current.setColumnFilters]}>
+      <ColumnFiltersContext.Provider value={[columnFilters, tableInstanceRef?.current?.setColumnFilters]}>
         <MantineReactTable
           tableInstanceRef={tableInstanceRef}
           rowVirtualizerInstanceRef={rowVirtualizerInstanceRef}
