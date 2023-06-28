@@ -106,6 +106,22 @@ const getMantineTheme = (colorScheme: ColorScheme): MantineThemeOverride => ({
       ),
     },
 
+    '.mantine-Modal-header': {
+      backgroundColor: (
+        theme.colorScheme === 'dark'
+          ? theme.colors.dark[4]
+          : theme.colors.gray[2]
+      ),
+    },
+
+    '.mantine-Modal-body': {
+      backgroundColor: (
+        theme.colorScheme === 'dark'
+          ? theme.colors.dark[4]
+          : theme.colors.gray[2]
+      ),
+    },
+
     '.mantine-Header-root': {
       borderColor: (
         theme.colorScheme === 'dark'

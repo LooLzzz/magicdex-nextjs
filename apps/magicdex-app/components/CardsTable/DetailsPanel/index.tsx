@@ -116,10 +116,12 @@ export default function DetailsPanel<T extends UserCardData>(
 
       <Carousel
         getEmblaApi={setEmbla}
+        withKeyboardEvents={false}
         withControls={false}
         draggable={false}
         slideGap='md'
         align='center'
+        w='100%'
       >
         <EmblaContext.Provider value={embla}>
 

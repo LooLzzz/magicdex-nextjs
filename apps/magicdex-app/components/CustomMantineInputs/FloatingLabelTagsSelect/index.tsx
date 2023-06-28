@@ -4,18 +4,21 @@ import { useListState } from '@mantine/hooks'
 import { forwardRef } from 'react'
 
 
-export type FloatingLabelTagsSelectProps = Omit<FloatingLabelMultiSelectProps, 'data' | 'searchable' | 'creatable'>
+export type FloatingLabelTagsSelectProps = Omit<FloatingLabelMultiSelectProps, 'data' | 'searchable' | 'creatable'> & {
+  initialDataValue?: string[],
+}
 
 const FloatingLabelTagsSelect = forwardRef<HTMLInputElement, FloatingLabelTagsSelectProps>(
   function FloatingLabelTagsSelect(
     {
       value,
       onChange,
+      initialDataValue,
       ...props
     },
     ref
   ) {
-    const [data, dataHandlers] = useListState([])
+    const [data, dataHandlers] = useListState(initialDataValue ?? [])
 
     return (
       <FloatingLabelMultiSelect

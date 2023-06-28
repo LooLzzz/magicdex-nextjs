@@ -101,6 +101,7 @@ function CardTextComponent({
       rest.ff = rest.ff ? `PhyrexianHorizontal, ${rest.ff}` : 'PhyrexianHorizontal'
       rest.style = {
         lineHeight: 1,
+        wordBreak: 'break-word',
         ...rest.style
       }
     }

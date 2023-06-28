@@ -21,15 +21,17 @@ export default function EditPanel({ card }: {
   const { mutate: userCardsMutate } = useUserCardsMutation()
 
   useEffect(() => {
-    embla?.reInit()
+    setTimeout(() => {
+      embla?.reInit()
+    }, 100)
   }, [embla, isEditing])
 
   const openDeleteModal = () =>
     modals.openConfirmModal({
-      title: 'Delete Card',
+      title: <Text size='xl' weight='bold'>Delete Card Confirmation</Text>,
       centered: true,
       children: (
-        <Text size="sm">
+        <Text size='md'>
           Are you sure you want to delete this card?
           <br />
           This action is irreversible.
@@ -51,6 +53,13 @@ export default function EditPanel({ card }: {
       ...columnFilters.filter(item => item.id !== 'tags'),
       { id: 'tags', value }
     ])
+  }
+
+  const handleSaveOnClick = () => {
+    if (isEditing)
+      cardEditingFormRef?.current?.submit()
+
+    setEditing(!isEditing)
   }
 
   return (
@@ -77,7 +86,7 @@ export default function EditPanel({ card }: {
 
         <Button
           sx={{ boxShadow: '0px 3px 1px -2px rgba(0,0,0,0.2), 0px 2px 2px 0px rgba(0,0,0,0.14), 0px 1px 5px 0px rgba(0,0,0,0.12)' }}
-          onClick={() => setEditing(!isEditing)}
+          onClick={handleSaveOnClick}
         >
           {isEditing ? 'Save' : 'Edit'}
         </Button>

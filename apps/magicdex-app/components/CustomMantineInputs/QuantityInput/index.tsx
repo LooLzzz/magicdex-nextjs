@@ -42,7 +42,8 @@ const QuantityInput = forwardRef<HTMLInputElement, QuantityInputProps>(
       <Flex
         wrap='nowrap'
         mt='md'
-        p='5px 8px'
+        px='8px'
+        py='5px'
         align='center'
         {...flexRootProps}
         className={cx([

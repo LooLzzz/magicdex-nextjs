@@ -46,7 +46,9 @@ export default function ImportWizard() {
   const form = useForm({ initialValues: placeholderFormValues.empty })
   const [selectedCard, setSelectedCard] = useState<string>()
   const [stagingArea, stagingAreaHandlers] = useListState<{ cardData: ScryfallCardData, formValues: BaseCardData, overrides: { lang?: string } }>([])
-  const { mutate: userCardsMutate, isLoading: isMutating } = useUserCardsMutation()
+  const { mutate: userCardsMutate, isLoading: isMutating } = useUserCardsMutation({
+    onSuccess: () => resetForm({ includeStagingArea: true })
+  })
 
   const { data: autocompleteData, isFetching: autocompleteFetching } = useScryfallAutocompleteQuery(form.values.name)
   const { data: cardPrintsData, isFetching: cardPrintsFetching } = useScryfallCardPrintsQuery({ name: selectedCard })
@@ -430,7 +432,7 @@ export default function ImportWizard() {
             </Grid.Col>
             <Grid.Col span='content'>
               <Button
-                sx={{ boxShadow: stagingArea.length ? '0px 3px 1px -2px rgba(0,0,0,0.2), 0px 2px 2px 0px rgba(0,0,0,0.14), 0px 1px 5px 0px rgba(0,0,0,0.12)': undefined }}
+                sx={{ boxShadow: stagingArea.length ? '0px 3px 1px -2px rgba(0,0,0,0.2), 0px 2px 2px 0px rgba(0,0,0,0.14), 0px 1px 5px 0px rgba(0,0,0,0.12)' : undefined }}
                 disabled={stagingArea.length === 0}
                 onClick={() => form.onSubmit(handleSubmit)()}
                 classNames={{ root: classes.buttonRoot }}

@@ -148,7 +148,7 @@ export function useUserCardsInfiniteQuery({
 }
 
 export function useUserCardsMutation(
-  options: Omit<UseMutationOptions<UserCardMutationData, Error, UserCardMutationVariables, unknown>, 'mutationFn'> = {}
+  { onSettled, onSuccess, onError, ...options }: Omit<UseMutationOptions<UserCardMutationData, Error, UserCardMutationVariables, unknown>, 'mutationFn'> = {}
 ) {
   const queryClient = useQueryClient()
 
@@ -197,13 +197,15 @@ export function useUserCardsMutation(
       return data
     },
 
-    onSettled: async () => {
+    onSettled: async (data, error, variables, context) => {
       await queryClient.invalidateQueries({
         predicate: query => query.queryKey.includes('user-card-data')
       })
+      await onSettled?.(data, error, variables, context)
     },
 
-    onSuccess: ({ metadata: { updatedRowCount, insertedRowCount, deletedRowCount } }) => {
+    onSuccess: async (data, variables, context) => {
+      const { metadata: { updatedRowCount, insertedRowCount, deletedRowCount } } = data
       notifications.show({
         title: 'Success',
         color: 'green',
@@ -224,9 +226,11 @@ export function useUserCardsMutation(
           )
         })(),
       })
+
+      await onSuccess?.(data, variables, context)
     },
 
-    onError: (error) => {
+    onError: async (error, variables, context) => {
       notifications.show({
         title: 'Error',
         color: 'red',
@@ -238,6 +242,8 @@ export function useUserCardsMutation(
           </>
         ),
       })
+
+      await onError?.(error, variables, context)
     },
 
     ...options
