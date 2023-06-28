@@ -28,7 +28,7 @@ export async function updateCardsDataByUserSessionHandler(session: Session, card
   // remove duplicates from 'card.tags' & sort it
   cards = cards.map(({ tags = [], ...rest }) => ({
     ...rest,
-    tags: [...new Set(tags)].sort()
+    tags: [...new Set(tags?.map(tag => tag.toLowerCase()))].sort()
   }))
 
   // sum 'card.amount' of cards with same key-fields
