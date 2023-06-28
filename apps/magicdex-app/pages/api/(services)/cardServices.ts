@@ -161,7 +161,7 @@ export async function createMissingMtgCards(session: Session, scryfallIds: strin
 export async function updateCardPricesByIds(
   session: Session,
   cards: UserCardData[],
-  { priceUpdatedAtThreshold = 1000 * 60 * 60 * 24 * 7 /* 7 days */ } = {}
+  { priceUpdatedAtThreshold = 1000 * 60 * 60 * 24 /* 24 hours */ } = {}
 ) {
   const supabaseClient = await createClientWithRLS(session.supabaseAccessToken)
   const utcNow = new Date()
