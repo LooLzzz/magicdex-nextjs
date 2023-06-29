@@ -3,7 +3,6 @@ import { UserCardData } from '@/types/supabase'
 import { ActionIcon, Affix, Container, Grid, Stack, Tooltip, rem } from '@mantine/core'
 import { useMediaQuery } from '@mantine/hooks'
 import { IconFileExport, IconFilePlus } from '@tabler/icons-react'
-import { MRT_Row } from 'mantine-react-table'
 import { GetServerSidePropsContext } from 'next'
 import { getServerSession } from 'next-auth'
 import { useRouter } from 'next/router'
@@ -14,7 +13,7 @@ import { authOptions } from '../api/auth/[...nextauth]'
 export default function CollectionPage() {
   const router = useRouter()
   const isSmallerThanLg = useMediaQuery('(max-width: 1225px)', false)
-  const [hoveredRow, setHoveredRow] = useState<MRT_Row<UserCardData>>()
+  const [hoveredCard, setHoveredCard] = useState<UserCardData>()
 
   function handleExportClick() {
     router.push('/collection/export')
@@ -51,7 +50,7 @@ export default function CollectionPage() {
               displayTransform
               displayPrice
               shouldTransfromTranslateImage={false}
-              card={hoveredRow?.original}
+              card={hoveredCard}
               aspectRatioProps={{
                 maw: CardImage.defaultWidth,
                 miw: CardImage.defaultWidth,
@@ -65,7 +64,7 @@ export default function CollectionPage() {
 
           <Grid.Col span={isSmallerThanLg ? 12 : 9} offset={0.2}>
             <CardsTable
-              onHoveredRowChange={setHoveredRow}
+              onHoveredCardChange={setHoveredCard}
             />
           </Grid.Col>
 

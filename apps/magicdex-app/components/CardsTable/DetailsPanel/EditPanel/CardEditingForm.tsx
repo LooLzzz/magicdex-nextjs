@@ -2,10 +2,10 @@ import { FloatingLabelSelect, FloatingLabelTagsSelect, QuantityInput } from '@/c
 import SelectCarditem from '@/components/ImportComponents/ImportWizard/SelectCarditem'
 import { useScryfallCardPrintsQuery, useUserCardsMutation } from '@/services/hooks'
 import { UserCardData } from '@/types/supabase'
-import { getCardFinishes } from '@/utils'
+import { getCardFinishes, scryfallDataToUserCardData } from '@/utils'
 import { Box, Center, Checkbox, Grid, Stack, rem } from '@mantine/core'
 import { useForm } from '@mantine/form'
-import { useMediaQuery } from '@mantine/hooks'
+import { useMediaQuery, usePrevious } from '@mantine/hooks'
 import { forwardRef, useCallback, useEffect, useImperativeHandle } from 'react'
 
 
@@ -16,10 +16,12 @@ export interface CardEditingFormHandle {
 
 export interface CardEditingFormProps {
   card: UserCardData,
+  onChange?: (value?: UserCardData) => void,
+  onDirtyChange?: (value: boolean) => void,
 }
 
 const CardEditingForm = forwardRef<CardEditingFormHandle, CardEditingFormProps>(
-  function CardEditingForm({ card }, ref) {
+  function CardEditingForm({ card, onChange: handleOnChange, onDirtyChange: handleOnDirtyChange }, ref) {
     const isLargerThanMd = useMediaQuery('(min-width: 768px)', false)
     const form = useForm({
       initialValues: {
@@ -27,6 +29,8 @@ const CardEditingForm = forwardRef<CardEditingFormHandle, CardEditingFormProps>(
         set: `${card.set}:${card.collector_number}`,
       }
     })
+    const isFormDirty = form?.isDirty()
+    const prevIsFormDirty = usePrevious(isFormDirty)
     const { mutate: userCardsMutate } = useUserCardsMutation()
     const { data: cardPrintsData, isFetching: cardPrintsFetching } = useScryfallCardPrintsQuery({ name: card.name })
     const { data: cardLangsData, isFetching: cardLangsFetching } = useScryfallCardPrintsQuery({
@@ -35,6 +39,31 @@ const CardEditingForm = forwardRef<CardEditingFormHandle, CardEditingFormProps>(
       set: form.values.set?.split(':', 1)[0],
       collector_number: form.values.set?.split(':')[1],
     })
+
+    useEffect(() => {
+      if (prevIsFormDirty !== isFormDirty)
+        handleOnDirtyChange?.(isFormDirty)
+
+      if (handleOnChange) {
+        if (isFormDirty) {
+          const newCard = {
+            ...scryfallDataToUserCardData(
+              cardLangsData?.data?.find(item => item.lang === form.values.lang)
+            ),
+            id: card.id,
+            foil: form.values.foil,
+            amount: form.values.amount,
+            prices: cardPrintsData?.data?.find(item => form.values.set === `${item.set}:${item.collector_number}`)?.prices ?? {},
+          }
+          newCard['price_usd'] = undefined
+          handleOnChange(newCard as undefined)
+        }
+        else {
+          handleOnChange(null)
+        }
+      }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [form?.values])
 
     useEffect(() => {
       const finishes = getCardFinishes(
@@ -91,9 +120,7 @@ const CardEditingForm = forwardRef<CardEditingFormHandle, CardEditingFormProps>(
               })) ?? []}
               {...form.getInputProps('set')}
               onChange={value => {
-                const newCard = cardPrintsData?.data?.find(item =>
-                  `${item.set}:${item.collector_number}` === value
-                )
+                const newCard = cardPrintsData?.data?.find(item => `${item.set}:${item.collector_number}` === value)
                 form.setValues({
                   lang: newCard?.lang ?? 'en',
                   scryfall_id: newCard?.id,
@@ -120,7 +147,6 @@ const CardEditingForm = forwardRef<CardEditingFormHandle, CardEditingFormProps>(
               onChange={value => {
                 const newCard = cardLangsData?.data?.find(item => item.lang === value)
                 form.setValues({
-                  lang: newCard?.lang ?? 'en',
                   scryfall_id: newCard?.id,
                 })
                 form.getInputProps('lang').onChange(value)

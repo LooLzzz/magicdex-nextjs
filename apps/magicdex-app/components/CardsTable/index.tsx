@@ -3,17 +3,15 @@ import { UserCardData } from '@/types/supabase'
 import { ActionIcon, Group, Text, Tooltip } from '@mantine/core'
 import { useHotkeys, useMediaQuery, usePrevious, useViewportSize } from '@mantine/hooks'
 import { IconEraser, IconRefresh } from '@tabler/icons-react'
-import { OnChangeFn } from '@tanstack/react-table'
 import {
   MRT_ColumnFiltersState,
   MRT_ExpandedState,
-  MRT_Row,
   MRT_SortingState,
   MRT_TableInstance,
   MRT_Virtualizer,
   MantineReactTable,
 } from 'mantine-react-table'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { Dispatch, SetStateAction, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import DetailsPanel from './DetailsPanel'
 import useColumnsDef from './columnsDef'
 import filtersDef, { ColumnFiltersContext } from './filtersDef'
@@ -21,9 +19,9 @@ import useStyles from './styles'
 
 
 export default function CardsTable({
-  onHoveredRowChange
+  onHoveredCardChange
 }: {
-  onHoveredRowChange?: OnChangeFn<MRT_Row<UserCardData>>
+  onHoveredCardChange?: Dispatch<SetStateAction<UserCardData>>
 }) {
   const { theme, classes } = useStyles()
   const { height: vheight } = useViewportSize()
@@ -69,7 +67,7 @@ export default function CardsTable({
   ])
 
   useEffect(() => {
-    if (expandedRows && prevMetadata?.totalRowCount !== data?.pages?.[0]?.metadata?.totalRowCount) {
+    if (expandedRows) {
       const expandedRowIdx = Object.keys(expandedRows)[0]
       if (expandedRowIdx === undefined)
         return
@@ -219,7 +217,7 @@ export default function CardsTable({
           }}
           mantineTableBodyRowProps={({ table, row }) => ({
             style: { cursor: 'pointer' },
-            onMouseEnter: () => isLargerThanLg && onHoveredRowChange?.(row),
+            onMouseEnter: () => isLargerThanLg && onHoveredCardChange?.(row?.original),
             onClick: () => table.setExpanded({ [row.id]: !table.getState().expanded[row.id] }),
           })}
           mantineDetailPanelProps={{

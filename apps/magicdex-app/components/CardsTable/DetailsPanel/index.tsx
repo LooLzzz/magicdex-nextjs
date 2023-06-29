@@ -64,6 +64,7 @@ export default function DetailsPanel<T extends UserCardData>(
   const { width: vwidth } = useViewportSize()
   const isLargerThanLg = useMediaQuery('(min-width: 1226px)', false)
   const isLargerThanMd = useMediaQuery('(min-width: 768px)', false)
+  const [stagingAreaCard, setStagingAreaCard] = useState<UserCardData>(null)
   const tableContainerWidth = table.refs.tableContainerRef?.current?.clientWidth
   const containerWidth = tableContainerWidth * 0.925
 
@@ -106,7 +107,10 @@ export default function DetailsPanel<T extends UserCardData>(
           openPriceTooltipToSides
           shouldTransfromTranslateImage={isLargerThanMd}
           shouldTransfromShrinkImage={isLargerThanMd}
-          card={row.original}
+          card={{
+            ...row.original,
+            ...stagingAreaCard,
+          }}
           aspectRatioProps={{
             maw: CardImage.defaultWidth,
             miw: CardImage.defaultWidth * (isLargerThanMd ? translateRanges(vwidth, [0.8, 0.9], [768, 1226]) : 0.9),
@@ -174,7 +178,10 @@ export default function DetailsPanel<T extends UserCardData>(
 
           <Carousel.Slide>
             <Stack pos='relative'>
-              <EditPanel card={row.original} />
+              <EditPanel
+                card={row.original}
+                onChange={setStagingAreaCard}
+              />
 
               <div style={{
                 position: 'absolute',

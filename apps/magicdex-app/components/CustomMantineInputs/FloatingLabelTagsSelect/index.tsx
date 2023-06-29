@@ -1,7 +1,7 @@
 import { FloatingLabelMultiSelect } from '@/components'
 import { FloatingLabelMultiSelectProps } from '@/components/CustomMantineInputs'
 import { useListState } from '@mantine/hooks'
-import { forwardRef } from 'react'
+import { forwardRef, useCallback } from 'react'
 
 
 export type FloatingLabelTagsSelectProps = Omit<FloatingLabelMultiSelectProps, 'data' | 'searchable' | 'creatable'> & {
@@ -20,6 +20,11 @@ const FloatingLabelTagsSelect = forwardRef<HTMLInputElement, FloatingLabelTagsSe
   ) {
     const [data, dataHandlers] = useListState(initialDataValue ?? [])
 
+    const handleOnChange = useCallback((value: string[]) => {
+      dataHandlers.setState(value)
+      onChange?.(value)
+    }, [dataHandlers, onChange])
+
     return (
       <FloatingLabelMultiSelect
         searchable
@@ -28,9 +33,10 @@ const FloatingLabelTagsSelect = forwardRef<HTMLInputElement, FloatingLabelTagsSe
         ref={ref}
         data={data}
         value={value}
-        onChange={onChange}
-        getCreateLabel={item => `[+] Create "${item}"`}
+        onChange={handleOnChange}
+        getCreateLabel={item => `[+] Create "${item.toLowerCase()}"`}
         onCreate={item => {
+          item = item.toLowerCase()
           dataHandlers.append(item)
           return item
         }}
