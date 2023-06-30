@@ -14,6 +14,7 @@ export default function CollectionPage() {
   const router = useRouter()
   const isSmallerThanLg = useMediaQuery('(max-width: 1225px)', false)
   const [hoveredCard, setHoveredCard] = useState<UserCardData>()
+  const [cardEditFormData, setCardEditFormData] = useState<UserCardData>()
 
   function handleExportClick() {
     router.push('/collection/export')
@@ -50,7 +51,10 @@ export default function CollectionPage() {
               displayTransform
               displayPrice
               shouldTransfromTranslateImage={false}
-              card={hoveredCard}
+              card={{
+                ...hoveredCard,
+                ...cardEditFormData,
+              }}
               aspectRatioProps={{
                 maw: CardImage.defaultWidth,
                 miw: CardImage.defaultWidth,
@@ -64,6 +68,7 @@ export default function CollectionPage() {
 
           <Grid.Col span={isSmallerThanLg ? 12 : 9} offset={0.2}>
             <CardsTable
+              onFormDataChange={setCardEditFormData}
               onHoveredCardChange={setHoveredCard}
             />
           </Grid.Col>

@@ -55,9 +55,10 @@ function CardInfo({ containerWidth, card }: {
 }
 
 export default function DetailsPanel<T extends UserCardData>(
-  { table, row }: {
+  { table, row, onFormDataChange }: {
     table: MRT_TableInstance<T>,
     row: MRT_Row<T>,
+    onFormDataChange: (data: UserCardData) => void,
   }) {
   const theme = useMantineTheme()
   const [embla, setEmbla] = useState<Embla>(null)
@@ -180,7 +181,10 @@ export default function DetailsPanel<T extends UserCardData>(
             <Stack pos='relative'>
               <EditPanel
                 card={row.original}
-                onChange={setStagingAreaCard}
+                onChange={value => {
+                  setStagingAreaCard(value)
+                  onFormDataChange(value)
+                }}
               />
 
               <div style={{

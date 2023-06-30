@@ -19,9 +19,10 @@ import useStyles from './styles'
 
 
 export default function CardsTable({
-  onHoveredCardChange
+  onHoveredCardChange, onFormDataChange,
 }: {
   onHoveredCardChange?: Dispatch<SetStateAction<UserCardData>>
+  onFormDataChange?: Dispatch<SetStateAction<UserCardData>>
 }) {
   const { theme, classes } = useStyles()
   const { height: vheight } = useViewportSize()
@@ -43,7 +44,7 @@ export default function CardsTable({
       columnFilterFns: { ...columnFilterFns, 'tags': 'arrIncludesAll' },
       columnFilters,
       globalFilter,
-      pageSize: Math.max(10, Math.floor((vheight - 250) / 60)),
+      pageSize: Math.max(10, 6 + Math.floor((vheight - 250) / 60)),
       sorting,
     },
   })
@@ -146,7 +147,7 @@ export default function CardsTable({
           manualFiltering
           manualSorting
 
-          renderDetailPanel={DetailsPanel}
+          renderDetailPanel={props => <DetailsPanel {...props} onFormDataChange={onFormDataChange} />}
           renderTopToolbarCustomActions={() => (
             <Group spacing={0}>
               <Tooltip withArrow label='Refresh Data'>
