@@ -1,16 +1,16 @@
-import useWebSocket, { Options } from 'react-use-websocket'
+import type { JsonObject, Options, WebSocketHook } from 'react-use-websocket/dist/lib/types'
 
 
 type Url = string | (() => string | Promise<string>) | null
-
 type ReadyStateText = 'Connecting' | 'Open' | 'Closing' | 'Closed' | 'Uninstantiated'
+type MagicdexWebSocketHook = (url: Url, options?: MagicdexWebSocketProps) => MagicdexWebSocketReturn
 
 interface MagicdexWebSocketProps extends Omit<Options, 'protocols'> {
   port?: number,
   protocol?: 'ws' | 'wss',
 }
 
-interface MagicdexWebSocketReturn extends ReturnType<typeof useWebSocket> {
+interface MagicdexWebSocketReturn extends WebSocketHook<MagicdexWebsocketResponseItem[]> {
   open: () => void,
   close: () => void,
   isClosed: boolean,
@@ -21,11 +21,23 @@ interface MagicdexWebSocketReturn extends ReturnType<typeof useWebSocket> {
   readyStateText: ReadyStateText,
 }
 
-type MagicdexWebSocketHook = (url: Url, options?: MagicdexWebSocketProps) => MagicdexWebSocketReturn
+interface MagicdexWebsocketResponseItem extends JsonObject {
+  coords: {
+    x: number,
+    y: number,
+    w: number,
+    h: number,
+  },
+  cardData: {
+    scryfall_id: string,
+    name: string,
+  }
+}
 
 export type {
-  MagicdexWebSocketProps,
-  MagicdexWebSocketReturn,
   MagicdexWebSocketHook,
+  MagicdexWebSocketProps,
+  MagicdexWebsocketResponseItem,
+  MagicdexWebSocketReturn,
   ReadyStateText,
 }

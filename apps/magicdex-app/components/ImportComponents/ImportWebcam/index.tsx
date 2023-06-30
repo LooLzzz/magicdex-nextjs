@@ -1,14 +1,16 @@
 import { FloatingLabelTextInput } from '@/components/CustomMantineInputs'
 import { useMagicdexWebSocket } from '@/services/hooks'
-import { Button, Center, Group, Stack, Text } from '@mantine/core'
-import React, { useCallback, useState } from 'react'
-import CanvasThing from './CanvasThing'
+import { Box, Button, Center, Group, Stack, Text } from '@mantine/core'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
+import Webcam from 'react-webcam'
 
 
 export default function ImportWebcam() {
-  const [socketUrl, setSocketUrl] = useState<string>('')
-  const [messageInput, setMessageInput] = useState<string>('')
-  const { sendMessage, lastMessage, isConnected, isConnecting, isInstantiated, open, close } = useMagicdexWebSocket(socketUrl)
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const webcamRef = useRef<Webcam>(null)
+  const canvasCtx = canvasRef?.current?.getContext('2d')
+  const [socketUrl, setSocketUrl] = useState<string>('localhost')
+  const { sendMessage, lastJsonMessage, isConnected, isConnecting, isInstantiated, open, close } = useMagicdexWebSocket(socketUrl, {})
 
   const handleConnectDisconnect = useCallback(
     () => {
@@ -16,18 +18,33 @@ export default function ImportWebcam() {
         open()
       else {
         close()
-        setMessageInput('')
       }
     },
     [isConnected, open, close])
 
   const handleSendMessage = useCallback(
     () => {
-      sendMessage(messageInput)
-      setMessageInput('')
+      sendMessage(webcamRef?.current?.getScreenshot())
     },
-    [sendMessage, messageInput]
+    [sendMessage]
   )
+
+  useEffect(() => {
+    if (!canvasCtx)
+      return
+
+    // clear canvas
+    canvasCtx.clearRect(0, 0, canvasCtx.canvas.width, canvasCtx.canvas.height)
+
+    // draw last message
+    canvasCtx.strokeStyle = 'black'
+    canvasCtx.lineWidth = 2
+    for (const data of (lastJsonMessage ?? [])) {
+      const { coords: { x, y, w, h }, cardData: { name } } = data
+      canvasCtx.strokeRect(x, y, w, h)
+      canvasCtx.fillText(name, x, y - 3)
+    }
+  }, [canvasCtx, lastJsonMessage])
 
   return (
     <Center>
@@ -38,17 +55,12 @@ export default function ImportWebcam() {
           disabled={isConnected}
           onChange={e => setSocketUrl(e.currentTarget.value)}
         />
-        <FloatingLabelTextInput
-          label='Message'
-          value={messageInput}
-          disabled={!isConnected}
-          onChange={e => setMessageInput(e.currentTarget.value)}
-        />
 
         <Center>
           <Group>
             <Button
               onClick={handleConnectDisconnect}
+              disabled={isConnecting}
               color={isConnected ? 'red' : undefined}
             >
               {isConnected ? 'Disconnect' : isConnecting ? 'Connecting...' : 'Connect'}
@@ -57,14 +69,34 @@ export default function ImportWebcam() {
               onClick={handleSendMessage}
               disabled={!isInstantiated || !isConnected}
             >
-              Send Message
+              Rx/Tx
             </Button>
           </Group>
         </Center>
 
-        {lastMessage ? <Text>Last message: {lastMessage.data}</Text> : null}
+        {lastJsonMessage ? <Text>Last message: {JSON.stringify(lastJsonMessage)}</Text> : null}
 
-        <CanvasThing />
+        <Box pos='relative'>
+          <canvas
+            ref={canvasRef}
+            width={webcamRef?.current?.video?.videoWidth}
+            height={webcamRef?.current?.video?.videoHeight}
+            style={{
+              position: 'absolute',
+              zIndex: 1,
+            }}
+          />
+
+          <Webcam
+            ref={webcamRef}
+            audio={false}
+            videoConstraints={{
+              facingMode: 'environment',
+              // width: 1280,
+              // height: 720,
+            }}
+          />
+        </Box>
       </Stack>
     </Center>
   )

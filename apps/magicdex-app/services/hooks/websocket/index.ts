@@ -1,12 +1,12 @@
 import { useCallback, useState } from 'react'
 import useWebSocket, { ReadyState } from 'react-use-websocket'
-import type { MagicdexWebSocketHook, ReadyStateText } from './types'
+import type { MagicdexWebSocketHook, MagicdexWebsocketResponseItem, ReadyStateText } from './types'
 
 
 const useMagicdexWebSocket: MagicdexWebSocketHook = (url, { port = 5200, protocol = 'ws', onClose, ...options } = {}) => {
   const [shouldConnect, setShouldConnect] = useState(false)
 
-  const res = useWebSocket(
+  const res = useWebSocket<MagicdexWebsocketResponseItem[]>(
     url ? `${protocol}://${url}:${port}` : undefined,
     {
       ...options,
