@@ -2,6 +2,7 @@ import { FloatingLabelTextInput } from '@/components/CustomMantineInputs'
 import { useMagicdexWebSocket } from '@/services/hooks'
 import { Button, Center, Group, Stack, Text } from '@mantine/core'
 import React, { useCallback, useState } from 'react'
+import CanvasThing from './CanvasThing'
 
 
 export default function ImportWebcam() {
@@ -62,6 +63,8 @@ export default function ImportWebcam() {
         </Center>
 
         {lastMessage ? <Text>Last message: {lastMessage.data}</Text> : null}
+
+        <CanvasThing />
       </Stack>
     </Center>
   )
