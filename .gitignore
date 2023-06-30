@@ -44,3 +44,10 @@ Thumbs.db
 
 # Next.js
 .next
+
+# Python
+__pycache__
+.venv
+.tox
+.pytest_cache
+

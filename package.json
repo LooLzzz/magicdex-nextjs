@@ -51,6 +51,7 @@
     "@nrwl/nx-cloud": "latest",
     "@nrwl/react": "15.8.7",
     "@nrwl/workspace": "15.8.7",
+    "@nxlv/python": "^16.0.0",
     "@testing-library/react": "14.0.0",
     "@types/bcrypt": "^5.0.0",
     "@types/jest": "^29.4.0",

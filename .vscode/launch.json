@@ -27,6 +27,23 @@
       "url": "http://localhost:4200",
       "webRoot": "${workspaceFolder}/apps/magicdex-app",
       // "webRoot": "${workspaceFolder}/apps/${input:app-name}",
+    },
+    {
+      "name": "Python Poetry: Debug FastAPI App",
+      "cwd": "${workspaceFolder}/apps/python-workspace",
+      "type": "python",
+      "request": "launch",
+      "module": "poetry",
+      "args": [
+        "run",
+        "uvicorn",
+        "webcam_import_app:app",
+        "--reload",
+        "--host",
+        "0.0.0.0",
+        "--port",
+        "5200"
+      ],
     }
   ],
   "inputs": [
