@@ -1,26 +1,46 @@
-import base64
-import random
+from abc import ABCMeta
+from functools import wraps
+from time import time
 
-import cv2
 import numpy as np
+from numpy import typing as npt
+
+from .types import RectDict
 
 
-def base64_image_to_opencv(data: str) -> np.ndarray:
-    img_data = data.split(',')[1]
-    img_ndarray = np.frombuffer(base64.b64decode(img_data), dtype=np.uint8)
-    return cv2.imdecode(img_ndarray, cv2.IMREAD_COLOR)
+class Singleton(type):
+    _instances = {}
+
+    def __call__(cls, *args, **kwargs):
+        if cls not in cls._instances:
+            cls._instances[cls] = super(type, cls).__call__(*args, **kwargs)
+        return cls._instances[cls]
 
 
-def gen_random_card_data(img_width: int, img_height: int):
+class SingletonABCMeta(ABCMeta):
+    _instances = {}
+
+    def __call__(cls, *args, **kwargs):
+        if cls not in cls._instances:
+            cls._instances[cls] = super(SingletonABCMeta, cls).__call__(*args, **kwargs)
+        return cls._instances[cls]
+
+
+def timeit_decorator(f):
+    @wraps(f)
+    def wrap(*args, **kw):
+        ts = time()
+        result = f(*args, **kw)
+        te = time()
+        print(f'{f.__name__}() took: {(te-ts)*1000:2.4f} ms')
+        return result
+    return wrap
+
+
+def rect_points_to_dict(rect: npt.NDArray[np.uint32]) -> RectDict:
     return {
-        'coords': {
-            'x': random.randint(0, img_width),
-            'y': random.randint(0, img_height),
-            'w': random.randint(0, img_width // 2),
-            'h': random.randint(0, img_height // 2),
-        },
-        'cardData': {
-            'scryfall_id': 'a1b2c3d4',
-            'name': random.choice(['Goku', 'Vegeta', 'Gohan', 'Piccolo', 'Krillin', 'Yamcha', 'Tien', 'Chiaotzu']),
-        }
+        'tl': {'x': int(rect[0][0]), 'y': int(rect[0][1])},
+        'tr': {'x': int(rect[1][0]), 'y': int(rect[1][1])},
+        'br': {'x': int(rect[2][0]), 'y': int(rect[2][1])},
+        'bl': {'x': int(rect[3][0]), 'y': int(rect[3][1])},
     }

@@ -167,3 +167,27 @@ export function translateRanges(
 export async function setAsyncTimeout(delay: number) {
   return new Promise(resolve => setTimeout(resolve, delay))
 }
+
+export function deepEqual<T>(a: T, b: T) {
+  const ok = Object.keys
+  const ta = typeof a
+  const tb = typeof b
+
+  return a && b && ta === 'object' && ta === tb ? (
+    ok(a).length === ok(b).length &&
+    ok(a).every(key => deepEqual(a[key], b[key]))
+  ) : (a === b)
+}
+
+export function deepArrayEqual<T>(a: T[], b: T[]) {
+  if (typeof a !== typeof b)
+    return false
+
+  if (!Array.isArray(a) || !Array.isArray(b))
+    return false
+
+  if (a.length !== b.length)
+    return false
+
+  return a.every((value, index) => deepEqual(value, b[index]))
+}

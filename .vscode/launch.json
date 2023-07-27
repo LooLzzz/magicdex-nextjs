@@ -29,14 +29,12 @@
       // "webRoot": "${workspaceFolder}/apps/${input:app-name}",
     },
     {
-      "name": "Python Poetry: Debug FastAPI App",
+      "name": "Python: Debug uvicorn app",
       "cwd": "${workspaceFolder}/apps/python-workspace",
       "type": "python",
       "request": "launch",
-      "module": "poetry",
+      "module": "uvicorn",
       "args": [
-        "run",
-        "uvicorn",
         "webcam_import_app:app",
         "--reload",
         "--host",

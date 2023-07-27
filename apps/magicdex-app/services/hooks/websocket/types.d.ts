@@ -21,17 +21,24 @@ interface MagicdexWebSocketReturn extends WebSocketHook<MagicdexWebsocketRespons
   readyStateText: ReadyStateText,
 }
 
+interface Point {
+  x: number,
+  y: number,
+}
+
 interface MagicdexWebsocketResponseItem extends JsonObject {
   coords: {
-    x: number,
-    y: number,
-    w: number,
-    h: number,
+    tl: Point,
+    tr: Point,
+    br: Point,
+    bl: Point,
   },
   cardData: {
     scryfall_id: string,
     name: string,
-  }
+    set: string,
+  },
+  match: number,
 }
 
 export type {
@@ -39,5 +46,6 @@ export type {
   MagicdexWebSocketProps,
   MagicdexWebsocketResponseItem,
   MagicdexWebSocketReturn,
+  Point,
   ReadyStateText,
 }
