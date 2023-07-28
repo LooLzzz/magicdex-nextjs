@@ -3,8 +3,9 @@ import useWebSocket, { ReadyState } from 'react-use-websocket'
 import type { MagicdexWebSocketHook, MagicdexWebsocketResponseItem, ReadyStateText } from './types'
 
 
-const useMagicdexWebSocket: MagicdexWebSocketHook = (url, { port = 5200, protocol = 'ws', onClose, ...options } = {}) => {
+const useMagicdexWebSocket: MagicdexWebSocketHook = (url, { port = 5200, onClose, ...options } = {}) => {
   const [shouldConnect, setShouldConnect] = useState(false)
+  const protocol = location.protocol === 'https:' ? 'wss' : 'ws'
 
   const res = useWebSocket<MagicdexWebsocketResponseItem[]>(
     url ? `${protocol}://${url}:${port}` : undefined,

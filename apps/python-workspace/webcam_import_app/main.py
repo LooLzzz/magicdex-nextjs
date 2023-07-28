@@ -24,7 +24,7 @@ async def root():
 
 
 @app.get('/phash-tree')
-async def get_bktree(phash_tree: PhashTreeABC = Depends(deps.phash_tree_dep)):
+async def get_phash_tree(phash_tree: PhashTreeABC = Depends(deps.phash_tree_dep)):
     return {'message': repr(phash_tree)}
 
 
