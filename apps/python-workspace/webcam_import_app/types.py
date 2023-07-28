@@ -18,3 +18,9 @@ class RectDict(TypedDict):
     tr: Point
     br: Point
     bl: Point
+
+
+class SubImageMatchDict(TypedDict):
+    coords: RectDict
+    cardData: dict
+    match: int

@@ -1,7 +1,6 @@
-import json
-import pickle
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from functools import lru_cache
 from pathlib import Path
 from typing import Generic, Literal, TypeVar
 
@@ -23,19 +22,21 @@ class PhashTreeABC(ABC):
     def __repr__(self):
         return f'<{self.__class__.__name__}(phash_bit_length={self.phash_bit_length})>'
 
+    @property
+    def default_tolerance(self):
+        return int(self.phash_bit_length * 0.375)
+
     @abstractmethod
     def find(self,
              item: 'int | CardPhashItem',
-             tolerance: int = None,
-             *, timeit: bool = False) -> 'None | PhashTreeResultItem[CardPhashItem]':
+             tolerance: int = None) -> 'list[PhashTreeResultItem[CardPhashItem]]':
         ...
 
     async def afind(self,
                     item: 'int | CardPhashItem',
-                    tolerance: int = None,
-                    *, timeit: bool = False) -> 'None | PhashTreeResultItem[CardPhashItem]':
+                    tolerance: int = None) -> 'list[PhashTreeResultItem[CardPhashItem]]':
         """Async version of `find()`"""
-        return self.find(item, tolerance, timeit=timeit)
+        return self.find(item, tolerance)
 
 
 class CardPhashItem(BaseModel):
@@ -74,10 +75,10 @@ class CardPhashItem(BaseModel):
         allow_population_by_field_name = True
 
 
-@dataclass
+@dataclass(unsafe_hash=True)
 class PhashTreeResultItem(Generic[T]):
-    distance: int
-    value: T
+    distance: int = field(hash=False, compare=False)
+    value: T = field(hash=True, compare=True)
 
     def __repr__(self):
         return f'(distance={self.distance}, value={self.value})'
@@ -88,23 +89,25 @@ class PhashTreeResultItem(Generic[T]):
 
 class PhashBitsDataFrame(PhashTreeABC, metaclass=utils.SingletonABCMeta):
     def __init__(self, *, phash_bit_length: Literal[64, 256, 1024] = 256):
-        # filepath = Path(__file__).parent.parent / f'data/phash_bits_png_{phash_bit_length}bit.json'
         filepath = Path(__file__).parent.parent / f'data/phash_normal_{phash_bit_length}bit.csv'
 
         self.phash_bit_length = phash_bit_length
         self.df = pd.read_csv(filepath, index_col='scryfall_id')
 
-    def find(self, value: int, tolerance: int = None, *, timeit: bool = False):
-        tolerance = tolerance or int(self.phash_bit_length * 0.375)
+    @lru_cache(maxsize=1024)
+    def find(self, value: int, tolerance: int = None, n: int = 1):
+        tolerance = tolerance or self.default_tolerance
 
         df = self.df.copy()
         df['distance'] = df['phash'].apply(lambda x: hamming_distance(int(x), value))
-        row = df.iloc[df['distance'].argmin()]
+        results = df.nsmallest(n, columns='distance', keep='first')
+        results = results[results['distance'] <= tolerance]
 
-        if row['distance'] > tolerance:
-            return None
-        return PhashTreeResultItem(distance=row['distance'],
-                                   value=CardPhashItem(scryfall_id=row.name, **row.to_dict()))
+        return [
+            PhashTreeResultItem(distance=row['distance'],
+                                value=CardPhashItem(scryfall_id=label, **row.to_dict()))
+            for label, row in results.iterrows()
+        ]
 
 
 class PhashHammingTrie(PhashTreeABC, metaclass=utils.SingletonABCMeta):
@@ -121,10 +124,12 @@ class PhashHammingTrie(PhashTreeABC, metaclass=utils.SingletonABCMeta):
         # self.trie = BinaryHammingTrie(items=(CardPhashItem(scryfall_id=row.name, **row.to_dict())
         #                                      for _, row in df.iloc[:1000].iterrows()))
 
-    def find(self, value: int, tolerance: int = None, *, timeit: bool = False):
-        tolerance = tolerance or int(self.phash_bit_length * 0.375)
-        result = self.trie.find(value, tolerance=tolerance)
+    @lru_cache(maxsize=1024)
+    def find(self, value: int, tolerance: int = None, n: int = 1):
+        tolerance = tolerance or self.default_tolerance
+        results = self.trie.find(value, tolerance=tolerance)
 
-        if result:
-            return PhashTreeResultItem(distance=result[0].distance, value=result[0].value)
-        return None
+        return [
+            PhashTreeResultItem(distance=item.distance, value=item.value)
+            for item in results[:n]
+        ]

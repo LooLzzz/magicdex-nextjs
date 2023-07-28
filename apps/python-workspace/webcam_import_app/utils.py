@@ -8,7 +8,7 @@ from numpy import typing as npt
 from .types import RectDict
 
 
-class Singleton(type):
+class SingletonMeta(type):
     _instances = {}
 
     def __call__(cls, *args, **kwargs):
