@@ -38,13 +38,13 @@ export interface ScryfallSearchReturnType {
  * Barebone implementation of Scryfall's `POST /cards/collection` endpoint.
  */
 export async function scryfallCardsCollectionEndpoint([...ids]) {
-  const resp = await axios.post(
+  const { data } = await axios.post(
     apiRoutes.cards.collection,
     {
       identifiers: ids.map(id => ({ id })),
     }
   )
-  return resp.data.data as {
+  return data as {
     data: ScryfallCardData[],
     not_found: string[]
   }
