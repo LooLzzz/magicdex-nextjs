@@ -335,85 +335,87 @@ export default function ImportWizard() {
             </Grid.Col>
           </Grid>
 
-          <Divider
-            labelPosition='center'
-            label={
-              smallerThanSm
-                ? <ActionIcon
-                  disabled={!selectedCard}
-                  variant='filled'
-                  color='theme'
-                  onClick={() => handleAddCurrentValuesToStagingArea({ resetForm: true })}
-                >
-                  <IconPlus />
-                </ActionIcon>
-                : undefined
-            }
-          />
-
           {
             stagingArea.length === 0
-              ? <Text italic>New cards will be displayed here.</Text>
+              ? undefined
               : (
-                <List>
-                  <Tooltip.Group openDelay={500} closeDelay={100}>
-                    {
-                      stagingArea.map((item, index) => (
-                        <List.Item key={index}>
-                          <Tooltip
-                            events={{ hover: true, focus: true, touch: true }}
-                            bg='transparent'
-                            position={smallerThanSm ? 'top' : 'right'}
-                            label={
-                              <CardImage
-                                tiltEnabled={false}
-                                glareEnabled={false}
-                                aspectRatioProps={{ w: CardImage.defaultWidth * 0.7 }}
-                                card={{ ...item.cardData, ...item.formValues } as undefined}
-                              />
-                            }
-                          >
-                            <Group spacing={rem(7.5)} sx={{ cursor: 'help' }}>
-                              <Text>
-                                {[
-                                  `x${item.formValues.amount}`,
-                                  item.cardData.name,
-                                  `[${item.cardData.set.toUpperCase()}]`,
-                                  `[#${item.cardData.collector_number}]`,
-                                  item.formValues.foil
-                                    ? '[F]'
-                                    : undefined
-                                  ,
-                                  `[@${item.cardData.lang}]`,
-                                ].filter(Boolean).join(' ')}
-                              </Text>
-                              <ActionIcon
-                                variant='filled'
-                                color='red'
-                                size='sm'
-                                onClick={() => stagingAreaHandlers.remove(index)}
-                              >
-                                <IconTrash />
-                              </ActionIcon>
-                              <ActionIcon
-                                variant='filled'
-                                color='theme'
-                                size='sm'
-                                onClick={() => {
-                                  setSelectedCard(item.cardData.name)
-                                  form.setValues(item.formValues)
-                                  stagingAreaHandlers.remove(index)
-                                }}
-                              >
-                                <IconEdit />
-                              </ActionIcon>
-                            </Group>
-                          </Tooltip>
-                        </List.Item>
-                      ))
+                <>
+                  <Divider
+                    labelPosition='center'
+                    label={
+                      smallerThanSm
+                        ? <ActionIcon
+                          disabled={!selectedCard}
+                          variant='filled'
+                          color='theme'
+                          onClick={() => handleAddCurrentValuesToStagingArea({ resetForm: true })}
+                        >
+                          <IconPlus />
+                        </ActionIcon>
+                        : undefined
                     }
-                  </Tooltip.Group>
-                </List>
+                  />
+
+                  <List>
+                    <Tooltip.Group openDelay={500} closeDelay={100}>
+                      {
+                        stagingArea.map((item, index) => (
+                          <List.Item key={index}>
+                            <Tooltip
+                              events={{ hover: true, focus: true, touch: true }}
+                              bg='transparent'
+                              position={smallerThanSm ? 'top' : 'right'}
+                              label={
+                                <CardImage
+                                  tiltEnabled={false}
+                                  glareEnabled={false}
+                                  aspectRatioProps={{ w: CardImage.defaultWidth * 0.7 }}
+                                  card={{ ...item.cardData, ...item.formValues } as undefined}
+                                />
+                              }
+                            >
+                              <Group spacing={rem(7.5)} sx={{ cursor: 'help' }}>
+                                <Text>
+                                  {[
+                                    `x${item.formValues.amount}`,
+                                    item.cardData.name,
+                                    `[${item.cardData.set.toUpperCase()}]`,
+                                    `[#${item.cardData.collector_number}]`,
+                                    item.formValues.foil
+                                      ? '[F]'
+                                      : undefined
+                                    ,
+                                    `[@${item.cardData.lang}]`,
+                                  ].filter(Boolean).join(' ')}
+                                </Text>
+                                <ActionIcon
+                                  variant='filled'
+                                  color='red'
+                                  size='sm'
+                                  onClick={() => stagingAreaHandlers.remove(index)}
+                                >
+                                  <IconTrash />
+                                </ActionIcon>
+                                <ActionIcon
+                                  variant='filled'
+                                  color='theme'
+                                  size='sm'
+                                  onClick={() => {
+                                    setSelectedCard(item.cardData.name)
+                                    form.setValues(item.formValues)
+                                    stagingAreaHandlers.remove(index)
+                                  }}
+                                >
+                                  <IconEdit />
+                                </ActionIcon>
+                              </Group>
+                            </Tooltip>
+                          </List.Item>
+                        ))
+                      }
+                    </Tooltip.Group>
+                  </List>
+                </>
               )
           }
 
