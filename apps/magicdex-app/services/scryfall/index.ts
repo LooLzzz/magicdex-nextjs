@@ -1,6 +1,7 @@
 import { ScryfallCardData } from '@/types/scryfall'
+import apiRoutes from './apiRoutes'
 import scryfallCache from './cache'
-import { fetchCardsDataByIds } from './services'
+import { fetchCardsDataByIds, search } from './services'
 
 
 /**
@@ -43,4 +44,9 @@ const scryfall = {
   getCardsDataByIds,
 }
 
-export default scryfall
+export {
+  scryfall as default,
+  apiRoutes as scryfallApiRoutes,
+  search as scryfallSearch,
+  fetchCardsDataByIds,
+}
