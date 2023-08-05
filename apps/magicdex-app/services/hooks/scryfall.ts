@@ -1,28 +1,12 @@
+import { scryfallApiRoutes, scryfallSearch } from '@/services/scryfall'
 import { ScryfallCardData } from '@/types/scryfall'
-import { UseQueryOptions, useQuery } from '@tanstack/react-query'
+import { UseQueryOptions, useQueries, useQuery } from '@tanstack/react-query'
 import axios from 'axios'
+import { useCallback, useMemo } from 'react'
 
 export type ScryfallAutocompleteReturnType = { data: string[], metadata: { total_values: number } }
 export type ScryfallCardPrintsReturnType = { data: ScryfallCardData[], metadata: { total_cards: number } }
 
-
-/**
- * recursively fetches all pages of a scryfall query
- */
-async function _fetchAllPages({ data, has_more, next_page }: {
-  data: ScryfallCardData[],
-  has_more: boolean,
-  next_page: string,
-}): Promise<ScryfallCardData[]> {
-  if (!has_more)
-    return data
-
-  const { data: nextData } = await axios.get(next_page)
-  return await _fetchAllPages({
-    ...nextData,
-    data: [...data, ...nextData.data],
-  })
-}
 
 export function useScryfallAutocompleteQuery(
   query: string,
@@ -37,7 +21,7 @@ export function useScryfallAutocompleteQuery(
           total_values: number,
           object: string,
         }
-      } = await axios.get('https://api.scryfall.com/cards/autocomplete', {
+      } = await axios.get(scryfallApiRoutes.cards.autocomplete, {
         params: {
           q: query
         }
@@ -63,57 +47,91 @@ export function useScryfallCardPrintsQuery(
     collector_number?: string,
     lang?: string,
     name?: string,
+    foil?: boolean,
     order?: '' | 'name' | 'released' | 'set',
     set?: string,
     unique?: '' | 'prints' | 'art' | 'cards',
+    exact?: boolean
+    fetchAllPages?: boolean,
   } = {},
   options: Omit<UseQueryOptions<ScryfallCardPrintsReturnType>, 'queryFn' | 'initialData'> = {},
 ) {
   const { queryKey = [], ...restOptions } = options
   const {
-    collector_number,
+    collector_number: cn,
     lang,
     name,
-    order = 'released',
     set,
+    foil,
+    order = 'released',
     unique = 'prints',
+    exact = true,
+    fetchAllPages = true,
   } = params
 
   return useQuery<ScryfallCardPrintsReturnType>(
-    ['scryfall', 'card-prints', name, set, collector_number, unique, order, lang, ...queryKey],
-    async () => {
-      const { data }: {
-        data: {
-          data: ScryfallCardData[],
-          total_cards: number,
-          has_more: boolean,
-          next_page: string,
-        }
-      } = await axios.get('https://api.scryfall.com/cards/search', {
-        params: {
-          q: [
-            name ? `!"${name}"` : null,
-            lang ? `lang:"${lang}"` : null,
-            set ? `set:"${set}"` : null,
-            collector_number ? `cn:"${collector_number}"` : null,
-            'game:"paper"',
-          ].filter(Boolean).join(' '),
-          unique,
-          order,
-        },
-      })
-
-      return {
-        data: await _fetchAllPages(data),
-        metadata: {
-          total_cards: data.total_cards,
-        },
-      } as undefined
-    },
+    ['scryfall', 'search', name, set, cn, unique, order, lang, foil, exact, fetchAllPages, ...queryKey],
+    async () => await scryfallSearch(
+      { name, set, collector_number: cn, lang, foil },
+      { order, unique, exact, fetchAllPages }
+    ),
     {
-      enabled: name?.length > 0 || set?.length > 0 || collector_number?.length > 0,
+      enabled: !!name || !!set || !!cn,
       refetchOnWindowFocus: false,
       ...restOptions
     }
   )
+}
+
+export function useScryfallBulkQuery(
+  params: {
+    collector_number?: string,
+    lang?: string,
+    name?: string,
+    foil?: boolean,
+    order?: '' | 'name' | 'released' | 'set',
+    set?: string,
+    unique?: '' | 'prints' | 'art' | 'cards',
+    fetchAllPages?: boolean,
+  }[] = [],
+  options: Omit<UseQueryOptions<ScryfallCardData[]>, 'queryFn' | 'initialData'> = {},
+) {
+  const { queryKey = [], ...restOptions } = options
+  const exact = true
+
+  const queries = useQueries({
+    queries: params.map(({
+      collector_number: cn,
+      lang,
+      name,
+      set,
+      foil,
+      order = 'released',
+      unique = 'prints',
+      fetchAllPages = true,
+    }, i) => ({
+      queryKey: ['scryfall', 'search', name, set, cn, unique, order, lang, foil, exact, fetchAllPages, ...queryKey],
+      queryFn: async () => {
+        const { data } = await scryfallSearch(
+          { name, set, collector_number: cn, lang, foil },
+          { order, unique, exact, fetchAllPages }
+        )
+        return data?.[0] ?? null
+      },
+      enabled: !!name || !!set || !!cn,
+      refetchOnWindowFocus: false,
+      ...restOptions,
+    }))
+  })
+
+  const flatData = useMemo(() => queries.flatMap(({ data }) => data), [queries])
+  const isLoading = useMemo(() => queries.some(({ isLoading }) => isLoading), [queries])
+  const isError = useMemo(() => queries.some(({ isError }) => isError), [queries])
+  const error = useMemo(() => queries.flatMap(({ error }) => error), [queries])
+  const isSuccess = useMemo(() => queries.every(({ isSuccess }) => isSuccess), [queries])
+  const refetchAll = useCallback(() => queries.forEach(({ refetch }) => refetch()), [queries])
+
+  return {
+    queries, flatData, isLoading, isError, error, isSuccess, refetchAll,
+  }
 }
