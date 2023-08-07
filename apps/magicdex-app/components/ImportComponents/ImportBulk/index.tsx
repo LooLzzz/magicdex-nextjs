@@ -21,7 +21,7 @@ import {
 import { useListState, useMediaQuery } from '@mantine/hooks'
 import { notifications } from '@mantine/notifications'
 import { IconEdit, IconTrash } from '@tabler/icons-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import useStyles from './styles'
 
 
@@ -41,6 +41,7 @@ export default function ImportBulk() {
   const { classes, theme } = useStyles()
   const smallerThanSm = useMediaQuery(`(max-width: ${em(theme.breakpoints.sm)})`)
   const [textareaText, setTextareaText] = useState('')
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
   const [cardQueryParams, setCardQueryParams] = useState<CardQueryParam[]>([])
   const [settledQueries, setSettledQueries] = useState(0)
   const [stagingArea, stagingAreaHandlers] = useListState<StagingArea>([])
@@ -152,7 +153,7 @@ export default function ImportBulk() {
           <>
             Failed to parse {failed.length} card{failed.length > 1 ? 's' : ''}.
             <br />
-            Please fix the remaining row{failed.length > 1 ? 's' : ''} and try again.
+            Please review the remaining rows and try again.
           </>
         ),
       })
@@ -162,6 +163,11 @@ export default function ImportBulk() {
     setTextareaText(failed.map(card => card.originalText).join('\n'))
     stagingAreaHandlers.append(...success)
   }
+
+  useEffect(() => {
+    // focus on Card List Textarea 150ms after mount
+    setTimeout(() => textareaRef?.current?.focus(), 150)
+  }, [])
 
   useEffect(() => {
     if (settledQueries > 0 && settledQueries === cardQueryParams.length)
@@ -190,6 +196,7 @@ export default function ImportBulk() {
 
         <Textarea
           autosize
+          ref={textareaRef}
           value={textareaText}
           onChange={event => setTextareaText(event.currentTarget.value)}
           minRows={12}

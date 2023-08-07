@@ -349,13 +349,12 @@ export const CardTextPrice = React.memo(
   }) {
     if (typeof price_usd === 'undefined') {
       price_usd = Number(
-        foil
+        (foil
           ? prices?.usd_foil
-          : prices?.usd
+          : prices?.usd)
+        || prices?.usd
+        || prices?.usd_foil
       )
-
-      if (!price_usd)
-        price_usd = undefined
     }
 
     return (

@@ -1,14 +1,24 @@
 import { authOptions } from '@/api/auth/[...nextauth]'
+import { Center, List, Stack, Text } from '@mantine/core'
 import type { GetServerSidePropsContext } from 'next'
 import { getServerSession } from 'next-auth'
 
 
-export default function SingupPage() {
-  // TODO: implement profile page:
-  // - change password
-  // - change user image
-  // - delete account
-  return <>im profile</>
+export default function ProfilePage() {
+  return (
+    <Center>
+      <Stack>
+        <Text>
+          TODO: implement profile page:
+        </Text>
+        <List>
+          <List.Item>change password</List.Item>
+          <List.Item>change user image</List.Item>
+          <List.Item>delete account</List.Item>
+        </List>
+      </Stack>
+    </Center>
+  )
 }
 
 export async function getServerSideProps(context: GetServerSidePropsContext) {

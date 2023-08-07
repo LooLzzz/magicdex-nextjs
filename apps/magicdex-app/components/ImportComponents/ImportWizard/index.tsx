@@ -31,6 +31,7 @@ import {
 } from '@mantine/core'
 import { useForm } from '@mantine/form'
 import { getHotkeyHandler, useHotkeys, useListState, useMediaQuery } from '@mantine/hooks'
+import { notifications } from '@mantine/notifications'
 import { IconEdit, IconPlus, IconTrash } from '@tabler/icons-react'
 import { useEffect, useRef, useState } from 'react'
 import SelectCarditem from './SelectCarditem'
@@ -58,6 +59,8 @@ export default function ImportWizard() {
     set: form.values.set?.split(':', 1)[0],
     collector_number: form.values.set?.split(':')[1],
   })
+  const cardLangData = cardLangsData?.data?.find(item => item.lang === form.values.lang)
+  const cardPrintData = cardPrintsData?.data?.find(item => form.values.set === `${item.set}:${item.collector_number}`)
 
   function resetForm({ includeStagingArea = false } = {}) {
     setSelectedCard(null)
@@ -70,12 +73,18 @@ export default function ImportWizard() {
   }
 
   function handleAddCurrentValuesToStagingArea({ resetForm: _resetForm = false } = {}) {
-    const cardLangData = cardLangsData?.data?.find(item => item.lang === form.values.lang)
-    const cardPrintData = cardPrintsData?.data?.find(item => form.values.set === `${item.set}:${item.collector_number}`)
     const cardData = cardLangData ?? cardPrintData
-
     if (!cardData)
       return
+
+    if (!cardData.games.includes('paper')) {
+      notifications.show({
+        title: 'Card is not available in paper',
+        color: 'red',
+        message: 'This card is not available in paper, please select a different printing',
+      })
+      return
+    }
 
     stagingAreaHandlers.append({
       cardData: cardPrintData,
@@ -134,11 +143,7 @@ export default function ImportWizard() {
   }, [selectedCard, cardPrintsData])
 
   useEffect(() => {
-    const finishes = getCardFinishes(
-      cardPrintsData?.data?.find(item =>
-        `${item.set}:${item.collector_number}` === form.values.set
-      )
-    )
+    const finishes = getCardFinishes(cardPrintData)
 
     if (finishes.foil && finishes.nonfoil)
       form.setFieldValue('foil', form.values?.foil ?? false)
@@ -178,12 +183,10 @@ export default function ImportWizard() {
                 displayPrice
                 openPriceTooltipToSides
                 card={{
-                  ...scryfallDataToUserCardData(
-                    cardLangsData?.data?.find(item => item.lang === form.values.lang)
-                  ),
+                  ...scryfallDataToUserCardData(cardLangData),
                   foil: form.values.foil,
                   amount: form.values.amount,
-                  prices: cardPrintsData?.data?.find(item => form.values.set === `${item.set}:${item.collector_number}`)?.prices ?? {},
+                  prices: cardPrintData?.prices ?? {},
                 } as undefined}
                 aspectRatioProps={{
                   maw: CardImage.defaultWidth,
@@ -300,11 +303,7 @@ export default function ImportWizard() {
                       disabled={
                         !selectedCard
                         || Object.values(
-                          getCardFinishes(
-                            cardPrintsData?.data?.find(item =>
-                              `${item.set}:${item.collector_number}` === form.values.set
-                            )
-                          )
+                          getCardFinishes(cardPrintData)
                         ).filter(Boolean).length < 2
                       }
                       label='Foil'
@@ -336,25 +335,29 @@ export default function ImportWizard() {
           </Grid>
 
           {
+            smallerThanSm && (
+              <Divider
+                labelPosition='center'
+                label={
+                  <ActionIcon
+                    disabled={!selectedCard}
+                    variant='filled'
+                    color='theme'
+                    onClick={() => handleAddCurrentValuesToStagingArea({ resetForm: true })}
+                  >
+                    <IconPlus />
+                  </ActionIcon>
+                }
+              />
+            )
+          }
+
+          {
             stagingArea.length === 0
               ? undefined
               : (
                 <>
-                  <Divider
-                    labelPosition='center'
-                    label={
-                      smallerThanSm
-                        ? <ActionIcon
-                          disabled={!selectedCard}
-                          variant='filled'
-                          color='theme'
-                          onClick={() => handleAddCurrentValuesToStagingArea({ resetForm: true })}
-                        >
-                          <IconPlus />
-                        </ActionIcon>
-                        : undefined
-                    }
-                  />
+                  {!smallerThanSm && <Divider />}
 
                   <List>
                     <Tooltip.Group openDelay={500} closeDelay={100}>
