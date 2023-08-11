@@ -167,3 +167,23 @@ export function translateRanges(
 export async function setAsyncTimeout(delay: number) {
   return new Promise(resolve => setTimeout(resolve, delay))
 }
+
+export async function getImageDimensionsFromFile(imageFile: File) {
+  return new Promise<{ width: number, height: number }>((resolve, reject) => {
+    const img = new Image()
+    img.onload = () => resolve({ width: img.width, height: img.height })
+    img.onerror = reject
+    img.src = URL.createObjectURL(imageFile)
+  })
+}
+
+/**
+ * Remove all keys from an object that have a falsy value
+*/
+export function compactObject<K extends string | number | symbol, V>(obj: Record<K, V>) {
+  return Object.fromEntries(
+    Object
+      .entries(obj)
+      .filter(([, value]) => Boolean(value))
+  ) as Record<K, V>
+}

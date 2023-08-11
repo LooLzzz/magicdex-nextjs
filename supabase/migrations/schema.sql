@@ -195,7 +195,8 @@ CREATE TABLE "next_auth"."users" (
     "email" "text",
     "password" "text",
     "emailVerified" timestamp with time zone,
-    "image" "text"
+    "image" "text",
+    "created_at" timestamp with time zone DEFAULT (now() at time zone 'utc') NOT NULL,
 );
 
 

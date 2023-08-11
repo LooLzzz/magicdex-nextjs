@@ -18,6 +18,7 @@ import {
   QuantityInput,
 } from './CustomMantineInputs'
 import * as ImportComponents from './ImportComponents'
+import UserInfo from './UserInfo'
 
 export {
   AuthErrorText,
@@ -38,4 +39,5 @@ export {
   FloatingLabelTextInput,
   ImportComponents,
   QuantityInput,
+  UserInfo,
 }

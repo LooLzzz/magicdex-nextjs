@@ -72,9 +72,12 @@ export const authOptions: NextAuthOptions = {
 
   callbacks: {
     session: async ({ session, user }) => {
-      // add user id to session
-      if (session?.user)
+      // add extra user info to session
+      if (session?.user) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        session.user.created_at = (user as any).created_at.toISOString()
         session.user.id = user.id
+      }
 
       // add supabase access token to session - used for supabase RLS
       const signingSecret = process.env.SUPABASE_JWT_SECRET
