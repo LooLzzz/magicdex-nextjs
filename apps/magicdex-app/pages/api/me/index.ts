@@ -27,8 +27,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       break
     }
 
+    case 'DELETE': {
+      const deleteResult = await userHandlers.deleteUserHandler(session)
+      res.status(deleteResult.success ? 200 : 400).json(deleteResult)
+      break
+    }
+
     default:
-      res.setHeader('Allow', ['GET', 'POST'])
+      res.setHeader('Allow', ['GET', 'POST', 'DELETE'])
       res.status(405).end(`Method ${method} Not Allowed`)
       break
   }

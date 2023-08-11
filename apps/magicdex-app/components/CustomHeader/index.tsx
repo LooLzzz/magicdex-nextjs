@@ -86,7 +86,7 @@ export default function CustomHeader({
                         )}
                         style={{ cursor: 'pointer' }}
                         alt='User Avatar'
-                        src={session.data.user.image}
+                        src={session.data.user?.image}
                         width={headerHeight * 0.6}
                         height={headerHeight * 0.6}
                         onMouseEnter={() => setAvatarIconHovering(true)}
@@ -149,7 +149,7 @@ export default function CustomHeader({
                       [classes.avatarHover]: drawerOpened
                     })}
                     alt='User Avatar'
-                    src={session.data.user.image}
+                    src={session.data.user?.image}
                     width={headerHeight * 0.6}
                     height={headerHeight * 0.6}
                   />

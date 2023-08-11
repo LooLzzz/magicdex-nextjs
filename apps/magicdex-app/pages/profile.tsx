@@ -3,8 +3,9 @@ import { FloatingLabelPasswordInput, UserInfo } from '@/components'
 import { UserInfoHandle } from '@/components/UserInfo'
 import { imgbb, users as usersService } from '@/services'
 import { compactObject, getImageDimensionsFromFile } from '@/utils'
-import { Box, Button, Container, Divider, Group, LoadingOverlay, Stack, Text, Title, rem } from '@mantine/core'
+import { Accordion, Box, Button, Container, Divider, Group, LoadingOverlay, Space, Stack, Text, Title, rem } from '@mantine/core'
 import { hasLength, matchesField, useForm } from '@mantine/form'
+import { modals } from '@mantine/modals'
 import { notifications } from '@mantine/notifications'
 import type { GetServerSidePropsContext } from 'next'
 import { getServerSession } from 'next-auth'
@@ -84,6 +85,22 @@ export default function ProfilePage() {
 
     validateInputOnChange: ['avatarFile'],
     clearInputErrorOnChange: true,
+  })
+
+  const handleDelete = () => modals.openConfirmModal({
+    title: 'Delete your profile',
+    centered: true,
+    children: (
+      <Text size='sm'>
+        Are you sure you want to delete your profile?
+        <br />
+        This action is IRREVERSIBLE!
+      </Text>
+    ),
+    labels: { confirm: 'YEET My Account', cancel: 'Cancel' },
+    confirmProps: { color: 'red', sx: { boxShadow: '0px 3px 1px -2px rgba(0,0,0,0.2), 0px 2px 2px 0px rgba(0,0,0,0.14), 0px 1px 5px 0px rgba(0,0,0,0.12)' } },
+    cancelProps: { variant: 'default' },
+    onConfirm: async () => await usersService.deleteUser(),
   })
 
   const handleSubmit = async ({ currentPassword, ...values }: typeof form.values) => {
@@ -196,11 +213,28 @@ export default function ProfilePage() {
               <Button type='reset' variant='default'>
                 Reset
               </Button>
-              <Button type='submit'>
+              <Button type='submit' sx={{ boxShadow: '0px 3px 1px -2px rgba(0,0,0,0.2), 0px 2px 2px 0px rgba(0,0,0,0.14), 0px 1px 5px 0px rgba(0,0,0,0.12)' }}>
                 Update
               </Button>
             </Group>
           </form>
+
+          <Space h='xl' />
+          <Divider />
+          <Space h='xl' />
+
+          <Accordion>
+            <Accordion.Item value='danger-zone' sx={{ borderBottom: '0px' }}>
+              <Accordion.Control>DANGER ZONE</Accordion.Control>
+              <Accordion.Panel sx={{ textAlign: 'center' }}>
+                <Space h='sm' />
+                <Button color='red' onClick={handleDelete}>
+                  Delete Account
+                </Button>
+              </Accordion.Panel>
+            </Accordion.Item>
+          </Accordion>
+
         </Stack>
       </Box>
     </Container>
@@ -220,8 +254,6 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
   }
 
   return {
-    props: {
-      session,
-    },
+    props: {},
   }
 }

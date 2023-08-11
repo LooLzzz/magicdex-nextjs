@@ -84,3 +84,15 @@ export async function updateUserById(id: string, options: UpdateUserOptions) {
   if (error)
     throw new HttpError(error.message) // HTTP 500
 }
+
+export async function deleteUserById(id: string) {
+  const { error } = (
+    await supabaseNextAuthClient
+      .from('users')
+      .delete()
+      .eq('id', id)
+  )
+
+  if (error)
+    throw new HttpError(error.message) // HTTP 500
+}
