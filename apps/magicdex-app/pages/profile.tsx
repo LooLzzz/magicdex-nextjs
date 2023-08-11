@@ -11,7 +11,7 @@ import type { GetServerSidePropsContext } from 'next'
 import { getServerSession } from 'next-auth'
 import { useSession } from 'next-auth/react'
 import { useRef, useState } from 'react'
-import uuid4 from 'uuid4'
+import { v4 as uuidv4 } from 'uuid'
 
 
 const MAX_AVATAR_FILE_SIZE_MB = 32
@@ -113,7 +113,7 @@ export default function ProfilePage() {
     setLoadingOverlayVisible(true)
 
     if (values.avatarFile) {
-      const { data: { url: newAvatarUrl } = {} } = await imgbb.uploadImage(values.avatarFile, { name: uuid4() })
+      const { data: { url: newAvatarUrl } = {} } = await imgbb.uploadImage(values.avatarFile, { name: uuidv4() })
       values['newAvatarUrl'] = newAvatarUrl
     }
 
