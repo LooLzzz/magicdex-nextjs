@@ -12,6 +12,6 @@ declare module '*.svg' {
 declare module 'next-auth' {
   interface Session extends DefaultSession {
     supabaseAccessToken?: string
-    user: DefaultSession['user'] & { id?: string }
+    user: DefaultSession['user'] & { id?: string, created_at?: string }
   }
 }
