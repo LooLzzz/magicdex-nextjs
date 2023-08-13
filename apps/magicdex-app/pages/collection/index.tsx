@@ -16,11 +16,11 @@ export default function CollectionPage() {
   const [hoveredCard, setHoveredCard] = useState<UserCardData>()
   const [cardEditFormData, setCardEditFormData] = useState<UserCardData>()
 
-  function handleExportClick() {
+  const handleExportClick = () => {
     router.push('/collection/export')
   }
 
-  function handleImportClick() {
+  const handleImportClick = () => {
     router.push('/collection/import')
   }
 
@@ -93,8 +93,6 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
   }
 
   return {
-    props: {
-      session,
-    }
+    props: {}
   }
 }

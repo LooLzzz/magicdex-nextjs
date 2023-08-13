@@ -83,9 +83,9 @@ export async function search(searchParams: SearchParams, options: SearchOptions 
           unique,
           q: [
             exact ? `!"${name}"` : `"${name}"`,
-            set && `s:${set}`,
-            cn && `cn:${cn}`,
-            lang && `lang:${lang}`,
+            set && `s:"${set}"`,
+            cn && `cn:"${cn}"`,
+            lang && `lang:"${lang}"`,
             foil && 'is:foil',
             'game:paper',
           ].filter(Boolean).join(' '),

@@ -33,7 +33,7 @@ const getMantineTheme = (colorScheme: ColorScheme): MantineThemeOverride => ({
             ? '#69737d'
             // ? theme.colors.gray[7]
             : '#acafb3'
-            // : theme.colors.gray[4]
+          // : theme.colors.gray[4]
         )
       }),
     },
@@ -74,6 +74,12 @@ const getMantineTheme = (colorScheme: ColorScheme): MantineThemeOverride => ({
           transition: 'pop',
         },
       },
+    },
+    Accordion: {
+      defaultProps: theme => ({
+        sx: { borderRadius: 6 },
+        bg: theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.colors.gray[2]
+      }),
     },
   },
 
@@ -158,6 +164,13 @@ const getMantineTheme = (colorScheme: ColorScheme): MantineThemeOverride => ({
 
     '.mantine-Checkbox-input': {
       cursor: 'pointer',
+    },
+
+    '.mantine-Accordion-control': {
+      borderRadius: rem(6),
+      '&:hover': {
+        backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[5] : theme.colors.gray[3],
+      },
     },
 
   }),

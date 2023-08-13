@@ -3,7 +3,7 @@ import type { GetServerSidePropsContext } from 'next'
 import { getServerSession } from 'next-auth'
 
 
-export default function SingupPage() {
+export default function SignupPage() {
   // TODO: implement signup
   return <>im signup</>
 }
@@ -21,8 +21,6 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
   }
 
   return {
-    props: {
-      session,
-    },
+    props: {},
   }
 }

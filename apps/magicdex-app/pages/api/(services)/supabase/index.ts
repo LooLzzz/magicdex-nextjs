@@ -9,7 +9,7 @@ const supabasePublicClient = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
 )
 
-const supabaseAuthClient = createClient(
+const supabaseNextAuthClient = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY,
   {
@@ -103,6 +103,6 @@ export {
   applyVerboseOperator,
   createClientWithRLS,
   createPgClient,
-  supabaseAuthClient,
+  supabaseNextAuthClient,
   supabasePublicClient as default,
 }

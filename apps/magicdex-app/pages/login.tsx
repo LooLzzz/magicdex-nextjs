@@ -158,7 +158,6 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
 
   return {
     props: {
-      session,
       query: context.query,
       providers: (await getProviders()) || [],
     }
