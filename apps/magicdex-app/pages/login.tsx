@@ -37,6 +37,7 @@ export default function LoginPage({
       {
         email: values.email,
         password: values.password,
+        callbackUrl: '/collection',
       })
   }
 
@@ -98,44 +99,50 @@ export default function LoginPage({
           />
 
           <Stack>
-            {Object.values(providers || {}).filter(provider => provider.id !== 'credentials').map(provider => (
-              <Button
-                sx={{
-                  boxShadow: '0px 3px 1px -2px rgba(0,0,0,0.2), 0px 2px 2px 0px rgba(0,0,0,0.14), 0px 1px 5px 0px rgba(0,0,0,0.12)',
-                  root: {
-                    paddingLeft: rem(5),
-                  },
-                  label: {
-                    flex: 1,
-                    justifyContent: 'center'
-                  },
-                  leftIcon: {
-                    height: '100%',
-                    margin: 0,
-                  },
-                }}
-                key={provider.id}
-                onClick={() => { setLoginError(''); setLoadingOverlay(true); signIn(provider.id) }}
-                leftIcon={
-                  <>
-                    <AuthProviderIcon providerId={provider.id} size={rem(20)} />
-                    <Divider
-                      orientation='vertical'
-                      sx={(theme) => ({
-                        marginLeft: rem(5),
-                        borderColor: (
-                          theme.colorScheme === 'dark'
-                            ? theme.colors.dark[5]
-                            : theme.colors.gray[5]
-                        ),
-                      })}
-                    />
-                  </>
-                }
-              >
-                Login with {provider.name}
-              </Button>
-            ))}
+            {
+              Object.values(providers || {}).filter(provider => provider.id !== 'credentials').map(provider => (
+                <Button
+                  key={provider.id}
+                  onClick={() => {
+                    setLoginError('')
+                    setLoadingOverlay(true)
+                    signIn(provider.id, { callbackUrl: '/collection' })
+                  }}
+                  sx={{
+                    boxShadow: '0px 3px 1px -2px rgba(0,0,0,0.2), 0px 2px 2px 0px rgba(0,0,0,0.14), 0px 1px 5px 0px rgba(0,0,0,0.12)',
+                    root: {
+                      paddingLeft: rem(5),
+                    },
+                    label: {
+                      flex: 1,
+                      justifyContent: 'center'
+                    },
+                    leftIcon: {
+                      height: '100%',
+                      margin: 0,
+                    },
+                  }}
+                  leftIcon={
+                    <>
+                      <AuthProviderIcon providerId={provider.id} size={rem(20)} />
+                      <Divider
+                        orientation='vertical'
+                        sx={(theme) => ({
+                          marginLeft: rem(5),
+                          borderColor: (
+                            theme.colorScheme === 'dark'
+                              ? theme.colors.dark[5]
+                              : theme.colors.gray[5]
+                          ),
+                        })}
+                      />
+                    </>
+                  }
+                >
+                  Login with {provider.name}
+                </Button>
+              ))
+            }
           </Stack>
         </Stack>
       </Box>

@@ -63,11 +63,15 @@ export default function CustomHeader({
               spacing={0}
               className={classes.hiddenMobile}
             >
-              {navbarRoutes.map((route, idx) => (
-                <NavbarLink key={idx} href={route.url}>
-                  {route.title}
-                </NavbarLink>
-              ))}
+              {
+                navbarRoutes
+                  .filter(v => !(v?.hide?.navbar || !isUserAuthenticated && v?.hide?.unauthenticated))
+                  .map((route, idx) => (
+                    <NavbarLink key={idx} href={route.url}>
+                      {route.title}
+                    </NavbarLink>
+                  ))
+              }
             </Group>
 
             <Menu withArrow
@@ -172,15 +176,19 @@ export default function CustomHeader({
         <ScrollArea h={`calc(100vh - ${rem(60)})`} mx="-md">
           <Divider my='sm' />
 
-          {navbarRoutes.map((route, idx) => (
-            <NavbarLink sidebar
-              key={idx}
-              onClick={closeDrawer}
-              href={route.url}
-            >
-              {route.title}
-            </NavbarLink>
-          ))}
+          {
+            navbarRoutes
+              .filter(v => !(v?.hide?.drawer || !isUserAuthenticated && v?.hide?.unauthenticated))
+              .map((route, idx) => (
+                <NavbarLink sidebar
+                  key={idx}
+                  onClick={closeDrawer}
+                  href={route.url}
+                >
+                  {route.title}
+                </NavbarLink>
+              ))
+          }
 
           <Divider my='sm' />
 

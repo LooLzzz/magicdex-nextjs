@@ -8,12 +8,21 @@ const apiRoutes = {
 const navbarRoutes = [
   {
     url: '/',
-    title: 'Home'
+    title: 'Home',
   },
   {
     url: '/collection',
-    title: 'Collection'
-  }
+    title: 'Collection',
+  },
+  {
+    url: '/profile',
+    title: 'Profile',
+    hide: {
+      unauthenticated: true,
+      navbar: true,
+      drawer: false,
+    },
+  },
 ]
 
 export {
