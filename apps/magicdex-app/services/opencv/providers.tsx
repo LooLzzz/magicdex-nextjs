@@ -1,7 +1,6 @@
-import Cv from '@/types/opencv'
 import { createContext, useEffect, useState } from 'react'
 
-const OpenCvContext = createContext<{ loaded: boolean, cv: typeof Cv }>(null)
+const OpenCvContext = createContext<{ loaded: boolean, cv }>(null)
 
 const { Consumer: OpenCvConsumer, Provider } = OpenCvContext
 
@@ -41,6 +40,7 @@ export const OpenCvProvider = ({
       opencvScriptTag.id = scriptId
       opencvScriptTag.src = openCvPath || `https://docs.opencv.org/${openCvVersion}/opencv.js`
 
+      // @ts-expect-error donnu why
       opencvScriptTag.nonce = true
       opencvScriptTag.defer = true
       opencvScriptTag.async = true

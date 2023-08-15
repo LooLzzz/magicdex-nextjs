@@ -53,3 +53,4 @@ __pycache__
 
 # Certificates
 .certs/
+.vercel
