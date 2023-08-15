@@ -1,11 +1,29 @@
-import { FloatingLabelTextInput } from '@/components/CustomMantineInputs'
-import { useMagicdexWebSocket } from '@/services/hooks'
 import { Box, Button, Center, Group, Stack } from '@mantine/core'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import Webcam from 'react-webcam'
 
+interface CardData {
+  distance: bigint,
+  cardData: {
+    scryfall_id: string,
+    name: string,
+    set: string,
+  },
+  coords: {
+    tl: { x: number, y: number },
+    tr: { x: number, y: number },
+    br: { x: number, y: number },
+    bl: { x: number, y: number },
+  },
+}
+
+interface WorkerMessage {
+  type: string,
+  data?: boolean | Error | CardData[],
+}
 
 export default function ImportWebcam() {
+  const workerRef = useRef<Worker>()
   const [timeStart, setTimeStart] = useState<number>(0)
   const [timeEnd, setTimeEnd] = useState<number>(0)
   const [rtt, setRtt] = useState<number>(0)
@@ -13,27 +31,17 @@ export default function ImportWebcam() {
   const webcamRef = useRef<Webcam>(null)
   const canvasCtx = canvasRef?.current?.getContext('2d')
   const [isNewMessage, setIsNewMessage] = useState<boolean>(true)
-  const [socketUrl, setSocketUrl] = useState<string>('localhost')
-  const { sendMessage, lastJsonMessage, isConnected, isConnecting, open, close } = useMagicdexWebSocket(
-    socketUrl,
-    {
-      onMessage: () => { setTimeEnd(Date.now()); setIsNewMessage(true) },
-      onClose: () => setIsNewMessage(true)
-    }
-  )
+  const [isWorkerLoaded, setIsWorkerLoaded] = useState<boolean>(false)
+  const [lastJsonMessage, setLastJsonMessage] = useState<CardData[]>([])
 
-  const handleConnectDisconnect = useCallback(() => {
-    if (!isConnected)
-      open()
-    else {
-      close()
-    }
-  }, [isConnected, open, close])
 
   const handleSendMessage = useCallback(async () => {
     setTimeStart(Date.now())
-    sendMessage(webcamRef?.current?.getScreenshot())
-  }, [sendMessage])
+    const { videoHeight: height, videoWidth: width } = webcamRef?.current?.video ?? {}
+    const webcamCanvasCtx = webcamRef?.current?.getCanvas()?.getContext('2d', { willReadFrequently: true })
+    const imageData = webcamCanvasCtx?.getImageData(0, 0, height, width)
+    workerRef.current?.postMessage({ imageData })
+  }, [])
 
   useEffect(() => {
     const t = timeEnd - timeStart
@@ -42,12 +50,12 @@ export default function ImportWebcam() {
   }, [timeStart, timeEnd])
 
   useEffect(() => {
-    if (!isConnected)
+    if (!setIsWorkerLoaded)
       return
 
     const interval = setInterval(() => {
       if (isNewMessage) {
-        handleSendMessage()
+        // handleSendMessage()
         setIsNewMessage(false)
       }
 
@@ -56,7 +64,7 @@ export default function ImportWebcam() {
         canvasCtx.clearRect(0, 0, canvasCtx.canvas.width, canvasCtx.canvas.height)
 
         // draw last message
-        for (const data of (lastJsonMessage ?? [])) {
+        for (const data of lastJsonMessage) {
           const { coords: { tl, tr, br, bl }, cardData: { name, set } } = data
           canvasCtx.strokeStyle = 'rgba(0, 0, 0, 0.5)'
           canvasCtx.lineWidth = 1.5
@@ -83,41 +91,52 @@ export default function ImportWebcam() {
     }, 10)
 
     return () => clearInterval(interval)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   })
+
+  const handleWorkerMessage = useCallback(({ type, data }: WorkerMessage) => {
+    if (type === 'error') {
+      console.error(data as Error)
+      return
+    }
+
+    if (type === 'loaded') {
+      setIsWorkerLoaded(data as boolean)
+      return
+    }
+
+    setTimeEnd(Date.now())
+    console.log('workerMessage', { type, data })
+    setLastJsonMessage((data ?? []) as CardData[])
+  }, [])
+
+  useEffect(() => {
+    workerRef.current = new Worker('/js/phash.worker.js')
+    workerRef.current.onmessage = ({ data }: MessageEvent<WorkerMessage>) => handleWorkerMessage(data)
+    return workerRef.current?.terminate
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   return (
     <Center>
       <Stack>
-        <FloatingLabelTextInput
-          label='Socket URL'
-          value={socketUrl}
-          disabled={isConnected}
-          onChange={e => setSocketUrl(e.currentTarget.value)}
-        />
-
         <Center>
           <Group>
             <Button
-              onClick={handleConnectDisconnect}
-              disabled={isConnecting}
-              color={isConnected ? 'red' : undefined}
-            >
-              {isConnected ? 'Disconnect' : isConnecting ? 'Connecting...' : 'Connect'}
-            </Button>
-            <Button
               onClick={handleSendMessage}
-              disabled={!isConnected}
-              color='default'
+              disabled={!isWorkerLoaded}
             >
-              Send Screenshot
+              {
+                isWorkerLoaded
+                  ? 'Send Screenshot'
+                  : 'Loading...'
+              }
             </Button>
           </Group>
         </Center>
 
         <Center>
-          {
-            rtt > 0 && `RTT: ${rtt}ms`
-          }
+          {rtt > 0 && `RTT: ${rtt}ms`}
         </Center>
 
         <Box pos='relative'>
@@ -134,11 +153,9 @@ export default function ImportWebcam() {
           <Webcam
             ref={webcamRef}
             audio={false}
-            // width={640}
-            // height={480}
-            videoConstraints={{
-              facingMode: 'environment',
-            }}
+            width={640}
+            height={480}
+            videoConstraints={{ facingMode: 'environment' }}
           />
         </Box>
       </Stack>
