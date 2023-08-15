@@ -153,8 +153,8 @@ export default function ImportWebcam() {
           <Webcam
             ref={webcamRef}
             audio={false}
-            width={640}
-            height={480}
+            // width={640}
+            // height={480}
             videoConstraints={{ facingMode: 'environment' }}
           />
         </Box>
