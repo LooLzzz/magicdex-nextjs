@@ -1,0 +1,75 @@
+{
+  "name": "python-workspace",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "sourceRoot": "apps/python-workspace/webcam_import_app",
+  "targets": {
+    "serve": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "poetry run uvicorn webcam_import_app:app --reload --host 0.0.0.0 --port 5200",
+        "cwd": "apps/python-workspace"
+      },
+      "configurations": {
+        "production": {
+          "optimization": true,
+          "extractCss": true,
+          "inspect": false,
+          "fileReplacements": [
+            {
+              "replace": "apps/python-workspace/src/environments/environment.ts",
+              "with": "apps/python-workspace/src/environments/environment.prod.ts"
+            }
+          ]
+        }
+      }
+    },
+    "lock": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "poetry lock --no-update",
+        "cwd": "apps/python-workspace"
+      }
+    },
+    "add": {
+      "executor": "@nxlv/python:add",
+      "options": {}
+    },
+    "update": {
+      "executor": "@nxlv/python:update",
+      "options": {}
+    },
+    "remove": {
+      "executor": "@nxlv/python:remove",
+      "options": {}
+    },
+    "build": {
+      "executor": "@nxlv/python:build",
+      "outputs": ["{projectRoot}/dist"],
+      "options": {
+        "outputPath": "apps/python-workspace/dist",
+        "publish": false,
+        "lockedVersions": true,
+        "bundleLocalDependencies": true
+      }
+    },
+    "install": {
+      "executor": "@nxlv/python:install",
+      "options": {
+        "silent": false,
+        "args": "",
+        "cacheDir": ".cache/pypoetry",
+        "verbose": false,
+        "debug": false
+      }
+    },
+    "lint": {
+      "executor": "@nxlv/python:flake8",
+      "outputs": ["{workspaceRoot}/reports/apps/python-workspace/pylint.txt"],
+      "options": {
+        "outputFile": "reports/apps/python-workspace/pylint.txt"
+      }
+    }
+  },
+  "tags": []
+}
