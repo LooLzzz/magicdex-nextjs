@@ -52,7 +52,7 @@ self.onmessage = async ({ data }) => {
 
     const { distance, ...cardData } = utils.match_phash(phash, phash_df, 130) ?? {}
     if (distance)
-      res.push({ cardData, coords, distance })
+      res.push({ cardData, coords, distance, phash })
   }
 
   postMessage({ type: 'message', data: res })

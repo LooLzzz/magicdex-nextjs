@@ -1,6 +1,8 @@
+import { useTimed } from '@/services/hooks'
 import { Box, Button, Center, Group, Stack } from '@mantine/core'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import Webcam from 'react-webcam'
+
 
 interface CardData {
   distance: bigint,
@@ -24,38 +26,54 @@ interface WorkerMessage {
 
 export default function ImportWebcam() {
   const workerRef = useRef<Worker>()
-  const [timeStart, setTimeStart] = useState<number>(0)
-  const [timeEnd, setTimeEnd] = useState<number>(0)
-  const [rtt, setRtt] = useState<number>(0)
+  const [rtt, { start: startTimer, stop: stopTimer }] = useTimed()
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const webcamRef = useRef<Webcam>(null)
   const canvasCtx = canvasRef?.current?.getContext('2d')
+  const [isActive, setIsActive] = useState<boolean>(false)
   const [isNewMessage, setIsNewMessage] = useState<boolean>(true)
   const [isWorkerLoaded, setIsWorkerLoaded] = useState<boolean>(false)
   const [lastJsonMessage, setLastJsonMessage] = useState<CardData[]>([])
 
-
   const handleSendMessage = useCallback(async () => {
-    setTimeStart(Date.now())
+    startTimer()
     const { videoHeight: height, videoWidth: width } = webcamRef?.current?.video ?? {}
-    const webcamCanvasCtx = webcamRef?.current?.getCanvas()?.getContext('2d', { willReadFrequently: true })
+    const webcamCanvasCtx = webcamRef.current?.getCanvas()?.getContext('2d', { willReadFrequently: true })
     const imageData = webcamCanvasCtx?.getImageData(0, 0, height, width)
+
+    // async function imageDataFromSource(source) {
+    //   const image = Object.assign(new Image(), { src: source })
+    //   await new Promise(resolve => image.addEventListener('load', () => resolve(null)))
+    //   const context = Object.assign(document.createElement('canvas'), {
+    //     width: image.width,
+    //     height: image.height
+    //   }).getContext('2d')
+    //   context.imageSmoothingEnabled = false
+    //   context.drawImage(image, 0, 0)
+    //   return [image, context.getImageData(0, 0, image.width, image.height)]
+    // }
+    // const [image, imageData] = await imageDataFromSource('/test_images/2.jpg')
+    // const hRatio = canvasRef.current?.width / image.width
+    // const vRatio = canvasRef.current?.height / image.height
+    // const ratio = Math.min(hRatio, vRatio)
+    // canvasCtx?.drawImage(image, 0, 0, image.width, image.height, 0, 0, image.width * ratio, image.height * ratio)
+    // canvasCtx?.putImageData(imageData, 0, 0)
+
+    // console.log({ imageData })
     workerRef.current?.postMessage({ imageData })
-  }, [])
+  }, [canvasCtx])
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
-    const t = timeEnd - timeStart
-    if (t > 0)
-      setRtt(t)
-  }, [timeStart, timeEnd])
-
-  useEffect(() => {
-    if (!setIsWorkerLoaded)
+    if (!isWorkerLoaded)
       return
 
     const interval = setInterval(() => {
+      if (!isActive)
+        return
+
       if (isNewMessage) {
-        // handleSendMessage()
+        handleSendMessage()
         setIsNewMessage(false)
       }
 
@@ -101,13 +119,14 @@ export default function ImportWebcam() {
     }
 
     if (type === 'loaded') {
-      setIsWorkerLoaded(data as boolean)
+      setTimeout(() => setIsWorkerLoaded(true), 250)
       return
     }
 
-    setTimeEnd(Date.now())
-    console.log('workerMessage', { type, data })
+    stopTimer()
+    setIsNewMessage(true)
     setLastJsonMessage((data ?? []) as CardData[])
+    console.log('workerMessage', { type, data })
   }, [])
 
   useEffect(() => {
@@ -123,13 +142,16 @@ export default function ImportWebcam() {
         <Center>
           <Group>
             <Button
-              onClick={handleSendMessage}
+              onClick={() => setIsActive(v => !v)}
               disabled={!isWorkerLoaded}
+              color={isActive ? 'red' : undefined}
             >
               {
-                isWorkerLoaded
-                  ? 'Send Screenshot'
-                  : 'Loading...'
+                !isWorkerLoaded
+                  ? 'Loading...'
+                  : !isActive
+                    ? 'Start'
+                    : 'Stop'
               }
             </Button>
           </Group>
