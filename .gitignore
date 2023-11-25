@@ -42,6 +42,9 @@ testem.log
 .DS_Store
 Thumbs.db
 
+# vercel
+.vercel
+
 # Next.js
 .next
 
