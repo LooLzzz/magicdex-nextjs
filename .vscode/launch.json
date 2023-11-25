@@ -21,6 +21,13 @@
       "preLaunchTask": "Start Supabase"
     },
     {
+      "name": "Node.js: Debug App",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "nx run phash-df-generator:serve",
+      // "command": "nx run ${input:app-name}:serve",
+    },
+    {
       "name": "Launch Client",
       "type": "chrome",
       "request": "launch",

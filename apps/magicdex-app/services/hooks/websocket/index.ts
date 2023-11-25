@@ -5,7 +5,10 @@ import type { MagicdexWebSocketHook, MagicdexWebsocketResponseItem, ReadyStateTe
 
 const useMagicdexWebSocket: MagicdexWebSocketHook = (url, { port = 5200, onClose, ...options } = {}) => {
   const [shouldConnect, setShouldConnect] = useState(false)
-  const protocol = location?.protocol === 'https:' ? 'wss' : 'ws'
+  let protocol = 'ws'
+  try {
+    location?.protocol === 'https:' ? 'wss' : 'ws'
+  } catch (e) { }
 
   const res = useWebSocket<MagicdexWebsocketResponseItem[]>(
     url ? `${protocol}://${url}:${port}` : undefined,
