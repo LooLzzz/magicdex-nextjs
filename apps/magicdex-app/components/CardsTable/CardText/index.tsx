@@ -363,7 +363,7 @@ export const CardTextPrice = React.memo(
         {...rest}
       >
         {
-          typeof price_usd === 'number'
+          typeof price_usd === 'number' && !isNaN(price_usd)
             ? (amount ?? 1) === 1
               ? `$${price_usd}`
               : <>

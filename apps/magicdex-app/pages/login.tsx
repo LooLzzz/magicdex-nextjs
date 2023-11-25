@@ -67,6 +67,7 @@ export default function LoginPage({
               <FloatingLabelTextInput required
                 id='email'
                 label='Email'
+                type='email'
                 {...form.getInputProps('email')}
               />
               <FloatingLabelPasswordInput required

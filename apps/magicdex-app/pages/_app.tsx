@@ -205,6 +205,10 @@ const App = ({
     <>
       <Head>
         <title>Welcome to magicdex-app!</title>
+        <meta
+          name='viewport'
+          content='width=device-width, user-scalable=no'
+        />
       </Head>
 
       <main>
