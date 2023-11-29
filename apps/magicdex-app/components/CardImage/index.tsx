@@ -204,6 +204,11 @@ export default function CardImage({
       >
         <AspectRatio
           ratio={ratio}
+          sx={{
+            '& > :first-child': {
+              height: 'auto',
+            },
+          }}
           {...aspectRatioProps}
         >
           <Tilt
