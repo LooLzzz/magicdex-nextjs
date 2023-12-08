@@ -1,16 +1,43 @@
 import AuthErrorText from './AuthErrorText'
 import AuthProviderIcon from './AuthProviderIcon'
-import { ContainedTextInput, ContainedTextSelect } from './ContainedTextInputs'
+import CardImage from './CardImage'
+import CardsTable from './CardsTable'
 import CustomFooter from './CustomFooter'
 import CustomHeader from './CustomHeader'
-import FloatingLabelInput from './FloatingLabelInput'
+import {
+  ContainedAutocomplete,
+  ContainedTextInput,
+  ContainedTextSelect,
+  FloatingLabelAutocomplete,
+  FloatingLabelMultiSelect,
+  FloatingLabelNumberInput,
+  FloatingLabelPasswordInput,
+  FloatingLabelSelect,
+  FloatingLabelTagsSelect,
+  FloatingLabelTextInput,
+  QuantityInput,
+} from './CustomMantineInputs'
+import * as ImportComponents from './ImportComponents'
+import UserInfo from './UserInfo'
 
 export {
   AuthErrorText,
   AuthProviderIcon,
+  CardImage,
+  CardsTable,
+  ContainedAutocomplete,
   ContainedTextInput,
   ContainedTextSelect,
   CustomFooter,
   CustomHeader,
-  FloatingLabelInput,
+  FloatingLabelAutocomplete,
+  FloatingLabelMultiSelect,
+  FloatingLabelNumberInput,
+  FloatingLabelPasswordInput,
+  FloatingLabelSelect,
+  FloatingLabelTagsSelect,
+  FloatingLabelTextInput,
+  ImportComponents,
+  QuantityInput,
+  UserInfo,
 }

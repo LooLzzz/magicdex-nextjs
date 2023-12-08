@@ -1,6 +1,6 @@
 import { authOptions } from '@/api/auth/[...nextauth]'
-import { AuthErrorText, AuthProviderIcon, FloatingLabelInput } from '@/components'
-import { Box, Button, Divider, Group, LoadingOverlay, rem, Stack, Title } from '@mantine/core'
+import { AuthErrorText, AuthProviderIcon, FloatingLabelPasswordInput, FloatingLabelTextInput } from '@/components'
+import { Box, Button, Container, Divider, Group, LoadingOverlay, Stack, Title, rem } from '@mantine/core'
 import { isEmail, useForm } from '@mantine/form'
 import type { GetServerSidePropsContext } from 'next'
 import { getServerSession } from 'next-auth'
@@ -32,15 +32,13 @@ export default function LoginPage({
 
   const handleSubmit = async (values) => {
     setLoadingOverlay(true)
-
-    await new Promise(resolve => setTimeout(() => {
-      setLoadingOverlay(false)
-      resolve(null)
-    }, 2000))
-    console.log(values)
-    setLoginError('Login is not implemented yet')
-
     form.setValues({ password: '' })
+    await signIn('credentials',
+      {
+        email: values.email,
+        password: values.password,
+        callbackUrl: '/collection',
+      })
   }
 
   const handleReset = (event) => {
@@ -49,93 +47,107 @@ export default function LoginPage({
   }
 
   return (
-    <Box maw={rem(300)} mx='auto' pos='relative' p={10} pt={5}>
-      <Stack>
-        <Title sx={{ paddingBottom: rem(7.5) }}>
-          Login
-        </Title>
+    <Container>
+      <Box maw={rem(300)} mx='auto' pos='relative' p={10} pt={5}>
+        <Stack>
+          <Title sx={{ paddingBottom: rem(7.5) }}>
+            Login
+          </Title>
 
-        <LoadingOverlay
-          visible={loadingOverlayVisible}
-          overlayBlur={1.75}
-          radius='sm'
-        />
-        <form
-          onSubmit={(event) => { setLoginError(''); form.onSubmit(handleSubmit)(event) }}
-          onReset={handleReset}
-        >
-          <Stack spacing='xl'>
-            <FloatingLabelInput required
-              id='email'
-              label='Email'
-              {...form.getInputProps('email')}
-            />
-            <FloatingLabelInput password required
-              label='Password'
-              {...form.getInputProps('password')}
-            />
+          <LoadingOverlay
+            visible={loadingOverlayVisible}
+            overlayBlur={1.75}
+            radius='sm'
+          />
+          <form
+            onSubmit={(event) => { setLoginError(''); form.onSubmit(handleSubmit)(event) }}
+            onReset={handleReset}
+          >
+            <Stack spacing='xl'>
+              <FloatingLabelTextInput required
+                id='email'
+                label='Email'
+                type='email'
+                {...form.getInputProps('email')}
+              />
+              <FloatingLabelPasswordInput required
+                label='Password'
+                {...form.getInputProps('password')}
+              />
+              {
+                loginError
+                  ? <AuthErrorText
+                    errorType={loginError}
+                    color='red'
+                    size='sm'
+                  />
+                  : null
+              }
+            </Stack>
+            <Group position='right' mt='md'>
+              <Button type='reset' variant='default'>
+                Reset
+              </Button>
+              <Button type='submit'>
+                Submit
+              </Button>
+            </Group>
+          </form>
+
+          <Divider
+            label='or'
+            labelPosition='center'
+          />
+
+          <Stack>
             {
-              loginError
-                ? <AuthErrorText
-                  errorType={loginError}
-                  color='red'
-                  size='sm'
-                />
-                : null
+              Object.values(providers || {}).filter(provider => provider.id !== 'credentials').map(provider => (
+                <Button
+                  key={provider.id}
+                  onClick={() => {
+                    setLoginError('')
+                    setLoadingOverlay(true)
+                    signIn(provider.id, { callbackUrl: '/collection' })
+                  }}
+                  sx={{
+                    boxShadow: '0px 3px 1px -2px rgba(0,0,0,0.2), 0px 2px 2px 0px rgba(0,0,0,0.14), 0px 1px 5px 0px rgba(0,0,0,0.12)',
+                    root: {
+                      paddingLeft: rem(5),
+                    },
+                    label: {
+                      flex: 1,
+                      justifyContent: 'center'
+                    },
+                    leftIcon: {
+                      height: '100%',
+                      margin: 0,
+                    },
+                  }}
+                  leftIcon={
+                    <>
+                      <AuthProviderIcon providerId={provider.id} size={rem(20)} />
+                      <Divider
+                        orientation='vertical'
+                        sx={(theme) => ({
+                          marginLeft: rem(5),
+                          borderColor: (
+                            theme.colorScheme === 'dark'
+                              ? theme.colors.dark[5]
+                              : theme.colors.gray[5]
+                          ),
+                        })}
+                      />
+                    </>
+                  }
+                >
+                  Login with {provider.name}
+                </Button>
+              ))
             }
           </Stack>
-          <Group position='right' mt='md'>
-            <Button type='reset' variant='default'>Reset</Button>
-            <Button type='submit'>Submit</Button>
-          </Group>
-        </form>
-
-        <Divider
-          label='or'
-          labelPosition='center'
-        />
-
-        <Stack>
-          {Object.values(providers || {}).map(provider => (
-            <Button
-              styles={{
-                root: {
-                  paddingLeft: rem(5),
-                },
-                label: {
-                  flex: 1,
-                  justifyContent: 'center'
-                },
-                leftIcon: {
-                  height: '100%',
-                  margin: 0,
-                },
-              }}
-              key={provider.id}
-              onClick={() => { setLoginError(''); setLoadingOverlay(true); signIn(provider.id) }}
-              leftIcon={
-                <>
-                  <AuthProviderIcon providerId={provider.id} size={rem(20)} />
-                  <Divider
-                    orientation='vertical'
-                    sx={(theme) => ({
-                      marginLeft: rem(5),
-                      borderColor: (
-                        theme.colorScheme === 'dark'
-                          ? theme.colors.dark[5]
-                          : theme.colors.gray[5]
-                      ),
-                    })}
-                  />
-                </>
-              }
-            >
-              Login with {provider.name}
-            </Button>
-          ))}
         </Stack>
-      </Stack>
-    </Box>
+      </Box>
+    </Container>
   )
 }
 
@@ -154,7 +166,6 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
 
   return {
     props: {
-      session,
       query: context.query,
       providers: (await getProviders()) || [],
     }

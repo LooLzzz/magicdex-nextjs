@@ -1,4 +1,4 @@
-import navbarRoutes from '@/services/navbarRoutes'
+import { navbarRoutes } from '@/routes'
 import {
   Avatar,
   Box,
@@ -18,6 +18,7 @@ import { useDisclosure } from '@mantine/hooks'
 import { IconMoonFilled, IconSunFilled } from '@tabler/icons-react'
 import { useSession } from 'next-auth/react'
 import Link from 'next/link'
+import { useRouter } from 'next/router'
 import { useState } from 'react'
 import LoginLogoutButtons from './LoginLogoutButtons'
 import NavbarLink from './NavbarLink'
@@ -30,8 +31,10 @@ export default function CustomHeader({
   headerHeight?: number
 }) {
   const session = useSession()
+  const router = useRouter()
   const { classes, cx } = useStyles()
   const { colorScheme, toggleColorScheme } = useMantineColorScheme()
+  const isUserAuthenticated = session.status === 'authenticated'
 
   const [avatarIconHovering, setAvatarIconHovering] = useState(false)
   const [menuOpened, setMenuOpened] = useState(false)
@@ -45,12 +48,12 @@ export default function CustomHeader({
   return (
     <Box pb={20}>
       <Header px='md' height={headerHeight}>
-        <Container sx={{ height: '100%' }}>
+        <Container size='xl' sx={{ height: '100%' }}>
           <Group position='apart' sx={{ height: '100%' }}>
             <Link href="/">
               <Image
                 alt='Magicdex Logo'
-                src='favicon.ico'
+                src='/favicon.ico'
                 width={headerHeight * 0.75}
               />
             </Link>
@@ -60,11 +63,15 @@ export default function CustomHeader({
               spacing={0}
               className={classes.hiddenMobile}
             >
-              {navbarRoutes.map((route, idx) => (
-                <NavbarLink key={idx} href={route.url}>
-                  {route.title}
-                </NavbarLink>
-              ))}
+              {
+                navbarRoutes
+                  .filter(v => !(v?.hide?.navbar || !isUserAuthenticated && v?.hide?.unauthenticated))
+                  .map((route, idx) => (
+                    <NavbarLink key={idx} href={route.url}>
+                      {route.title}
+                    </NavbarLink>
+                  ))
+              }
             </Group>
 
             <Menu withArrow
@@ -73,7 +80,7 @@ export default function CustomHeader({
             >
               <Menu.Target>
                 {
-                  session.status === 'authenticated' && session.data?.user?.image
+                  isUserAuthenticated && session.data?.user?.image
                     ? <Box pos='relative' p={rem(4)}>
                       <Image
                         radius='xl'
@@ -83,7 +90,7 @@ export default function CustomHeader({
                         )}
                         style={{ cursor: 'pointer' }}
                         alt='User Avatar'
-                        src={session.data.user.image}
+                        src={session.data.user?.image}
                         width={headerHeight * 0.6}
                         height={headerHeight * 0.6}
                         onMouseEnter={() => setAvatarIconHovering(true)}
@@ -91,16 +98,24 @@ export default function CustomHeader({
                       />
                     </Box>
                     : <Avatar
+                      color='white'
                       variant={avatarIconHovering || menuOpened ? 'filled' : 'default'}
                       onMouseEnter={() => setAvatarIconHovering(true)}
                       onMouseLeave={() => setAvatarIconHovering(false)}
-                      style={{ cursor: 'pointer' }}
+                      style={{ cursor: 'pointer', color: 'white' }}
                       className={classes.hiddenMobile}
                     />
                 }
               </Menu.Target>
 
               <Menu.Dropdown>
+                {
+                  isUserAuthenticated &&
+                  <Menu.Item closeMenuOnClick onClick={() => router.push('/profile')}>
+                    Profile
+                  </Menu.Item>
+                }
+
                 <LoginLogoutButtons
                   component={({ children, ...props }) => (
                     <Menu.Item closeMenuOnClick {...props}>
@@ -131,14 +146,14 @@ export default function CustomHeader({
               onClick={toggleDrawer}
             >
               {
-                session.status === 'authenticated' && session.data?.user?.image
+                isUserAuthenticated && session.data?.user?.image
                   ? <Image
                     radius='xl'
                     className={cx({
                       [classes.avatarHover]: drawerOpened
                     })}
                     alt='User Avatar'
-                    src={session.data.user.image}
+                    src={session.data.user?.image}
                     width={headerHeight * 0.6}
                     height={headerHeight * 0.6}
                   />
@@ -161,20 +176,28 @@ export default function CustomHeader({
         <ScrollArea h={`calc(100vh - ${rem(60)})`} mx="-md">
           <Divider my='sm' />
 
-          {navbarRoutes.map((route, idx) => (
-            <NavbarLink sidebar
-              key={idx}
-              onClick={closeDrawer}
-              href={route.url}
-            >
-              {route.title}
-            </NavbarLink>
-          ))}
+          {
+            navbarRoutes
+              .filter(v => !(v?.hide?.drawer || !isUserAuthenticated && v?.hide?.unauthenticated))
+              .map((route, idx) => (
+                <NavbarLink sidebar
+                  key={idx}
+                  onClick={closeDrawer}
+                  href={route.url}
+                >
+                  {route.title}
+                </NavbarLink>
+              ))
+          }
 
           <Divider my='sm' />
 
           <Group grow position='center' pb='xl' px='md'>
-            <LoginLogoutButtons afterOnClick={closeDrawer} />
+            <LoginLogoutButtons
+              reversed
+              afterOnClick={closeDrawer}
+              logoutProps={{ color: 'red' }}
+            />
           </Group>
         </ScrollArea>
       </Drawer>

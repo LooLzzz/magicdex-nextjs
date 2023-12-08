@@ -1,4 +1,6 @@
 import {
+  Autocomplete,
+  AutocompleteProps,
   PasswordInput,
   PasswordInputProps,
   Select,
@@ -9,7 +11,7 @@ import {
 import useStyles from './styles'
 
 
-export function ContainedTextInput({
+export default function ContainedTextInput({
   password = false,
   ...inputProps
 }:
@@ -39,6 +41,17 @@ export function ContainedTextSelect({ ...inputProps }: SelectProps) {
 
   return (
     <Select
+      {...inputProps}
+      classNames={classes}
+    />
+  )
+}
+
+export function ContainedAutocomplete({ ...inputProps }: AutocompleteProps) {
+  const { classes } = useStyles()
+
+  return (
+    <Autocomplete
       {...inputProps}
       classNames={classes}
     />

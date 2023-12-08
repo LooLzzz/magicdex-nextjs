@@ -1,3 +1,19 @@
+@font-face {
+  font-family: "PhyrexianHorizontal";
+  src: url("/Phyrexian.woff2") format("woff2");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Determination Mono";
+  src: url("/determinationmonoweb-webfont.woff2") format("woff2");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 html {
   -webkit-text-size-adjust: 100%;
   font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
@@ -62,4 +78,12 @@ pre {
     Liberation Mono, Courier New, monospace;
   overflow: scroll;
   padding: 0.5rem 0.75rem;
+}
+
+.cursor-not-allowed {
+  cursor: not-allowed;
+}
+
+.ms {
+  margin: 0 1px 2px 1px;
 }

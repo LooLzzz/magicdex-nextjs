@@ -9,6 +9,7 @@ import {
 } from '@mantine/core'
 import { ModalsProvider } from '@mantine/modals'
 import { Notifications, showNotification } from '@mantine/notifications'
+import { Hydrate, QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { getCookie, setCookie } from 'cookies-next'
 import { SessionProvider } from 'next-auth/react'
 import NextApp, { AppContext, AppProps } from 'next/app'
@@ -19,9 +20,68 @@ import './styles.css'
 
 const getMantineTheme = (colorScheme: ColorScheme): MantineThemeOverride => ({
   colorScheme,
-  primaryColor: 'violet',
+  // primaryColor: 'violet',
+  primaryColor: 'indigo',
   // primaryShade: 8,
   white: '#F8F9FA',
+
+  components: {
+    Divider: {
+      defaultProps: theme => ({
+        color: (
+          theme.colorScheme === 'dark'
+            ? '#69737d'
+            // ? theme.colors.gray[7]
+            : '#acafb3'
+          // : theme.colors.gray[4]
+        )
+      }),
+    },
+    SegmentedControl: {
+      defaultProps: theme => ({
+        bg: (
+          theme.colorScheme === 'dark'
+            ? theme.colors.dark[4]
+            : theme.colors.gray[3]
+        ),
+      }),
+    },
+    Carousel: {
+      defaultProps: {
+        styles: {
+          control: {
+            '&[data-inactive]': {
+              opacity: 0,
+              cursor: 'default',
+            },
+          },
+        },
+      },
+    },
+    Paper: {
+      defaultProps: theme => ({
+        bg: (
+          theme.colorScheme === 'dark'
+            ? theme.colors.gray[8]
+            : theme.colors.gray[2]
+        ),
+      }),
+    },
+    Tooltip: {
+      defaultProps: {
+        withArrow: true,
+        transitionProps: {
+          transition: 'pop',
+        },
+      },
+    },
+    Accordion: {
+      defaultProps: theme => ({
+        sx: { borderRadius: 6 },
+        bg: theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.colors.gray[2]
+      }),
+    },
+  },
 
   globalStyles: (theme) => ({
     // body: {
@@ -32,11 +92,39 @@ const getMantineTheme = (colorScheme: ColorScheme): MantineThemeOverride => ({
     //   ),
     // },
 
+    '.ss-common': {
+      color: (
+        theme.colorScheme === 'dark'
+          ? '#60584D'
+          : theme.colors.dark[5]
+      ),
+    },
+
+    '.ss-2x': {
+      fontSize: '1.65rem',
+    },
+
     '.mantine-Overlay-root': {
       backgroundColor: (
         theme.colorScheme === 'dark'
           ? 'rgba(44, 46, 51, 0.75)'
           : 'rgba(210, 210, 220, 0.75)'
+      ),
+    },
+
+    '.mantine-Modal-header': {
+      backgroundColor: (
+        theme.colorScheme === 'dark'
+          ? theme.colors.dark[4]
+          : theme.colors.gray[2]
+      ),
+    },
+
+    '.mantine-Modal-body': {
+      backgroundColor: (
+        theme.colorScheme === 'dark'
+          ? theme.colors.dark[4]
+          : theme.colors.gray[2]
       ),
     },
 
@@ -46,27 +134,58 @@ const getMantineTheme = (colorScheme: ColorScheme): MantineThemeOverride => ({
           ? theme.colors.dark[5]
           : theme.colors.gray[4]
       ),
+      backgroundColor: theme.fn.themeColor(theme.primaryColor, 7),
     },
+
     '.mantine-footer': {
       marginTop: rem(20),
       borderTop: `${rem(1)} solid`,
+      backgroundColor: (
+        theme.colorScheme === 'dark'
+          ? theme.colors.dark[6]
+          : theme.colors.gray[2]
+      ),
       borderColor: (
         theme.colorScheme === 'dark'
           ? theme.colors.dark[5]
-          : theme.colors.gray[4]
+          : theme.colors.gray[3]
       ),
     },
+
+    '.mantine-Carousel-viewport': {
+      transition: 'height 0.2s',
+    },
+
+    '.mantine-Carousel-container': {
+      transition: 'height 0.2s',
+      display: 'flex',
+      alignItems: 'flex-start',
+    },
+
+    '.mantine-Checkbox-input': {
+      cursor: 'pointer',
+    },
+
+    '.mantine-Accordion-control': {
+      borderRadius: rem(6),
+      '&:hover': {
+        backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[5] : theme.colors.gray[3],
+      },
+    },
+
   }),
 })
 
 const App = ({
   Component,
-  pageProps: { session, ...pageProps },
+  pageProps: { session, dehydratedState, ...pageProps },
   colorScheme: _colorScheme
 }:
   AppProps & { colorScheme: ColorScheme }
 ) => {
   const [colorScheme, setColorScheme] = useState<ColorScheme>(_colorScheme)
+  const [queryClient] = useState(() => new QueryClient())
+
 
   const toggleColorScheme = (value?: ColorScheme) => {
     const nextColorScheme = value || (colorScheme === 'dark' ? 'light' : 'dark')
@@ -75,7 +194,7 @@ const App = ({
     setCookie('mantine-color-scheme', nextColorScheme, { maxAge: 60 * 60 * 24 * 30 })
 
     showNotification({
-      // TODO: remove this
+      // TODO: maybe remove this?
       title: 'Color scheme toggled',
       message: `Current color scheme is now ${colorScheme === 'dark' ? 'light' : 'dark'}`,
       color: colorScheme === 'dark' ? 'red' : 'blue',
@@ -86,33 +205,45 @@ const App = ({
     <>
       <Head>
         <title>Welcome to magicdex-app!</title>
+        <meta
+          name='viewport'
+          content='width=device-width, user-scalable=no'
+        />
       </Head>
 
       <main>
         <SessionProvider session={session}>
-          <ColorSchemeProvider
-            colorScheme={colorScheme}
-            toggleColorScheme={toggleColorScheme}
-          >
-            <MantineProvider
-              withGlobalStyles
-              withNormalizeCSS
-              theme={getMantineTheme(colorScheme)}
-            >
-              <ModalsProvider>
-                <Notifications
-                  limit={3}
-                  position='bottom-left'
-                />
-                <CustomHeader />
-                <Container>
-                  <Component {...pageProps} />
-                </Container>
-                <CustomFooter />
+          <QueryClientProvider client={queryClient}>
+            <Hydrate state={dehydratedState}>
+              <ColorSchemeProvider
+                colorScheme={colorScheme}
+                toggleColorScheme={toggleColorScheme}
+              >
+                <MantineProvider
+                  withGlobalStyles
+                  withNormalizeCSS
+                  theme={getMantineTheme(colorScheme)}
+                >
+                  <ModalsProvider>
+                    <Notifications
+                      limit={3}
+                      position='bottom-left'
+                    />
+                    <CustomHeader />
+                    <Container fluid
+                      sx={{
+                        minHeight: `calc(100vh - 100px)`,
+                      }}
+                    >
+                      <Component {...pageProps} />
+                    </Container>
+                    <CustomFooter />
 
-              </ModalsProvider>
-            </MantineProvider>
-          </ColorSchemeProvider>
+                  </ModalsProvider>
+                </MantineProvider>
+              </ColorSchemeProvider>
+            </Hydrate>
+          </QueryClientProvider>
         </SessionProvider>
       </main>
     </>
