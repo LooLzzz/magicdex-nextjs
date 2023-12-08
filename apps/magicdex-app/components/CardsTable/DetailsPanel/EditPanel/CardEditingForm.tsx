@@ -46,6 +46,9 @@ const CardEditingForm = forwardRef<CardEditingFormHandle, CardEditingFormProps>(
 
       if (handleOnChange) {
         if (isFormDirty) {
+          if (cardPrintsFetching || cardLangsFetching)
+            return
+
           const newCard = {
             ...scryfallDataToUserCardData(
               cardLangsData?.data?.find(item => item.lang === form.values.lang)
@@ -63,9 +66,12 @@ const CardEditingForm = forwardRef<CardEditingFormHandle, CardEditingFormProps>(
         }
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [form?.values])
+    }, [form?.values, cardPrintsFetching, cardLangsFetching])
 
     useEffect(() => {
+      if (!isFormDirty)
+        return
+
       const finishes = getCardFinishes(
         cardPrintsData?.data?.find(item =>
           `${item.set}:${item.collector_number}` === form.values.set

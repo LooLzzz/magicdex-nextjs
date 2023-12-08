@@ -5,7 +5,7 @@ import { ActionIcon, Badge, Box, Button, Chip, Divider, Group, SimpleGrid, Stack
 import { useMediaQuery } from '@mantine/hooks'
 import { modals } from '@mantine/modals'
 import { IconCheck, IconTrash, IconX } from '@tabler/icons-react'
-import { useContext, useEffect, useRef, useState } from 'react'
+import { useCallback, useContext, useEffect, useRef, useState } from 'react'
 import { EmblaContext } from '..'
 import CardEditingForm, { CardEditingFormHandle } from './CardEditingForm'
 
@@ -33,7 +33,7 @@ export default function EditPanel({ card, onChange: handleOnChange }: {
       handleOnChange?.(null)
   }, [isEditing, handleOnChange])
 
-  const openDeleteModal = () =>
+  const openDeleteModal = useCallback(() =>
     modals.openConfirmModal({
       title: <Text size='xl' weight='bold'>Delete Card Confirmation</Text>,
       centered: true,
@@ -53,21 +53,21 @@ export default function EditPanel({ card, onChange: handleOnChange }: {
         ...card,
         amount: 0,
       }]),
-    })
+    }), [card, userCardsMutate])
 
-  const handleChipsOnChanged = (value: string[]) => {
+  const handleChipsOnChanged = useCallback((value: string[]) => {
     setColumnFilters([
       ...columnFilters.filter(item => item.id !== 'tags'),
       { id: 'tags', value }
     ])
-  }
+  }, [setColumnFilters, columnFilters])
 
-  const handleSaveOnClick = () => {
+  const handleSaveOnClick = useCallback(() => {
     if (isEditing)
       cardEditingFormRef?.current?.submit()
 
     setEditing(!isEditing)
-  }
+  }, [isEditing, cardEditingFormRef])
 
   return (
     <Box>
