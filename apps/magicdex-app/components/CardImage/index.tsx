@@ -205,7 +205,7 @@ export default function CardImage({
         <AspectRatio
           ratio={ratio}
           sx={{
-            '& > :first-child': {
+            '& > div:first-of-type': {
               height: 'auto',
             },
           }}
