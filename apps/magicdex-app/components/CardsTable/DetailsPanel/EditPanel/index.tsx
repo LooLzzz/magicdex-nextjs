@@ -1,5 +1,6 @@
 import { ColumnFiltersContext } from '@/components/CardsTable/filtersDef'
 import { useUserCardsMutation } from '@/services/hooks'
+import { useCollectionStore } from '@/store'
 import { UserCardData } from '@/types/supabase'
 import { ActionIcon, Badge, Box, Button, Chip, Divider, Group, SimpleGrid, Stack, Text, Transition, } from '@mantine/core'
 import { useMediaQuery } from '@mantine/hooks'
@@ -10,11 +11,9 @@ import { EmblaContext } from '..'
 import CardEditingForm, { CardEditingFormHandle } from './CardEditingForm'
 
 
-export default function EditPanel({ card, onChange: handleOnChange }: {
-  card: UserCardData,
-  onChange?: (UserCardData) => void,
-}) {
+export default function EditPanel({ card }: { card: UserCardData }) {
   const embla = useContext(EmblaContext)
+  const { clearStagingArea } = useCollectionStore()
   const [columnFilters, setColumnFilters] = useContext(ColumnFiltersContext)
   const cardEditingFormRef = useRef<CardEditingFormHandle>(null)
   const [isEditing, setEditing] = useState(false)
@@ -30,8 +29,8 @@ export default function EditPanel({ card, onChange: handleOnChange }: {
 
   useEffect(() => {
     if (!isEditing)
-      handleOnChange?.(null)
-  }, [isEditing, handleOnChange])
+      clearStagingArea()
+  }, [isEditing, clearStagingArea])
 
   const openDeleteModal = useCallback(() =>
     modals.openConfirmModal({
@@ -105,7 +104,6 @@ export default function EditPanel({ card, onChange: handleOnChange }: {
           ? <CardEditingForm
             ref={cardEditingFormRef}
             card={card}
-            onChange={handleOnChange}
             onDirtyChange={setFormDirty}
           />
           : <SimpleGrid w='100%' spacing='xl' cols={isLargerThanSm ? 2 : 1}>

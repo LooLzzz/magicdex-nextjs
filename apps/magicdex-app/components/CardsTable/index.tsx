@@ -1,4 +1,5 @@
 import { useUserCardsInfiniteQuery } from '@/services/hooks/users'
+import { useCollectionStore } from '@/store'
 import { UserCardData } from '@/types/supabase'
 import { ActionIcon, Group, Text, Tooltip } from '@mantine/core'
 import { useHotkeys, useMediaQuery, usePrevious, useViewportSize } from '@mantine/hooks'
@@ -11,19 +12,14 @@ import {
   MRT_Virtualizer,
   MantineReactTable,
 } from 'mantine-react-table'
-import { Dispatch, SetStateAction, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import DetailsPanel from './DetailsPanel'
 import useColumnsDef from './columnsDef'
 import filtersDef, { ColumnFiltersContext } from './filtersDef'
 import useStyles from './styles'
 
 
-export default function CardsTable({
-  onHoveredCardChange, onFormDataChange,
-}: {
-  onHoveredCardChange?: Dispatch<SetStateAction<UserCardData>>
-  onFormDataChange?: Dispatch<SetStateAction<UserCardData>>
-}) {
+export default function CardsTable() {
   const { theme, classes } = useStyles()
   const { height: vheight } = useViewportSize()
   const tableInstanceRef = useRef<MRT_TableInstance<UserCardData>>(null)
@@ -31,6 +27,7 @@ export default function CardsTable({
   const rowVirtualizerInstanceRef = useRef<MRT_Virtualizer<HTMLDivElement, HTMLTableRowElement>>(null)
   const isLargerThanLg = useMediaQuery('(min-width: 1226px)', false)
   const isLargerThanMd = useMediaQuery('(min-width: 768px)', false)
+  const { setSelectedRowCard } = useCollectionStore()
   const [expandedRows, setExpandedRows] = useState<MRT_ExpandedState>({})
   const [columnFilters, setColumnFilters] = useState<MRT_ColumnFiltersState>([])
   const columnFilterFns = tableInstanceRef.current?.getState().columnFilterFns
@@ -85,6 +82,15 @@ export default function CardsTable({
   useEffect(() => {
     rowVirtualizerInstanceRef?.current?.scrollToIndex(0)
   }, [sorting, columnFilters, globalFilter, columnFilterFns])
+
+  const handleOnHoveredCardChange = useCallback(
+    (row: UserCardData) => {
+      if (isLargerThanLg) {
+        return () => setSelectedRowCard(row)
+      }
+    },
+    [isLargerThanLg, setSelectedRowCard],
+  )
 
   const handleScroll = useCallback(
     (containerRefElement?: HTMLDivElement) => {
@@ -147,7 +153,7 @@ export default function CardsTable({
           manualFiltering
           manualSorting
 
-          renderDetailPanel={props => <DetailsPanel {...props} onFormDataChange={onFormDataChange} />}
+          renderDetailPanel={props => <DetailsPanel {...props} />}
           renderTopToolbarCustomActions={() => (
             <Group spacing={0}>
               <Tooltip withArrow label='Refresh Data'>
@@ -218,7 +224,7 @@ export default function CardsTable({
           }}
           mantineTableBodyRowProps={({ table, row }) => ({
             style: { cursor: 'pointer' },
-            onMouseEnter: () => isLargerThanLg && onHoveredCardChange?.(row?.original),
+            onMouseEnter: handleOnHoveredCardChange(row.original),
             onClick: () => table.setExpanded({ [row.id]: !table.getState().expanded[row.id] }),
           })}
           mantineDetailPanelProps={{
@@ -249,7 +255,6 @@ export default function CardsTable({
           }}
           onGlobalFilterChange={setGlobalFilter}
           onSortingChange={setSorting}
-          // onHoveredRowChange={onHoveredRowChange}
           onExpandedChange={expandedUpdater => {
             if (typeof expandedUpdater === 'boolean' || typeof expandedUpdater === 'object') {
               // expand/close all

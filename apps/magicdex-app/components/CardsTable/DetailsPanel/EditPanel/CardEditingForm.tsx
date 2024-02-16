@@ -1,6 +1,7 @@
 import { FloatingLabelSelect, FloatingLabelTagsSelect, QuantityInput } from '@/components/CustomMantineInputs'
 import SelectCarditem from '@/components/ImportComponents/ImportWizard/SelectCarditem'
 import { useScryfallCardPrintsQuery, useUserCardsMutation } from '@/services/hooks'
+import { useCollectionStore } from '@/store'
 import { UserCardData } from '@/types/supabase'
 import { getCardFinishes, scryfallDataToUserCardData } from '@/utils'
 import { Box, Center, Checkbox, Grid, Stack, rem } from '@mantine/core'
@@ -16,13 +17,13 @@ export interface CardEditingFormHandle {
 
 export interface CardEditingFormProps {
   card: UserCardData,
-  onChange?: (value?: UserCardData) => void,
   onDirtyChange?: (value: boolean) => void,
 }
 
 const CardEditingForm = forwardRef<CardEditingFormHandle, CardEditingFormProps>(
-  function CardEditingForm({ card, onChange: handleOnChange, onDirtyChange: handleOnDirtyChange }, ref) {
+  function CardEditingForm({ card, onDirtyChange: handleOnDirtyChange }, ref) {
     const isLargerThanMd = useMediaQuery('(min-width: 768px)', false)
+    const { setStagingAreaCard, clearStagingArea } = useCollectionStore()
     const form = useForm({
       initialValues: {
         ...card,
@@ -44,26 +45,24 @@ const CardEditingForm = forwardRef<CardEditingFormHandle, CardEditingFormProps>(
       if (prevIsFormDirty !== isFormDirty)
         handleOnDirtyChange?.(isFormDirty)
 
-      if (handleOnChange) {
-        if (isFormDirty) {
-          if (cardPrintsFetching || cardLangsFetching)
-            return
+      if (isFormDirty) {
+        if (cardPrintsFetching || cardLangsFetching)
+          return
 
-          const newCard = {
-            ...scryfallDataToUserCardData(
-              cardLangsData?.data?.find(item => item.lang === form.values.lang)
-            ),
-            id: card.id,
-            foil: form.values.foil,
-            amount: form.values.amount,
-            prices: cardPrintsData?.data?.find(item => form.values.set === `${item.set}:${item.collector_number}`)?.prices ?? {},
-          }
-          newCard['price_usd'] = undefined
-          handleOnChange(newCard as undefined)
+        const newCard = {
+          ...scryfallDataToUserCardData(
+            cardLangsData?.data?.find(item => item.lang === form.values.lang)
+          ),
+          id: card.id,
+          foil: form.values.foil,
+          amount: form.values.amount,
+          prices: cardPrintsData?.data?.find(item => form.values.set === `${item.set}:${item.collector_number}`)?.prices ?? {},
         }
-        else {
-          handleOnChange(null)
-        }
+        newCard['price_usd'] = undefined
+        setStagingAreaCard(newCard)
+      }
+      else {
+        clearStagingArea()
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [form?.values, cardPrintsFetching, cardLangsFetching])

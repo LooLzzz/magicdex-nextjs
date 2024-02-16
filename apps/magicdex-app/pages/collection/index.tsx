@@ -1,4 +1,6 @@
+import { authOptions } from '@/api/auth/[...nextauth]'
 import { CardImage, CardsTable } from '@/components'
+import { useCollectionStore } from '@/store'
 import { UserCardData } from '@/types/supabase'
 import { ActionIcon, Affix, Container, Grid, Stack, Tooltip, rem } from '@mantine/core'
 import { useMediaQuery } from '@mantine/hooks'
@@ -6,15 +8,12 @@ import { IconFileExport, IconFilePlus } from '@tabler/icons-react'
 import { GetServerSidePropsContext } from 'next'
 import { getServerSession } from 'next-auth'
 import { useRouter } from 'next/router'
-import { useState } from 'react'
-import { authOptions } from '../api/auth/[...nextauth]'
 
 
 export default function CollectionPage() {
   const router = useRouter()
   const isSmallerThanLg = useMediaQuery('(max-width: 1225px)', false)
-  const [hoveredCard, setHoveredCard] = useState<UserCardData>()
-  const [cardEditFormData, setCardEditFormData] = useState<UserCardData>()
+  const { stagingAreaCard, selectedRowCard } = useCollectionStore()
 
   const handleExportClick = () => {
     router.push('/collection/export')
@@ -52,9 +51,9 @@ export default function CollectionPage() {
               displayPrice
               shouldTransfromTranslateImage={false}
               card={{
-                ...hoveredCard,
-                ...cardEditFormData,
-              }}
+                ...selectedRowCard,
+                ...stagingAreaCard,
+              } as UserCardData}
               aspectRatioProps={{
                 maw: CardImage.defaultWidth,
                 miw: CardImage.defaultWidth,
@@ -67,10 +66,7 @@ export default function CollectionPage() {
           </Grid.Col>
 
           <Grid.Col span={isSmallerThanLg ? 12 : 9} offset={0.2}>
-            <CardsTable
-              onFormDataChange={setCardEditFormData}
-              onHoveredCardChange={setHoveredCard}
-            />
+            <CardsTable />
           </Grid.Col>
 
         </Grid>

@@ -156,7 +156,7 @@ export default function useColumnsDef(allSets: { set_name: string, set_id: strin
     },
 
     {
-      accessorFn: card => card.type_line.replace(/—/g, '-'),
+      accessorFn: card => card.type_line?.replace(/—/g, '-'),
       id: 'type_line',
       header: 'Type',
       filterFn: 'fuzzy',

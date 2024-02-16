@@ -1,4 +1,5 @@
 import { CardImage } from '@/components'
+import { useCollectionStore } from '@/store'
 import { UserCardData } from '@/types/supabase'
 import { emblaAutoHeightEffect, translateRanges } from '@/utils'
 import { Carousel, Embla } from '@mantine/carousel'
@@ -55,17 +56,16 @@ function CardInfo({ containerWidth, card }: {
 }
 
 export default function DetailsPanel<T extends UserCardData>(
-  { table, row, onFormDataChange }: {
+  { table, row }: {
     table: MRT_TableInstance<T>,
     row: MRT_Row<T>,
-    onFormDataChange: (data: UserCardData) => void,
   }) {
   const theme = useMantineTheme()
   const [embla, setEmbla] = useState<Embla>(null)
   const { width: vwidth } = useViewportSize()
   const isLargerThanLg = useMediaQuery('(min-width: 1226px)', false)
   const isLargerThanMd = useMediaQuery('(min-width: 768px)', false)
-  const [stagingAreaCard, setStagingAreaCard] = useState<UserCardData>(null)
+  const { stagingAreaCard } = useCollectionStore()
   const tableContainerWidth = table.refs.tableContainerRef?.current?.clientWidth
   const containerWidth = tableContainerWidth * 0.925
 
@@ -179,13 +179,7 @@ export default function DetailsPanel<T extends UserCardData>(
 
           <Carousel.Slide>
             <Stack pos='relative'>
-              <EditPanel
-                card={row.original}
-                onChange={value => {
-                  setStagingAreaCard(value)
-                  onFormDataChange(value)
-                }}
-              />
+              <EditPanel card={row.original}/>
 
               <div style={{
                 position: 'absolute',

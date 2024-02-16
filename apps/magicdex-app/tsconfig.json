@@ -18,6 +18,8 @@
       "@/routes/*": ["./routes/*"],
       "@/services": ["./services"],
       "@/services/*": ["./services/*"],
+      "@/store": ["./store"],
+      "@/store/*": ["./store/*"],
       "@/types": ["./types"],
       "@/types/*": ["./types/*"],
       "@/utils": ["./utils"],
